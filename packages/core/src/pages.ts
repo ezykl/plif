@@ -5,9 +5,18 @@ export function visiblePages(
   portrait: boolean,
 ): number[] {
   if (portrait) return [index];
-  if (hasCover && index === 0) return [0];
-  if (index + 1 < total) return [index, index + 1];
-  return [index];
+
+  const left = hasCover
+    ? index === 0
+      ? 0
+      : index % 2 === 1
+        ? index
+        : index - 1
+    : index - (index % 2);
+
+  if (hasCover && left === 0) return [0];
+  if (left + 1 < total) return [left, left + 1];
+  return [left];
 }
 
 export function formatPageLabel(
@@ -17,8 +26,8 @@ export function formatPageLabel(
   portrait: boolean,
 ): string {
   const pages = visiblePages(index, total, hasCover, portrait).map((i) => i + 1);
-  const first = pages[0];
-  const last = pages[pages.length - 1];
+  const first = Math.min(...pages);
+  const last = Math.max(...pages);
   const range = first === last ? `${first}` : `${first}–${last}`;
   return `${range} / ${total}`;
 }

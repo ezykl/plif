@@ -11,6 +11,11 @@ describe("visiblePages", () => {
     expect(visiblePages(9, 12, true, false)).toEqual([9, 10]);
   });
 
+  it("normalizes right-hand page index to spread", () => {
+    expect(visiblePages(2, 12, true, false)).toEqual([1, 2]);
+    expect(visiblePages(10, 12, true, false)).toEqual([9, 10]);
+  });
+
   it("shows the back cover alone when total is even", () => {
     expect(visiblePages(11, 12, true, false)).toEqual([11]);
   });
@@ -21,6 +26,8 @@ describe("visiblePages", () => {
 
   it("pairs from index 0 without a cover", () => {
     expect(visiblePages(0, 4, false, false)).toEqual([0, 1]);
+    expect(visiblePages(1, 4, false, false)).toEqual([0, 1]);
+    expect(visiblePages(3, 4, false, false)).toEqual([2, 3]);
   });
 
   it("always shows one page in portrait mode", () => {
@@ -35,5 +42,17 @@ describe("formatPageLabel", () => {
 
   it("formats spreads with an en dash", () => {
     expect(formatPageLabel(1, 12, true, false)).toBe("2–3 / 12");
+  });
+
+  it("formats portrait mode as a single page", () => {
+    expect(formatPageLabel(5, 12, true, true)).toBe("6 / 12");
+  });
+
+  it("formats back cover as a single page", () => {
+    expect(formatPageLabel(11, 12, true, false)).toBe("12 / 12");
+  });
+
+  it("formats coverless spreads with an en dash", () => {
+    expect(formatPageLabel(0, 4, false, false)).toBe("1–2 / 4");
   });
 });
