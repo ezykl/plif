@@ -1,5 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "jsx": "react-jsx" },
-  "include": ["src", "vite.config.ts", "../../packages/reader/src/page-flip.d.ts"]
+  "include": ["src", "vite.config.ts"]
 }

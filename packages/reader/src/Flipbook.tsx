@@ -57,15 +57,25 @@ export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipb
     };
   }, [manifest, effectiveReduceMotion]);
 
-  useImperativeHandle(ref, () => ({
-    next: () => flipRef.current?.flipNext(),
-    prev: () => flipRef.current?.flipPrev(),
-    goTo: (index) => flipRef.current?.flip(index),
-  }));
+  useImperativeHandle(
+    ref,
+    () => ({
+      next: () => flipRef.current?.flipNext(),
+      prev: () => flipRef.current?.flipPrev(),
+      goTo: (index) => flipRef.current?.flip(index),
+    }),
+    [],
+  );
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "ArrowRight") flipRef.current?.flipNext();
-    if (e.key === "ArrowLeft") flipRef.current?.flipPrev();
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      flipRef.current?.flipNext();
+    }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      flipRef.current?.flipPrev();
+    }
   };
 
   return (

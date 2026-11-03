@@ -90,8 +90,10 @@ describe("<Flipbook>", () => {
   it("flips with arrow keys", () => {
     const { getByRole } = render(<Flipbook manifest={manifest} />);
     const region = getByRole("region", { name: "T" });
-    fireEvent.keyDown(region, { key: "ArrowRight" });
-    fireEvent.keyDown(region, { key: "ArrowLeft" });
+    const rightDispatched = fireEvent.keyDown(region, { key: "ArrowRight" });
+    const leftDispatched = fireEvent.keyDown(region, { key: "ArrowLeft" });
+    expect(rightDispatched).toBe(false);
+    expect(leftDispatched).toBe(false);
     expect(instance.flipNext).toHaveBeenCalledTimes(1);
     expect(instance.flipPrev).toHaveBeenCalledTimes(1);
   });
