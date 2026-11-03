@@ -18,13 +18,19 @@ export interface FlipbookProps {
 }
 
 export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipbook(
-  { manifest, onPageChange, reduceMotion = false, className },
+  { manifest, onPageChange, reduceMotion, className },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const flipRef = useRef<PageFlip | null>(null);
   const onPageChangeRef = useRef(onPageChange);
   onPageChangeRef.current = onPageChange;
+
+  const effectiveReduceMotion =
+    reduceMotion ??
+    (typeof window !== "undefined" && typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -34,7 +40,10 @@ export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipb
     const host = document.createElement("div");
     container.appendChild(host);
 
-    const flip = new PageFlip(host, toFlipSettings(manifest, { reduceMotion }));
+    const flip = new PageFlip(
+      host,
+      toFlipSettings(manifest, { reduceMotion: effectiveReduceMotion }),
+    );
     flip.loadFromImages(manifest.pages.map((p) => p.src));
     manifest.pages.forEach((page, i) => {
       if (page.density) flip.getPage(i)?.setDensity(page.density);
@@ -46,7 +55,7 @@ export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipb
       flip.destroy();
       flipRef.current = null;
     };
-  }, [manifest, reduceMotion]);
+  }, [manifest, effectiveReduceMotion]);
 
   useImperativeHandle(ref, () => ({
     next: () => flipRef.current?.flipNext(),

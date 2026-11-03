@@ -26,7 +26,10 @@ const manifest = parseManifest({
   pages: [{ src: "a.webp" }, { src: "b.webp", density: "hard" }],
 });
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  instance.getPage.mockReturnValue({ setDensity: vi.fn() });
+});
 
 describe("<Flipbook>", () => {
   it("creates the engine and loads page images", () => {
@@ -37,10 +40,37 @@ describe("<Flipbook>", () => {
 
   it("applies per-page density from the manifest", () => {
     const setDensity = vi.fn();
-    instance.getPage.mockReturnValue({ setDensity });
+    instance.getPage.mockReturnValueOnce({ setDensity });
     render(<Flipbook manifest={manifest} />);
     expect(instance.getPage).toHaveBeenCalledWith(1);
     expect(setDensity).toHaveBeenCalledWith("hard");
+  });
+
+  it("detects prefers-reduced-motion when prop is omitted", () => {
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query === "(prefers-reduced-motion: reduce)",
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    try {
+      render(<Flipbook manifest={manifest} />);
+      expect(PageFlipMock).toHaveBeenCalledWith(
+        expect.any(HTMLElement),
+        expect.objectContaining({
+          flippingTime: 1,
+          drawShadow: false,
+        }),
+      );
+    } finally {
+      window.matchMedia = originalMatchMedia;
+    }
   });
 
   it("reports page changes", () => {
