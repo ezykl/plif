@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ImportedPage } from "@plif/core";
+import { parseManifest, type ImportedPage } from "@plif/core";
 import { CreatorWizard, type CreatorWizardProps } from "./CreatorWizard";
 
 afterEach(() => cleanup());
@@ -67,5 +67,45 @@ describe("<CreatorWizard>", () => {
     expect(screen.getByText(/1 TOC chapters/i)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /Load Sample Book/i }));
     expect(onResetToSample).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders PublishPanel in publish step when manifest and download callbacks are provided", () => {
+    const manifest = parseManifest({
+      version: 1,
+      title: "School Paper",
+      pageSize: { width: 480, height: 679 },
+      hasCover: true,
+      theme: "magazine",
+      direction: "ltr",
+      toc: [],
+      pages: [{ src: "p1.webp" }],
+    });
+
+    render(
+      <CreatorWizard
+        {...makeProps({
+          step: "publish",
+          manifest,
+          onDownloadHtml: vi.fn(),
+          onDownloadManifest: vi.fn(),
+        })}
+      />,
+    );
+
+    expect(screen.getByText(/Export & Embed/i)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Download Standalone HTML" })).toBeTruthy();
+  });
+
+  it("renders publish summary without crashing when manifest and download callbacks are omitted", () => {
+    render(
+      <CreatorWizard
+        {...makeProps({
+          step: "publish",
+        })}
+      />,
+    );
+
+    expect(screen.getByText(/Ready to Publish/i)).toBeTruthy();
+    expect(screen.queryByText(/Export & Embed/i)).toBeNull();
   });
 });

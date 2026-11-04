@@ -60,4 +60,21 @@ describe("<PublishPanel>", () => {
     fireEvent.click(screen.getByRole("tab", { name: "Web Component" }));
     expect(screen.getByText(/<plif-book src=/i)).toBeTruthy();
   });
+
+  it("renders custom publishUrl and manifestUrl into snippets", () => {
+    render(
+      <PublishPanel
+        manifest={manifest}
+        onDownloadHtml={vi.fn()}
+        onDownloadManifest={vi.fn()}
+        publishUrl="https://custom.site/book"
+        manifestUrl="https://custom.site/manifest.json"
+      />,
+    );
+
+    expect(screen.getByText(/https:\/\/custom\.site\/book/i)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Web Component" }));
+    expect(screen.getByText(/https:\/\/custom\.site\/manifest\.json/i)).toBeTruthy();
+  });
 });

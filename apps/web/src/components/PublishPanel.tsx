@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { generateIframeEmbed, generateWebComponentEmbed, THEMES, type Manifest } from "@plif/core";
 
 export interface PublishPanelProps {
@@ -20,6 +20,15 @@ export function PublishPanel({
 }: PublishPanelProps) {
   const [embedType, setEmbedType] = useState<"iframe" | "web-component">("iframe");
   const [copied, setCopied] = useState(false);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const themeTokens = THEMES[manifest.theme];
 
@@ -36,9 +45,16 @@ export function PublishPanel({
 
   const handleCopy = async () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
-      await navigator.clipboard.writeText(currentCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      try {
+        await navigator.clipboard.writeText(currentCode);
+        setCopied(true);
+        if (copyTimeoutRef.current) {
+          clearTimeout(copyTimeoutRef.current);
+        }
+        copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // ignore or handle clipboard failure
+      }
     }
   };
 
@@ -110,7 +126,9 @@ export function PublishPanel({
           <button
             type="button"
             role="tab"
+            id="iframe-tab"
             aria-selected={embedType === "iframe"}
+            aria-controls="embed-panel"
             onClick={() => setEmbedType("iframe")}
             style={{
               padding: "6px 12px",
@@ -127,7 +145,9 @@ export function PublishPanel({
           <button
             type="button"
             role="tab"
+            id="webcomponent-tab"
             aria-selected={embedType === "web-component"}
+            aria-controls="embed-panel"
             onClick={() => setEmbedType("web-component")}
             style={{
               padding: "6px 12px",
@@ -143,7 +163,12 @@ export function PublishPanel({
           </button>
         </div>
 
-        <div style={{ position: "relative" }}>
+        <div
+          role="tabpanel"
+          id="embed-panel"
+          aria-labelledby={embedType === "iframe" ? "iframe-tab" : "webcomponent-tab"}
+          style={{ position: "relative" }}
+        >
           <pre
             style={{
               margin: 0,
