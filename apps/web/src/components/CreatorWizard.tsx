@@ -1,9 +1,11 @@
 import {
   THEMES,
+  type BookDirection,
   type BookPresetId,
   type BookTheme,
   type BulkDensityMode,
   type ImportedPage,
+  type TocItem,
 } from "@plif/core";
 import { BookSettingsPanel } from "./BookSettingsPanel";
 import { PageOrganizer } from "./PageOrganizer";
@@ -17,6 +19,8 @@ export interface CreatorWizardProps {
   hasCover: boolean;
   theme: BookTheme;
   pages: readonly ImportedPage[];
+  direction?: BookDirection;
+  toc?: readonly TocItem[];
   isImporting?: boolean;
   progressText?: string | null;
   errorText?: string | null;
@@ -27,6 +31,8 @@ export interface CreatorWizardProps {
   onChangeTheme: (theme: BookTheme) => void;
   onSelectPreset: (presetId: BookPresetId) => void;
   onApplyBulkDensity: (mode: BulkDensityMode) => void;
+  onChangeDirection?: (direction: BookDirection) => void;
+  onChangeToc?: (toc: TocItem[]) => void;
   onResetToSample: () => void;
 }
 
@@ -43,6 +49,8 @@ export function CreatorWizard({
   hasCover,
   theme,
   pages,
+  direction = "ltr",
+  toc = [],
   isImporting = false,
   progressText = null,
   errorText = null,
@@ -53,6 +61,8 @@ export function CreatorWizard({
   onChangeTheme,
   onSelectPreset,
   onApplyBulkDensity,
+  onChangeDirection,
+  onChangeToc,
   onResetToSample,
 }: CreatorWizardProps) {
   const themeTokens = THEMES[theme];
@@ -191,11 +201,15 @@ export function CreatorWizard({
             title={title}
             hasCover={hasCover}
             theme={theme}
+            direction={direction}
+            toc={toc}
             onChangeTitle={onChangeTitle}
             onChangeHasCover={onChangeHasCover}
             onChangeTheme={onChangeTheme}
             onSelectPreset={onSelectPreset}
             onApplyBulkDensity={onApplyBulkDensity}
+            onChangeDirection={onChangeDirection}
+            onChangeToc={onChangeToc}
           />
           <PageOrganizer
             pages={pages}
@@ -231,7 +245,9 @@ export function CreatorWizard({
             <span style={{ fontSize: 13, color: "#57534e" }}>
               {pages.length > 0 ? `${pages.length} imported pages` : "12 sample pages"} •{" "}
               {hasCover ? "Standalone cover" : "Newspaper spread (no cover)"} • Theme:{" "}
-              {themeTokens.label}
+              {themeTokens.label} •{" "}
+              {direction === "rtl" ? "Right-to-Left (RTL)" : "Left-to-Right (LTR)"} • {toc.length}{" "}
+              TOC chapters
             </span>
           </div>
           <button

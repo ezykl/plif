@@ -98,6 +98,29 @@ describe("<Flipbook>", () => {
     expect(instance.flipPrev).toHaveBeenCalledTimes(1);
   });
 
+  it("reverses arrow keys when manifest.direction is rtl", () => {
+    const rtlManifest = parseManifest({
+      version: 1,
+      title: "RTL Book",
+      direction: "rtl",
+      pageSize: { width: 480, height: 679 },
+      pages: [{ src: "a.webp" }, { src: "b.webp" }],
+    });
+    const { getByRole } = render(<Flipbook manifest={rtlManifest} />);
+    const region = getByRole("region", { name: "RTL Book" });
+    expect(region.getAttribute("dir")).toBe("rtl");
+    fireEvent.keyDown(region, { key: "ArrowLeft" });
+    expect(instance.flipNext).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(region, { key: "ArrowRight" });
+    expect(instance.flipPrev).toHaveBeenCalledTimes(1);
+  });
+
+  it("applies CSS scale transform when zoom prop is provided", () => {
+    const { getByRole } = render(<Flipbook manifest={manifest} zoom={1.5} />);
+    const region = getByRole("region", { name: "T" });
+    expect(region.style.transform).toBe("scale(1.5)");
+  });
+
   it("exposes an imperative handle", () => {
     const ref = createRef<FlipbookHandle>();
     render(<Flipbook ref={ref} manifest={manifest} />);

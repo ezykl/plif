@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import type { KeyboardEvent } from "react";
 import { PageFlip } from "page-flip";
-import type { Manifest } from "@plif/core";
+import { clampZoom, resolveArrowAction, type Manifest } from "@plif/core";
 import { toFlipSettings } from "./settings";
 
 export interface FlipbookHandle {
@@ -14,11 +14,12 @@ export interface FlipbookProps {
   manifest: Manifest;
   onPageChange?: (index: number) => void;
   reduceMotion?: boolean;
+  zoom?: number;
   className?: string;
 }
 
 export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipbook(
-  { manifest, onPageChange, reduceMotion, className },
+  { manifest, onPageChange, reduceMotion, zoom = 1, className },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,6 +32,8 @@ export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipb
     (typeof window !== "undefined" && typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
       : false);
+
+  const safeZoom = clampZoom(zoom);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -68,11 +71,11 @@ export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipb
   );
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "ArrowRight") {
+    const action = resolveArrowAction(e.key, manifest.direction);
+    if (action === "next") {
       e.preventDefault();
       flipRef.current?.flipNext();
-    }
-    if (e.key === "ArrowLeft") {
+    } else if (action === "prev") {
       e.preventDefault();
       flipRef.current?.flipPrev();
     }
@@ -83,9 +86,15 @@ export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipb
       ref={containerRef}
       role="region"
       aria-label={manifest.title}
+      dir={manifest.direction}
       tabIndex={0}
       className={className}
       onKeyDown={onKeyDown}
+      style={{
+        transform: `scale(${safeZoom})`,
+        transformOrigin: "center top",
+        transition: effectiveReduceMotion ? "none" : "transform 0.15s ease",
+      }}
     />
   );
 });

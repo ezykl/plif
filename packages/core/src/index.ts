@@ -3,3 +3,4 @@ export * from "./manifest";
 export * from "./pages";
 export * from "./order";
 export * from "./themes";
+export * from "./extras";
