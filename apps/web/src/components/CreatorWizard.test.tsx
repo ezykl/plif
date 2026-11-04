@@ -50,10 +50,21 @@ describe("<CreatorWizard>", () => {
 
   it("renders publish summary and reset button in the publish step", () => {
     const onResetToSample = vi.fn();
-    render(<CreatorWizard {...makeProps({ step: "publish", onResetToSample })} />);
+    render(
+      <CreatorWizard
+        {...makeProps({
+          step: "publish",
+          direction: "ltr",
+          toc: [{ title: "Ch 1", page: 1 }],
+          onResetToSample,
+        })}
+      />,
+    );
 
     expect(screen.getByText(/Ready to Publish/i)).toBeTruthy();
     expect(screen.getByText(/School Paper/i)).toBeTruthy();
+    expect(screen.getByText(/Left-to-Right \(LTR\)/i)).toBeTruthy();
+    expect(screen.getByText(/1 TOC chapters/i)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /Load Sample Book/i }));
     expect(onResetToSample).toHaveBeenCalledTimes(1);
   });

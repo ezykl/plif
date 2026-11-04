@@ -58,4 +58,44 @@ describe("<BookSettingsPanel>", () => {
     fireEvent.click(screen.getByRole("button", { name: /Theme: Newsprint/i }));
     expect(onChangeTheme).toHaveBeenCalledWith("newsprint");
   });
+
+  it("switches reading direction (LTR / RTL) and adds/removes Table of Contents chapters", () => {
+    const onChangeDirection = vi.fn();
+    const onChangeToc = vi.fn();
+
+    render(
+      <BookSettingsPanel
+        title="Manga"
+        hasCover={true}
+        theme="magazine"
+        direction="ltr"
+        toc={[{ title: "Chapter 1", page: 1 }]}
+        onChangeTitle={vi.fn()}
+        onChangeHasCover={vi.fn()}
+        onChangeTheme={vi.fn()}
+        onSelectPreset={vi.fn()}
+        onApplyBulkDensity={vi.fn()}
+        onChangeDirection={onChangeDirection}
+        onChangeToc={onChangeToc}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Right to Left (RTL)" }));
+    expect(onChangeDirection).toHaveBeenCalledWith("rtl");
+
+    fireEvent.change(screen.getByLabelText("Chapter title"), {
+      target: { value: "Chapter 2" },
+    });
+    fireEvent.change(screen.getByLabelText("Chapter page"), {
+      target: { value: "5" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add chapter" }));
+    expect(onChangeToc).toHaveBeenCalledWith([
+      { title: "Chapter 1", page: 1 },
+      { title: "Chapter 2", page: 5 },
+    ]);
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove chapter Chapter 1" }));
+    expect(onChangeToc).toHaveBeenCalledWith([]);
+  });
 });

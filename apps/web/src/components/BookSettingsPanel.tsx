@@ -1,20 +1,27 @@
+import { useState } from "react";
 import {
   BOOK_PRESETS,
   THEMES,
+  type BookDirection,
   type BookPresetId,
   type BookTheme,
   type BulkDensityMode,
+  type TocItem,
 } from "@plif/core";
 
 export interface BookSettingsPanelProps {
   title: string;
   hasCover: boolean;
   theme: BookTheme;
+  direction?: BookDirection;
+  toc?: readonly TocItem[];
   onChangeTitle: (title: string) => void;
   onChangeHasCover: (hasCover: boolean) => void;
   onChangeTheme: (theme: BookTheme) => void;
   onSelectPreset: (presetId: BookPresetId) => void;
   onApplyBulkDensity: (mode: BulkDensityMode) => void;
+  onChangeDirection?: (direction: BookDirection) => void;
+  onChangeToc?: (toc: TocItem[]) => void;
 }
 
 const PRESET_LIST = Object.values(BOOK_PRESETS);
@@ -24,12 +31,19 @@ export function BookSettingsPanel({
   title,
   hasCover,
   theme,
+  direction = "ltr",
+  toc = [],
   onChangeTitle,
   onChangeHasCover,
   onChangeTheme,
   onSelectPreset,
   onApplyBulkDensity,
+  onChangeDirection,
+  onChangeToc,
 }: BookSettingsPanelProps) {
+  const [chapterTitle, setChapterTitle] = useState("");
+  const [chapterPage, setChapterPage] = useState("1");
+
   return (
     <section
       aria-label="Book style and cover settings"
@@ -87,6 +101,136 @@ export function BookSettingsPanel({
           />
           <span>Standalone front & back cover</span>
         </label>
+      </div>
+
+      <div style={{ display: "grid", gap: 6 }}>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>Reading Direction</span>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <button
+            type="button"
+            aria-pressed={direction === "ltr"}
+            onClick={() => onChangeDirection?.("ltr")}
+            style={{
+              padding: "6px 12px",
+              borderRadius: 6,
+              border: direction === "ltr" ? "2px solid #1c1917" : "1px solid #d6d3d1",
+              background: "#ffffff",
+              fontSize: 13,
+              fontWeight: direction === "ltr" ? 700 : 400,
+              cursor: "pointer",
+            }}
+          >
+            Left to Right (LTR)
+          </button>
+          <button
+            type="button"
+            aria-pressed={direction === "rtl"}
+            onClick={() => onChangeDirection?.("rtl")}
+            style={{
+              padding: "6px 12px",
+              borderRadius: 6,
+              border: direction === "rtl" ? "2px solid #1c1917" : "1px solid #d6d3d1",
+              background: "#ffffff",
+              fontSize: 13,
+              fontWeight: direction === "rtl" ? 700 : 400,
+              cursor: "pointer",
+            }}
+          >
+            Right to Left (RTL)
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gap: 6 }}>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>Table of Contents</span>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+          <input
+            type="text"
+            aria-label="Chapter title"
+            placeholder="Chapter title"
+            value={chapterTitle}
+            onChange={(e) => setChapterTitle(e.target.value)}
+            style={{
+              padding: "6px 10px",
+              borderRadius: 6,
+              border: "1px solid #d6d3d1",
+              fontSize: 13,
+              flex: "1 1 160px",
+            }}
+          />
+          <input
+            type="number"
+            aria-label="Chapter page"
+            min={1}
+            value={chapterPage}
+            onChange={(e) => setChapterPage(e.target.value)}
+            style={{
+              padding: "6px 10px",
+              borderRadius: 6,
+              border: "1px solid #d6d3d1",
+              fontSize: 13,
+              width: 80,
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const trimmed = chapterTitle.trim();
+              const pageNum = Math.max(1, Number.parseInt(chapterPage, 10) || 1);
+              if (!trimmed) return;
+              onChangeToc?.([...toc, { title: trimmed, page: pageNum }]);
+              setChapterTitle("");
+            }}
+            style={{
+              padding: "6px 12px",
+              borderRadius: 6,
+              border: "1px solid #d6d3d1",
+              background: "#ffffff",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Add chapter
+          </button>
+        </div>
+        {toc.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {toc.map((item, idx) => (
+              <span
+                key={`${item.title}-${item.page}-${idx}`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "4px 8px",
+                  borderRadius: 6,
+                  background: "#ffffff",
+                  border: "1px solid #d6d3d1",
+                  fontSize: 12,
+                }}
+              >
+                <span>
+                  {item.title} (p. {item.page})
+                </span>
+                <button
+                  type="button"
+                  aria-label={`Remove chapter ${item.title}`}
+                  onClick={() => onChangeToc?.(toc.filter((_, i) => i !== idx))}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    color: "#b91c1c",
+                    cursor: "pointer",
+                    fontWeight: 700,
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div style={{ display: "grid", gap: 6 }}>
@@ -184,6 +328,7 @@ export function BookSettingsPanel({
                 type="button"
                 aria-label={`Theme: ${t.label}`}
                 aria-pressed={active}
+                onChange={() => {}}
                 onClick={() => onChangeTheme(t.id)}
                 style={{
                   textAlign: "left",
