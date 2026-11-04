@@ -65,6 +65,15 @@ export function App() {
   const total = activeManifest.pages.length;
   const themeTokens = THEMES[theme];
 
+  const indexRef = useRef(index);
+  indexRef.current = index;
+
+  useEffect(() => {
+    if (indexRef.current > 0) {
+      book.current?.goTo(indexRef.current);
+    }
+  }, [activeManifest]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const onHashChange = () => {

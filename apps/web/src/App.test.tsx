@@ -62,4 +62,10 @@ describe("<App>", () => {
     fireEvent.click(screen.getByRole("button", { name: /Campus News/i }));
     expect(window.location.hash).toBe("#/page/3");
   });
+
+  it("initializes to page 5 when window.location.hash is set to #/page/5 on cold load", () => {
+    window.location.hash = "#/page/5";
+    render(<App />);
+    expect(screen.getByText("4–5 / 12")).toBeTruthy();
+  });
 });

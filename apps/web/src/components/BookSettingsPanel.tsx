@@ -328,7 +328,6 @@ export function BookSettingsPanel({
                 type="button"
                 aria-label={`Theme: ${t.label}`}
                 aria-pressed={active}
-                onChange={() => {}}
                 onClick={() => onChangeTheme(t.id)}
                 style={{
                   textAlign: "left",
