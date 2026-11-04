@@ -9,6 +9,7 @@ export class PlifBookElement extends HTMLElement {
 
   private _container: HTMLDivElement | null = null;
   private _flip: PageFlip | null = null;
+  private _currentSrc: string | null = null;
 
   connectedCallback(): void {
     if (!this._container) {
@@ -22,7 +23,7 @@ export class PlifBookElement extends HTMLElement {
     }
 
     const src = this.getAttribute("src");
-    if (src) {
+    if (src && src !== this._currentSrc) {
       void this.loadFromUrl(src);
     }
   }
@@ -40,12 +41,13 @@ export class PlifBookElement extends HTMLElement {
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
-    if (name === "src" && newValue) {
+    if (name === "src" && newValue && newValue !== this._currentSrc) {
       void this.loadFromUrl(newValue);
     }
   }
 
   async loadFromUrl(url: string): Promise<void> {
+    this._currentSrc = url;
     try {
       const res = await fetch(url);
       if (!res.ok) return;
@@ -67,7 +69,12 @@ export class PlifBookElement extends HTMLElement {
     const bookHost = document.createElement("div");
     this._container.appendChild(bookHost);
 
-    const flip = new PageFlip(bookHost, toFlipSettings(manifest, { reduceMotion: false }));
+    const reduceMotion =
+      typeof window !== "undefined" && typeof window.matchMedia === "function"
+        ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        : false;
+
+    const flip = new PageFlip(bookHost, toFlipSettings(manifest, { reduceMotion }));
     flip.loadFromImages(manifest.pages.map((p) => p.src));
     manifest.pages.forEach((p, idx) => {
       if (p.density) {
