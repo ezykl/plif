@@ -12,17 +12,33 @@ export interface WebComponentEmbedOptions {
   scriptUrl?: string;
 }
 
-export function generateIframeEmbed(options: IframeEmbedOptions): string {
-  const width = options.width ?? "100%";
-  const height = options.height ?? "600px";
-  const title = options.title ? ` title="${options.title.replace(/"/g, "&quot;")}"` : "";
+function escapeAttr(val: string | number): string {
+  return String(val)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
 
-  return `<iframe src="${options.src}" width="${width}" height="${height}"${title} style="border: 0; max-width: 100%; border-radius: 8px;" allow="fullscreen" allowfullscreen></iframe>`;
+function escapeText(val: string): string {
+  return val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+export function generateIframeEmbed(options: IframeEmbedOptions): string {
+  const width = options.width !== undefined ? escapeAttr(options.width) : "100%";
+  const height = options.height !== undefined ? escapeAttr(options.height) : "600px";
+  const src = escapeAttr(options.src);
+  const title = options.title ? ` title="${escapeAttr(options.title)}"` : "";
+
+  return `<iframe src="${src}" width="${width}" height="${height}"${title} style="border: 0; max-width: 100%; border-radius: 8px;" allow="fullscreen" allowfullscreen></iframe>`;
 }
 
 export function generateWebComponentEmbed(options: WebComponentEmbedOptions): string {
-  const scriptUrl = options.scriptUrl ?? "https://unpkg.com/@plif/reader/dist/plif-book.js";
-  return `<script type="module" src="${scriptUrl}"></script>\n<plif-book src="${options.manifestUrl}" style="width: 100%; min-height: 600px; display: block;"></plif-book>`;
+  const scriptUrl = escapeAttr(
+    options.scriptUrl ?? "https://unpkg.com/@plif/reader/dist/plif-book.js",
+  );
+  const manifestUrl = escapeAttr(options.manifestUrl);
+  return `<script type="module" src="${scriptUrl}"></script>\n<plif-book src="${manifestUrl}" style="width: 100%; min-height: 600px; display: block;"></plif-book>`;
 }
 
 export function generateStandaloneHtml(manifest: Manifest): string {
@@ -34,7 +50,7 @@ export function generateStandaloneHtml(manifest: Manifest): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${manifest.title.replace(/</g, "&lt;")}</title>
+  <title>${escapeText(manifest.title)}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -69,6 +85,7 @@ ${escapedManifest}
       var manifest = JSON.parse(document.getElementById('plif-manifest').textContent);
       var container = document.getElementById('flipbook');
       if (!window.St || !window.St.PageFlip) return;
+      var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var flip = new window.St.PageFlip(container, {
         width: manifest.pageSize.width,
         height: manifest.pageSize.height,
@@ -79,8 +96,8 @@ ${escapedManifest}
         minHeight: 400,
         maxHeight: 1600,
         usePortrait: true,
-        drawShadow: true,
-        flippingTime: 700
+        drawShadow: !reduceMotion,
+        flippingTime: reduceMotion ? 1 : 700
       });
       flip.loadFromImages(manifest.pages.map(function(p) { return p.src; }));
       manifest.pages.forEach(function(p, i) {
