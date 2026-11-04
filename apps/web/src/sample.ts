@@ -19,6 +19,11 @@ export const sampleManifest = parseManifest({
   version: 1,
   title: "Sample Magazine",
   pageSize: { width: 480, height: 679 },
+  toc: [
+    { title: "Front Cover", page: 1 },
+    { title: "Campus News", page: 3 },
+    { title: "Back Cover", page: 12 },
+  ],
   pages: Array.from({ length: TOTAL }, (_, i) => ({
     src: samplePage(i + 1, TOTAL),
     alt: `Page ${i + 1}`,

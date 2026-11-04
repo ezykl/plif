@@ -1,16 +1,19 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   applyBookPreset,
   applyBulkDensity,
   buildManifest,
-  formatPageLabel,
+  formatPageHash,
+  parsePageHash,
   THEMES,
+  type BookDirection,
   type BookPresetId,
   type BookTheme,
   type BulkDensityMode,
   type ImportedPage,
+  type TocItem,
 } from "@plif/core";
-import { Flipbook, type FlipbookHandle } from "@plif/reader";
+import { Flipbook, ReaderToolbar, type FlipbookHandle } from "@plif/reader";
 import { CreatorWizard, type WizardStep } from "./components/CreatorWizard";
 import { importFiles } from "./import";
 import { sampleManifest } from "./sample";
@@ -26,12 +29,20 @@ const SAMPLE_IMPORTED_PAGES: ImportedPage[] = sampleManifest.pages.map((p, idx) 
 
 export function App() {
   const book = useRef<FlipbookHandle>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<WizardStep>("upload");
   const [title, setTitle] = useState(sampleManifest.title);
   const [hasCover, setHasCover] = useState(sampleManifest.hasCover);
   const [theme, setTheme] = useState<BookTheme>(sampleManifest.theme);
+  const [direction, setDirection] = useState<BookDirection>(sampleManifest.direction);
+  const [toc, setToc] = useState<TocItem[]>(sampleManifest.toc);
   const [pages, setPages] = useState<ImportedPage[]>([]);
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    return parsePageHash(window.location.hash, SAMPLE_IMPORTED_PAGES.length) ?? 0;
+  });
+  const [zoom, setZoom] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [progressText, setProgressText] = useState<string | null>(null);
   const [errorText, setErrorText] = useState<string | null>(null);
@@ -44,13 +55,62 @@ export function App() {
         title,
         hasCover,
         theme,
+        direction,
+        toc,
         pages: effectivePages,
       }),
-    [title, hasCover, theme, effectivePages],
+    [title, hasCover, theme, direction, toc, effectivePages],
   );
 
   const total = activeManifest.pages.length;
   const themeTokens = THEMES[theme];
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onHashChange = () => {
+      const parsed = parsePageHash(window.location.hash, total);
+      if (parsed !== null) {
+        setIndex(parsed);
+        book.current?.goTo(parsed);
+      }
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, [total]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const onFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+  const updatePageIndex = (nextIndex: number) => {
+    setIndex(nextIndex);
+    if (typeof window !== "undefined") {
+      window.location.hash = formatPageHash(nextIndex);
+    }
+  };
+
+  const handleGoToPage = (targetIndex: number) => {
+    book.current?.goTo(targetIndex);
+    updatePageIndex(targetIndex);
+  };
+
+  const handleToggleFullscreen = () => {
+    if (typeof document === "undefined") return;
+    if (document.fullscreenElement) {
+      void document.exitFullscreen?.();
+      setIsFullscreen(false);
+    } else if (stageRef.current?.requestFullscreen) {
+      void stageRef.current.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      setIsFullscreen((prev) => !prev);
+    }
+  };
 
   const handleUploadFiles = async (files: File[]) => {
     setIsImporting(true);
@@ -61,7 +121,7 @@ export function App() {
         onProgress: (cur, max) => setProgressText(`Rendering PDF page ${cur} / ${max}...`),
       });
       setPages((prev) => [...prev, ...imported]);
-      setIndex(0);
+      updatePageIndex(0);
       setProgressText(null);
       setStep("arrange");
     } catch (err) {
@@ -78,21 +138,24 @@ export function App() {
     setHasCover(next.hasCover);
     setTheme(next.theme);
     setPages(next.pages);
-    setIndex(0);
+    updatePageIndex(0);
   };
 
   const handleApplyBulkDensity = (mode: BulkDensityMode) => {
     const base = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
     setPages(applyBulkDensity(base, mode));
-    setIndex(0);
+    updatePageIndex(0);
   };
 
   const handleResetToSample = () => {
     setTitle(sampleManifest.title);
     setHasCover(sampleManifest.hasCover);
     setTheme(sampleManifest.theme);
+    setDirection(sampleManifest.direction);
+    setToc(sampleManifest.toc);
     setPages([]);
-    setIndex(0);
+    setZoom(1);
+    updatePageIndex(0);
   };
 
   return (
@@ -139,7 +202,7 @@ export function App() {
             <h1 style={{ margin: "2px 0 0", fontSize: 22 }}>{activeManifest.title}</h1>
           </div>
           <span style={{ fontSize: 13, opacity: 0.85 }}>
-            {hasCover ? "Cover + Spread Mode" : "Newspaper Spread Mode"}
+            {hasCover ? "Cover + Spread Mode" : "Newspaper Spread Mode"} • {direction.toUpperCase()}
           </span>
         </div>
       </header>
@@ -159,6 +222,8 @@ export function App() {
           title={title}
           hasCover={hasCover}
           theme={theme}
+          direction={direction}
+          toc={toc}
           pages={pages}
           isImporting={isImporting}
           progressText={progressText}
@@ -166,55 +231,52 @@ export function App() {
           onUploadFiles={handleUploadFiles}
           onChangePages={(next) => {
             setPages(next);
-            setIndex(0);
+            updatePageIndex(0);
           }}
           onChangeTitle={setTitle}
           onChangeHasCover={(next) => {
             setHasCover(next);
-            setIndex(0);
+            updatePageIndex(0);
           }}
           onChangeTheme={setTheme}
+          onChangeDirection={setDirection}
+          onChangeToc={setToc}
           onSelectPreset={handleSelectPreset}
           onApplyBulkDensity={handleApplyBulkDensity}
           onResetToSample={handleResetToSample}
         />
 
-        <Flipbook ref={book} manifest={activeManifest} onPageChange={setIndex} />
+        <div
+          ref={stageRef}
+          style={{
+            display: "grid",
+            placeItems: "center",
+            gap: 16,
+            width: "100%",
+            background: isFullscreen ? themeTokens.stageBg : "transparent",
+            padding: isFullscreen ? 24 : 0,
+          }}
+        >
+          <Flipbook
+            ref={book}
+            manifest={activeManifest}
+            zoom={zoom}
+            onPageChange={updatePageIndex}
+          />
 
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <button
-            type="button"
-            onClick={() => book.current?.prev()}
-            style={{
-              padding: "8px 16px",
-              borderRadius: 999,
-              border: `1px solid ${themeTokens.accentColor}`,
-              background: "transparent",
-              color: themeTokens.textColor,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Previous
-          </button>
-          <span style={{ fontWeight: 600 }}>
-            {formatPageLabel(index, total, activeManifest.hasCover, false)}
-          </span>
-          <button
-            type="button"
-            onClick={() => book.current?.next()}
-            style={{
-              padding: "8px 16px",
-              borderRadius: 999,
-              border: `1px solid ${themeTokens.accentColor}`,
-              background: "transparent",
-              color: themeTokens.textColor,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Next
-          </button>
+          <ReaderToolbar
+            manifest={activeManifest}
+            currentIndex={index}
+            zoom={zoom}
+            isFullscreen={isFullscreen}
+            onPrev={() => book.current?.prev()}
+            onNext={() => book.current?.next()}
+            onGoToPage={handleGoToPage}
+            onChangeZoom={setZoom}
+            onToggleFullscreen={handleToggleFullscreen}
+            accentColor={themeTokens.accentColor}
+            textColor={themeTokens.textColor}
+          />
         </div>
       </main>
     </div>
