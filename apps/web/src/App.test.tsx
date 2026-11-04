@@ -68,4 +68,15 @@ describe("<App>", () => {
     render(<App />);
     expect(screen.getByText("4–5 / 12")).toBeTruthy();
   });
+
+  it("navigates to publish step and renders standalone download and embed tools", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "3. Preview & Publish" }));
+
+    expect(screen.getByRole("button", { name: "Download Standalone HTML" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Download Manifest JSON" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Copy Embed Code" })).toBeTruthy();
+    expect(screen.getByText(/<iframe src=/i)).toBeTruthy();
+  });
 });
