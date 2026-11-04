@@ -16,6 +16,7 @@ describe("importImageFile", () => {
     vi.spyOn(HTMLCanvasElement.prototype, "toDataURL").mockReturnValue(
       "data:image/webp;base64,TEST",
     );
+    HTMLCanvasElement.prototype.toBlob = (cb: BlobCallback) => cb(null);
 
     const page = await importImageFile(file, {
       maxDimension: 1000,

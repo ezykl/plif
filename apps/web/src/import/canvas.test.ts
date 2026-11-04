@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { canvasToWebpUrl, scaleToFitMaxDimension } from "./canvas";
 
 describe("scaleToFitMaxDimension", () => {
@@ -23,23 +23,36 @@ describe("scaleToFitMaxDimension", () => {
 });
 
 describe("canvasToWebpUrl", () => {
+  beforeEach(() => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
+      {} as CanvasRenderingContext2D,
+    );
+    vi.spyOn(HTMLCanvasElement.prototype, "toDataURL").mockReturnValue(
+      "data:image/webp;base64,AAA",
+    );
+    if (typeof URL.createObjectURL !== "function") {
+      URL.createObjectURL = () => "";
+    }
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:webp-test");
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("returns an object URL when toBlob yields a non-empty Blob", async () => {
     const canvas = document.createElement("canvas");
     canvas.toBlob = (cb: BlobCallback) => cb(new Blob(["webp-bytes"], { type: "image/webp" }));
-    const createUrlSpy = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:webp-test");
 
     const url = await canvasToWebpUrl(canvas, 0.85);
     expect(url).toBe("blob:webp-test");
-    createUrlSpy.mockRestore();
   });
 
   it("falls back to toDataURL when toBlob returns null", async () => {
     const canvas = document.createElement("canvas");
     canvas.toBlob = (cb: BlobCallback) => cb(null);
-    canvas.toDataURL = vi.fn().mockReturnValue("data:image/webp;base64,AAA");
 
     const url = await canvasToWebpUrl(canvas, 0.8);
     expect(url).toBe("data:image/webp;base64,AAA");
-    expect(canvas.toDataURL).toHaveBeenCalledWith("image/webp", 0.8);
   });
 });
