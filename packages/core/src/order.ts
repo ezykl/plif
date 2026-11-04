@@ -1,4 +1,5 @@
 import { parseManifest, type Manifest } from "./manifest";
+import type { BookTheme } from "./themes";
 
 export interface ImportedPage {
   id: string;
@@ -12,6 +13,7 @@ export interface ImportedPage {
 export interface BuildManifestOptions {
   title: string;
   hasCover?: boolean;
+  theme?: BookTheme;
   pages: readonly ImportedPage[];
 }
 
@@ -60,6 +62,7 @@ export function buildManifest(opts: BuildManifestOptions): Manifest {
       height: Math.round(first.height),
     },
     hasCover: opts.hasCover ?? true,
+    theme: opts.theme ?? "magazine",
     pages: opts.pages.map((p) => ({
       src: p.src,
       ...(p.alt !== undefined ? { alt: p.alt } : {}),

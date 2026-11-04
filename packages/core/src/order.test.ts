@@ -60,6 +60,7 @@ describe("buildManifest", () => {
       title: "Campus Issue",
       pageSize: { width: 600, height: 800 },
       hasCover: true,
+      theme: "magazine",
       pages: [
         { src: "blob:1", alt: "Page 1", density: "hard" },
         { src: "blob:2", alt: "Page 2" },

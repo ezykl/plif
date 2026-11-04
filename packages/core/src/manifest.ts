@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { bookThemeSchema } from "./themes";
 
 export const pageSchema = z.object({
   src: z.string().min(1),
@@ -14,6 +15,7 @@ export const manifestSchema = z.object({
     height: z.number().positive(),
   }),
   hasCover: z.boolean().default(true),
+  theme: bookThemeSchema.default("magazine"),
   pages: z.array(pageSchema).min(1),
 });
 
