@@ -4,6 +4,7 @@ import {
   applyBulkDensity,
   buildManifest,
   formatPageHash,
+  generateStandaloneHtml,
   parsePageHash,
   THEMES,
   type BookDirection,
@@ -167,6 +168,39 @@ export function App() {
     updatePageIndex(0);
   };
 
+  const downloadFile = (filename: string, content: string, type: string) => {
+    if (typeof window === "undefined" || typeof document === "undefined") return;
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const sanitizeFilename = (name: string) =>
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "flipbook";
+
+  const handleDownloadHtml = () => {
+    const html = generateStandaloneHtml(activeManifest);
+    downloadFile(`${sanitizeFilename(activeManifest.title)}.html`, html, "text/html");
+  };
+
+  const handleDownloadManifest = () => {
+    const json = JSON.stringify(activeManifest, null, 2);
+    downloadFile(
+      `${sanitizeFilename(activeManifest.title)}-manifest.json`,
+      json,
+      "application/json",
+    );
+  };
+
   return (
     <div
       style={{
@@ -234,6 +268,7 @@ export function App() {
           direction={direction}
           toc={toc}
           pages={pages}
+          manifest={activeManifest}
           isImporting={isImporting}
           progressText={progressText}
           errorText={errorText}
@@ -253,6 +288,8 @@ export function App() {
           onSelectPreset={handleSelectPreset}
           onApplyBulkDensity={handleApplyBulkDensity}
           onResetToSample={handleResetToSample}
+          onDownloadHtml={handleDownloadHtml}
+          onDownloadManifest={handleDownloadManifest}
         />
 
         <div
