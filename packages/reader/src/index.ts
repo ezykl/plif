@@ -2,3 +2,4 @@
 /// <reference path="./page-flip.d.ts" />
 export * from "./settings";
 export * from "./Flipbook";
+export * from "./ReaderToolbar";
