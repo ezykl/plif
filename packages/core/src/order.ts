@@ -1,3 +1,4 @@
+import type { BookDirection, TocItem } from "./extras";
 import { parseManifest, type Manifest } from "./manifest";
 import type { BookTheme } from "./themes";
 
@@ -14,6 +15,8 @@ export interface BuildManifestOptions {
   title: string;
   hasCover?: boolean;
   theme?: BookTheme;
+  direction?: BookDirection;
+  toc?: readonly TocItem[];
   pages: readonly ImportedPage[];
 }
 
@@ -63,6 +66,8 @@ export function buildManifest(opts: BuildManifestOptions): Manifest {
     },
     hasCover: opts.hasCover ?? true,
     theme: opts.theme ?? "magazine",
+    direction: opts.direction ?? "ltr",
+    toc: opts.toc ? [...opts.toc] : [],
     pages: opts.pages.map((p) => ({
       src: p.src,
       ...(p.alt !== undefined ? { alt: p.alt } : {}),
