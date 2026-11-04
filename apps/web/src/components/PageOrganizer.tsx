@@ -30,6 +30,7 @@ export function PageOrganizer({
 
   const handleFileDrop = (e: DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
+    if (isImporting) return;
     const list = e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
     if (list.length > 0) {
       onUploadFiles(list);
@@ -116,6 +117,7 @@ export function PageOrganizer({
                 key={page.id}
                 draggable
                 onDragStart={() => setDragIndex(i)}
+                onDragEnd={() => setDragIndex(null)}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => {
                   if (dragIndex !== null && dragIndex !== i) {
