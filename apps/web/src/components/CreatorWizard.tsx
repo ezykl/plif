@@ -5,10 +5,12 @@ import {
   type BookTheme,
   type BulkDensityMode,
   type ImportedPage,
+  type Manifest,
   type TocItem,
 } from "@plif/core";
 import { BookSettingsPanel } from "./BookSettingsPanel";
 import { PageOrganizer } from "./PageOrganizer";
+import { PublishPanel } from "./PublishPanel";
 
 export type WizardStep = "upload" | "arrange" | "publish";
 
@@ -19,6 +21,7 @@ export interface CreatorWizardProps {
   hasCover: boolean;
   theme: BookTheme;
   pages: readonly ImportedPage[];
+  manifest?: Manifest;
   direction?: BookDirection;
   toc?: readonly TocItem[];
   isImporting?: boolean;
@@ -34,6 +37,8 @@ export interface CreatorWizardProps {
   onChangeDirection?: (direction: BookDirection) => void;
   onChangeToc?: (toc: TocItem[]) => void;
   onResetToSample: () => void;
+  onDownloadHtml?: () => void;
+  onDownloadManifest?: () => void;
 }
 
 const STEPS: { id: WizardStep; label: string }[] = [
@@ -49,6 +54,7 @@ export function CreatorWizard({
   hasCover,
   theme,
   pages,
+  manifest,
   direction = "ltr",
   toc = [],
   isImporting = false,
@@ -64,6 +70,8 @@ export function CreatorWizard({
   onChangeDirection,
   onChangeToc,
   onResetToSample,
+  onDownloadHtml,
+  onDownloadManifest,
 }: CreatorWizardProps) {
   const themeTokens = THEMES[theme];
 
@@ -223,47 +231,57 @@ export function CreatorWizard({
       )}
 
       {step === "publish" && (
-        <section
-          aria-label="Publish summary"
-          style={{
-            padding: 16,
-            borderRadius: 8,
-            border: "1px solid #d6d3d1",
-            background: "#fafaf9",
-            color: "#1c1917",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 12,
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div style={{ display: "grid", gap: 4 }}>
-            <strong style={{ fontSize: 15 }}>
-              Ready to Publish: {title.trim() || "Untitled Book"}
-            </strong>
-            <span style={{ fontSize: 13, color: "#57534e" }}>
-              {pages.length > 0 ? `${pages.length} imported pages` : "12 sample pages"} •{" "}
-              {hasCover ? "Standalone cover" : "Newspaper spread (no cover)"} • Theme:{" "}
-              {themeTokens.label} •{" "}
-              {direction === "rtl" ? "Right-to-Left (RTL)" : "Left-to-Right (LTR)"} • {toc.length}{" "}
-              TOC chapters
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={onResetToSample}
+        <div style={{ display: "grid", gap: 16 }}>
+          <section
+            aria-label="Publish summary"
             style={{
-              padding: "6px 12px",
-              borderRadius: 6,
+              padding: 16,
+              borderRadius: 8,
               border: "1px solid #d6d3d1",
-              background: "#ffffff",
-              cursor: "pointer",
+              background: "#fafaf9",
+              color: "#1c1917",
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 12,
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            Load Sample Book
-          </button>
-        </section>
+            <div style={{ display: "grid", gap: 4 }}>
+              <strong style={{ fontSize: 15 }}>
+                Ready to Publish: {title.trim() || "Untitled Book"}
+              </strong>
+              <span style={{ fontSize: 13, color: "#57534e" }}>
+                {pages.length > 0 ? `${pages.length} imported pages` : "12 sample pages"} •{" "}
+                {hasCover ? "Standalone cover" : "Newspaper spread (no cover)"} • Theme:{" "}
+                {themeTokens.label} •{" "}
+                {direction === "rtl" ? "Right-to-Left (RTL)" : "Left-to-Right (LTR)"} • {toc.length}{" "}
+                TOC chapters
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={onResetToSample}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 6,
+                border: "1px solid #d6d3d1",
+                background: "#ffffff",
+                cursor: "pointer",
+              }}
+            >
+              Load Sample Book
+            </button>
+          </section>
+
+          {manifest && onDownloadHtml && onDownloadManifest && (
+            <PublishPanel
+              manifest={manifest}
+              onDownloadHtml={onDownloadHtml}
+              onDownloadManifest={onDownloadManifest}
+            />
+          )}
+        </div>
       )}
     </div>
   );
