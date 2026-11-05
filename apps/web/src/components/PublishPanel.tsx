@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { generateIframeEmbed, generateWebComponentEmbed, THEMES, type Manifest } from "@plif/core";
+import { generateIframeEmbed, generateWebComponentEmbed, type Manifest } from "@plif/core";
 
 export interface PublishPanelProps {
   manifest: Manifest;
@@ -29,8 +29,6 @@ export function PublishPanel({
       }
     };
   }, []);
-
-  const themeTokens = THEMES[manifest.theme];
 
   const iframeCode = generateIframeEmbed({
     src: publishUrl,
@@ -62,58 +60,173 @@ export function PublishPanel({
     <div
       style={{
         display: "grid",
-        gap: 16,
-        padding: 16,
-        background: "#ffffff",
-        borderRadius: 8,
-        border: "1px solid #e7e5e4",
-        color: "#1c1917",
+        gap: 20,
+        padding: 24,
+        background: "#fdfbf7",
+        borderRadius: 12,
+        border: "1px solid #e6dfd5",
+        color: "#24201d",
+        boxShadow: "0 2px 8px rgba(36, 32, 29, 0.04)",
       }}
     >
+      {/* Panel Heading */}
+      <div>
+        <h3
+          style={{
+            margin: 0,
+            fontSize: 20,
+            fontWeight: 700,
+            fontFamily: 'Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif',
+            color: "#24201d",
+          }}
+        >
+          Export & Embed
+        </h3>
+        <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b635b" }}>
+          Download a portable offline publication or integrate your flipbook directly into any
+          website.
+        </p>
+      </div>
+
+      {/* Export Options Grid */}
       <div
         style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 12,
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: 16,
         }}
       >
-        <div>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Export & Embed</h3>
-          <p style={{ margin: "2px 0 0", fontSize: 13, color: "#78716c" }}>
-            Download a portable offline flipbook or embed this book into any website.
-          </p>
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {/* Primary Card: Standalone HTML */}
+        <div
+          style={{
+            background: "#ffffff",
+            border: "2px solid #c25e3e",
+            borderRadius: 10,
+            padding: 18,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            gap: 14,
+            boxShadow: "0 4px 12px rgba(194, 94, 62, 0.08)",
+          }}
+        >
+          <div style={{ display: "grid", gap: 6 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 8,
+              }}
+            >
+              <span style={{ fontSize: 15, fontWeight: 700, color: "#24201d" }}>
+                Standalone Flipbook HTML
+              </span>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  padding: "2px 8px",
+                  borderRadius: 9999,
+                  background: "#fef3c7",
+                  color: "#92400e",
+                  border: "1px solid #fde68a",
+                }}
+              >
+                Recommended • 100% Offline
+              </span>
+            </div>
+            <p style={{ margin: 0, fontSize: 12, color: "#6b635b", lineHeight: 1.5 }}>
+              Self-contained file with embedded images and flip engine. Works completely offline in
+              any web browser with zero server dependencies.
+            </p>
+          </div>
           <button
             type="button"
             onClick={onDownloadHtml}
             style={{
-              padding: "8px 14px",
-              borderRadius: 6,
+              minHeight: 44,
+              minWidth: 44,
+              padding: "10px 18px",
+              borderRadius: 8,
               border: "none",
-              background: themeTokens.accentColor,
+              background: "#c25e3e",
               color: "#ffffff",
               fontWeight: 600,
-              fontSize: 13,
+              fontSize: 14,
               cursor: "pointer",
+              boxShadow: "0 2px 4px rgba(194, 94, 62, 0.2)",
+              transition: "background 0.15s ease",
             }}
           >
             Download Standalone HTML
           </button>
+        </div>
+
+        {/* Secondary Card: Manifest JSON */}
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px solid #e6dfd5",
+            borderRadius: 10,
+            padding: 18,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            gap: 14,
+            boxShadow: "0 2px 6px rgba(36, 32, 29, 0.03)",
+          }}
+        >
+          <div style={{ display: "grid", gap: 6 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 8,
+              }}
+            >
+              <span style={{ fontSize: 15, fontWeight: 700, color: "#24201d" }}>
+                Book Manifest JSON
+              </span>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  padding: "2px 8px",
+                  borderRadius: 9999,
+                  background: "#f5efe6",
+                  color: "#6b635b",
+                  border: "1px solid #e6dfd5",
+                }}
+              >
+                Headless & Developer
+              </span>
+            </div>
+            <p style={{ margin: 0, fontSize: 12, color: "#6b635b", lineHeight: 1.5 }}>
+              Pure JSON configuration referencing hosted assets. Ideal for headless CMS pipelines
+              and custom reader implementations.
+            </p>
+          </div>
           <button
             type="button"
             onClick={onDownloadManifest}
             style={{
-              padding: "8px 14px",
-              borderRadius: 6,
-              border: "1px solid #d6d3d1",
+              minHeight: 44,
+              minWidth: 44,
+              padding: "10px 18px",
+              borderRadius: 8,
+              border: "1px solid #d6ccc2",
               background: "#ffffff",
-              color: "#1c1917",
+              color: "#24201d",
               fontWeight: 600,
-              fontSize: 13,
+              fontSize: 14,
               cursor: "pointer",
+              transition: "border-color 0.15s ease",
             }}
           >
             Download Manifest JSON
@@ -121,46 +234,66 @@ export function PublishPanel({
         </div>
       </div>
 
-      <div style={{ display: "grid", gap: 8 }}>
-        <div role="tablist" aria-label="Embed options" style={{ display: "flex", gap: 8 }}>
-          <button
-            type="button"
-            role="tab"
-            id="iframe-tab"
-            aria-selected={embedType === "iframe"}
-            aria-controls="embed-panel"
-            onClick={() => setEmbedType("iframe")}
-            style={{
-              padding: "6px 12px",
-              borderRadius: 6,
-              border: embedType === "iframe" ? "2px solid #1c1917" : "1px solid #d6d3d1",
-              background: embedType === "iframe" ? "#f5f5f4" : "#ffffff",
-              fontWeight: 600,
-              fontSize: 12,
-              cursor: "pointer",
-            }}
-          >
-            Iframe Snippet
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="webcomponent-tab"
-            aria-selected={embedType === "web-component"}
-            aria-controls="embed-panel"
-            onClick={() => setEmbedType("web-component")}
-            style={{
-              padding: "6px 12px",
-              borderRadius: 6,
-              border: embedType === "web-component" ? "2px solid #1c1917" : "1px solid #d6d3d1",
-              background: embedType === "web-component" ? "#f5f5f4" : "#ffffff",
-              fontWeight: 600,
-              fontSize: 12,
-              cursor: "pointer",
-            }}
-          >
-            Web Component
-          </button>
+      {/* Embed Code Snippets */}
+      <div style={{ display: "grid", gap: 10 }}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <div role="tablist" aria-label="Embed options" style={{ display: "flex", gap: 8 }}>
+            <button
+              type="button"
+              role="tab"
+              id="iframe-tab"
+              aria-selected={embedType === "iframe"}
+              aria-controls="embed-panel"
+              onClick={() => setEmbedType("iframe")}
+              style={{
+                minHeight: 44,
+                padding: "8px 16px",
+                borderRadius: 8,
+                border: embedType === "iframe" ? "2px solid #c25e3e" : "1px solid #e6dfd5",
+                background: embedType === "iframe" ? "#c25e3e" : "#ffffff",
+                color: embedType === "iframe" ? "#ffffff" : "#24201d",
+                fontWeight: 600,
+                fontSize: 13,
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              Iframe Snippet
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="webcomponent-tab"
+              aria-selected={embedType === "web-component"}
+              aria-controls="embed-panel"
+              onClick={() => setEmbedType("web-component")}
+              style={{
+                minHeight: 44,
+                padding: "8px 16px",
+                borderRadius: 8,
+                border: embedType === "web-component" ? "2px solid #c25e3e" : "1px solid #e6dfd5",
+                background: embedType === "web-component" ? "#c25e3e" : "#ffffff",
+                color: embedType === "web-component" ? "#ffffff" : "#24201d",
+                fontWeight: 600,
+                fontSize: 13,
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              Web Component
+            </button>
+          </div>
+          <span style={{ fontSize: 12, color: "#6b635b" }}>
+            Works in WordPress, Webflow, Squarespace, Ghost, Notion, and vanilla HTML.
+          </span>
         </div>
 
         <div
@@ -172,15 +305,17 @@ export function PublishPanel({
           <pre
             style={{
               margin: 0,
-              padding: 12,
-              background: "#18181b",
-              color: "#f4f4f5",
-              borderRadius: 6,
-              fontSize: 12,
+              padding: "16px 20px",
+              background: "#1f1d1b",
+              color: "#fdfbf7",
+              borderRadius: 8,
+              fontSize: 13,
               overflowX: "auto",
-              fontFamily: "monospace",
+              fontFamily: '"JetBrains Mono", "Fira Code", ui-monospace, monospace',
               whiteSpace: "pre-wrap",
               wordBreak: "break-all",
+              lineHeight: 1.6,
+              border: "1px solid #2e2a27",
             }}
           >
             <code>{currentCode}</code>
@@ -190,16 +325,18 @@ export function PublishPanel({
             onClick={handleCopy}
             style={{
               position: "absolute",
-              top: 8,
-              right: 8,
-              padding: "4px 10px",
-              borderRadius: 4,
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              background: "rgba(255, 255, 255, 0.12)",
+              top: 10,
+              right: 10,
+              minHeight: 36,
+              padding: "6px 14px",
+              borderRadius: 6,
+              border: "1px solid rgba(255, 255, 255, 0.25)",
+              background: copied ? "#3e6b5c" : "rgba(255, 255, 255, 0.14)",
               color: "#ffffff",
               fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
+              transition: "background 0.15s ease",
             }}
           >
             {copied ? "Copied!" : "Copy Embed Code"}

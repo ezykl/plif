@@ -79,4 +79,12 @@ describe("<App>", () => {
     expect(screen.getByRole("button", { name: "Copy Embed Code" })).toBeTruthy();
     expect(screen.getByText(/<iframe src=/i)).toBeTruthy();
   });
+
+  it("renders stationery header with book logo, edition badge, and mode indicator", () => {
+    render(<App />);
+
+    expect(screen.getByRole("img", { name: "Book logo" })).toBeTruthy();
+    expect(screen.getByText(/Plif Flipbook Studio • Magazine Edition/i)).toBeTruthy();
+    expect(screen.getByText(/Cover \+ Spread Mode • LTR/i)).toBeTruthy();
+  });
 });
