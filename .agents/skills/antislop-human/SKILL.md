@@ -1,6 +1,6 @@
 ---
 name: antislop-human
-description: "Human and accessibility skill for antislop. Contrast, keyboard, focus, states, and interaction affordances for real people. Includes the contrast checker."
+description: "Anti Slop Human Factors: Contrast, keyboard, focus, states, interaction affordances."
 allowed-tools: Bash(python *) Bash(python3 *) Read Write Edit Glob Grep
 ---
 
