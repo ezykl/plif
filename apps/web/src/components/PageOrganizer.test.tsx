@@ -116,4 +116,37 @@ describe("<PageOrganizer>", () => {
     expect(screen.getByRole("status").textContent).toBe("Importing 2 of 5 pages...");
     expect(screen.getByRole("alert").textContent).toBe("Failed to parse PDF.");
   });
+
+  it("renders the Cover ribbon only when hasCover is true", () => {
+    const { rerender } = render(
+      <PageOrganizer
+        pages={pages}
+        hasCover={true}
+        onUploadFiles={vi.fn()}
+        onChangePages={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Cover")).toBeTruthy();
+
+    rerender(
+      <PageOrganizer
+        pages={pages}
+        hasCover={false}
+        onUploadFiles={vi.fn()}
+        onChangePages={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText("Cover")).toBeNull();
+  });
+
+  it("renders friendly format chips in the dropzone", () => {
+    render(<PageOrganizer pages={[]} onUploadFiles={vi.fn()} onChangePages={vi.fn()} />);
+
+    expect(screen.getByText("PDF Document")).toBeTruthy();
+    expect(screen.getByText("PNG")).toBeTruthy();
+    expect(screen.getByText("JPEG")).toBeTruthy();
+    expect(screen.getByText("WebP")).toBeTruthy();
+  });
 });

@@ -35,6 +35,7 @@ export function App() {
   const [title, setTitle] = useState(sampleManifest.title);
   const [hasCover, setHasCover] = useState(sampleManifest.hasCover);
   const [theme, setTheme] = useState<BookTheme>(sampleManifest.theme);
+  const [activePreset, setActivePreset] = useState<BookPresetId | undefined>("magazine");
   const [direction, setDirection] = useState<BookDirection>(sampleManifest.direction);
   const [toc, setToc] = useState<TocItem[]>(sampleManifest.toc);
   const [pages, setPages] = useState<ImportedPage[]>([]);
@@ -143,6 +144,7 @@ export function App() {
   };
 
   const handleSelectPreset = (presetId: BookPresetId) => {
+    setActivePreset(presetId);
     const base = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
     const next = applyBookPreset(presetId, base);
     setHasCover(next.hasCover);
@@ -161,6 +163,7 @@ export function App() {
     setTitle(sampleManifest.title);
     setHasCover(sampleManifest.hasCover);
     setTheme(sampleManifest.theme);
+    setActivePreset("magazine");
     setDirection(sampleManifest.direction);
     setToc(sampleManifest.toc);
     setPages([]);
@@ -215,8 +218,10 @@ export function App() {
       <header
         style={{
           background: themeTokens.headerBg,
-          borderBottom: "1px solid rgba(255, 255, 255, 0.12)",
-          padding: "12px 24px",
+          color: "#fdfbf7",
+          borderBottom: `1px solid ${themeTokens.borderSubtle}`,
+          padding: "14px 24px",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
         }}
       >
         <div
@@ -227,26 +232,56 @@ export function App() {
             flexWrap: "wrap",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 12,
+            gap: 16,
           }}
         >
           <div>
-            <span
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 20 }} role="img" aria-label="Book logo">
+                📖
+              </span>
+              <span
+                style={{
+                  fontSize: 12,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.14em",
+                  color: themeTokens.accentColor,
+                  fontWeight: 700,
+                }}
+              >
+                Plif Flipbook Studio • {themeTokens.label} Edition
+              </span>
+            </div>
+            <h1
               style={{
-                fontSize: 11,
-                textTransform: "uppercase",
-                letterSpacing: "0.16em",
-                color: themeTokens.accentColor,
+                margin: "4px 0 0",
+                fontSize: 22,
                 fontWeight: 700,
+                fontFamily: 'Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif',
+                letterSpacing: "-0.01em",
+                color: "#fdfbf7",
               }}
             >
-              Plif Flipbook Studio • {themeTokens.label}
-            </span>
-            <h1 style={{ margin: "2px 0 0", fontSize: 22 }}>{activeManifest.title}</h1>
+              {activeManifest.title}
+            </h1>
           </div>
-          <span style={{ fontSize: 13, opacity: 0.85 }}>
-            {hasCover ? "Cover + Spread Mode" : "Newspaper Spread Mode"} • {direction.toUpperCase()}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                padding: "6px 12px",
+                borderRadius: 9999,
+                background: "rgba(255, 255, 255, 0.08)",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                color: "#fdfbf7",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              {hasCover ? "Cover + Spread Mode" : "Newspaper Spread Mode"} •{" "}
+              {direction.toUpperCase()}
+            </span>
+          </div>
         </div>
       </header>
 
@@ -262,6 +297,7 @@ export function App() {
         <CreatorWizard
           step={step}
           onStepChange={setStep}
+          activePreset={activePreset}
           title={title}
           hasCover={hasCover}
           theme={theme}
@@ -301,6 +337,8 @@ export function App() {
             width: "100%",
             background: isFullscreen ? themeTokens.stageBg : "transparent",
             padding: isFullscreen ? 24 : 0,
+            filter: isFullscreen ? "none" : "drop-shadow(0 16px 40px rgba(36, 32, 29, 0.18))",
+            transition: "filter 0.2s ease",
           }}
         >
           <Flipbook

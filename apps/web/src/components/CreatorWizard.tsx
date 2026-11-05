@@ -22,6 +22,7 @@ export interface CreatorWizardProps {
   theme: BookTheme;
   pages: readonly ImportedPage[];
   manifest?: Manifest;
+  activePreset?: BookPresetId;
   direction?: BookDirection;
   toc?: readonly TocItem[];
   isImporting?: boolean;
@@ -41,10 +42,10 @@ export interface CreatorWizardProps {
   onDownloadManifest?: () => void;
 }
 
-const STEPS: { id: WizardStep; label: string }[] = [
-  { id: "upload", label: "1. Upload" },
-  { id: "arrange", label: "2. Arrange & Style" },
-  { id: "publish", label: "3. Preview & Publish" },
+const STEPS: { id: WizardStep; label: string; icon: string }[] = [
+  { id: "upload", label: "1. Upload", icon: "📄" },
+  { id: "arrange", label: "2. Arrange & Style", icon: "🎨" },
+  { id: "publish", label: "3. Preview & Publish", icon: "🚀" },
 ];
 
 export function CreatorWizard({
@@ -55,6 +56,7 @@ export function CreatorWizard({
   theme,
   pages,
   manifest,
+  activePreset,
   direction = "ltr",
   toc = [],
   isImporting = false,
@@ -80,46 +82,65 @@ export function CreatorWizard({
       style={{
         width: "min(960px, 92vw)",
         display: "grid",
-        gap: 12,
+        gap: 16,
       }}
     >
+      {/* Top Stationery Nav Bar */}
       <div
         role="tablist"
         aria-label="Flipbook creation steps"
         style={{
           display: "flex",
           flexWrap: "wrap",
-          gap: 8,
+          gap: 10,
           alignItems: "center",
           justifyContent: "space-between",
-          background: "#fafaf9",
-          padding: "10px 14px",
-          borderRadius: 8,
-          border: "1px solid #d6d3d1",
+          background: "#fdfbf7",
+          padding: "10px 16px",
+          borderRadius: 10,
+          border: "1px solid #e6dfd5",
+          boxShadow: "0 2px 6px rgba(36, 32, 29, 0.04)",
         }}
       >
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {STEPS.map((s) => {
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+          {STEPS.map((s, idx) => {
             const active = s.id === step;
             return (
-              <button
-                key={s.id}
-                role="tab"
-                type="button"
-                aria-selected={active}
-                onClick={() => onStepChange(s.id)}
-                style={{
-                  padding: "6px 14px",
-                  borderRadius: 999,
-                  border: active ? `2px solid ${themeTokens.accentColor}` : "1px solid #d6d3d1",
-                  background: active ? "#1c1917" : "#ffffff",
-                  color: active ? "#ffffff" : "#1c1917",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                {s.label}
-              </button>
+              <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <button
+                  role="tab"
+                  type="button"
+                  aria-label={s.label}
+                  aria-selected={active}
+                  onClick={() => onStepChange(s.id)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "7px 16px",
+                    borderRadius: 9999,
+                    border: active ? "2px solid #c25e3e" : "1px solid #e6dfd5",
+                    background: active ? "#c25e3e" : "#ffffff",
+                    color: active ? "#ffffff" : "#24201d",
+                    fontWeight: 600,
+                    fontSize: 13,
+                    cursor: "pointer",
+                    boxShadow: active ? "0 2px 8px rgba(194, 94, 62, 0.25)" : "none",
+                    transition: "all 150ms ease",
+                  }}
+                >
+                  <span>{s.icon}</span>
+                  <span>{s.label}</span>
+                </button>
+                {idx < STEPS.length - 1 && (
+                  <span
+                    aria-hidden="true"
+                    style={{ color: "#a8a29e", fontSize: 13, fontWeight: 700 }}
+                  >
+                    ›
+                  </span>
+                )}
+              </div>
             );
           })}
         </div>
@@ -130,16 +151,23 @@ export function CreatorWizard({
               type="button"
               onClick={() => onStepChange("arrange")}
               style={{
-                padding: "6px 14px",
-                borderRadius: 6,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "8px 16px",
+                borderRadius: 8,
                 border: "none",
-                background: themeTokens.accentColor,
+                background: "#c25e3e",
                 color: "#ffffff",
                 fontWeight: 600,
+                fontSize: 13,
                 cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(194, 94, 62, 0.25)",
+                transition: "all 150ms ease",
               }}
             >
-              Next: Arrange & Style →
+              <span>Next: Arrange & Style</span>
+              <span>→</span>
             </button>
           )}
           {step === "arrange" && (
@@ -148,10 +176,13 @@ export function CreatorWizard({
                 type="button"
                 onClick={() => onStepChange("upload")}
                 style={{
-                  padding: "6px 12px",
-                  borderRadius: 6,
-                  border: "1px solid #d6d3d1",
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: "1px solid #e6dfd5",
                   background: "#ffffff",
+                  color: "#24201d",
+                  fontWeight: 600,
+                  fontSize: 13,
                   cursor: "pointer",
                 }}
               >
@@ -161,16 +192,22 @@ export function CreatorWizard({
                 type="button"
                 onClick={() => onStepChange("publish")}
                 style={{
-                  padding: "6px 14px",
-                  borderRadius: 6,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 16px",
+                  borderRadius: 8,
                   border: "none",
-                  background: themeTokens.accentColor,
+                  background: "#c25e3e",
                   color: "#ffffff",
                   fontWeight: 600,
+                  fontSize: 13,
                   cursor: "pointer",
+                  boxShadow: "0 2px 8px rgba(194, 94, 62, 0.25)",
                 }}
               >
-                Next: Preview & Publish →
+                <span>Next: Preview & Publish</span>
+                <span>→</span>
               </button>
             </>
           )}
@@ -179,10 +216,13 @@ export function CreatorWizard({
               type="button"
               onClick={() => onStepChange("arrange")}
               style={{
-                padding: "6px 12px",
-                borderRadius: 6,
-                border: "1px solid #d6d3d1",
+                padding: "8px 14px",
+                borderRadius: 8,
+                border: "1px solid #e6dfd5",
                 background: "#ffffff",
+                color: "#24201d",
+                fontWeight: 600,
+                fontSize: 13,
                 cursor: "pointer",
               }}
             >
@@ -192,9 +232,37 @@ export function CreatorWizard({
         </div>
       </div>
 
+      {/* Step Reassuring Guidance Banner */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "10px 16px",
+          borderRadius: 8,
+          background: "#f5efe6",
+          border: "1px solid #e6dfd5",
+          fontSize: 13,
+          color: "#6b635b",
+        }}
+      >
+        <span style={{ fontSize: 16 }}>
+          {step === "upload" ? "🔒" : step === "arrange" ? "📖" : "🚀"}
+        </span>
+        <span>
+          {step === "upload" &&
+            "100% Client-Side: Drop in your PDF or images. Files process in-memory and never leave your browser."}
+          {step === "arrange" &&
+            "Book Binding & Style: Customize page density, standalone covers, themes, and reading direction."}
+          {step === "publish" &&
+            "Ready to Share: Download a portable standalone flipbook or grab embed code for your website."}
+        </span>
+      </div>
+
       {step === "upload" && (
         <PageOrganizer
           pages={pages}
+          hasCover={hasCover}
           isImporting={isImporting}
           progressText={progressText}
           errorText={errorText}
@@ -209,6 +277,7 @@ export function CreatorWizard({
             title={title}
             hasCover={hasCover}
             theme={theme}
+            activePreset={activePreset}
             direction={direction}
             toc={toc}
             onChangeTitle={onChangeTitle}
@@ -221,6 +290,7 @@ export function CreatorWizard({
           />
           <PageOrganizer
             pages={pages}
+            hasCover={hasCover}
             isImporting={isImporting}
             progressText={progressText}
             errorText={errorText}
@@ -236,22 +306,40 @@ export function CreatorWizard({
             aria-label="Publish summary"
             style={{
               padding: 16,
-              borderRadius: 8,
-              border: "1px solid #d6d3d1",
-              background: "#fafaf9",
-              color: "#1c1917",
+              borderRadius: 10,
+              border: "1px solid #e6dfd5",
+              background: "#ffffff",
+              color: "#24201d",
               display: "flex",
               flexWrap: "wrap",
-              gap: 12,
+              gap: 14,
               alignItems: "center",
               justifyContent: "space-between",
+              boxShadow: "0 2px 8px rgba(36, 32, 29, 0.05)",
             }}
           >
             <div style={{ display: "grid", gap: 4 }}>
-              <strong style={{ fontSize: 15 }}>
-                Ready to Publish: {title.trim() || "Untitled Book"}
-              </strong>
-              <span style={{ fontSize: 13, color: "#57534e" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span
+                  style={{
+                    display: "inline-block",
+                    padding: "2px 8px",
+                    borderRadius: 4,
+                    background: "#3e6b5c",
+                    color: "#ffffff",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Ready
+                </span>
+                <strong style={{ fontSize: 16, fontFamily: "Charter, Georgia, serif" }}>
+                  Ready to Publish: {title.trim() || "Untitled Book"}
+                </strong>
+              </div>
+              <span style={{ fontSize: 13, color: "#6b635b" }}>
                 {pages.length > 0 ? `${pages.length} imported pages` : "12 sample pages"} •{" "}
                 {hasCover ? "Standalone cover" : "Newspaper spread (no cover)"} • Theme:{" "}
                 {themeTokens.label} •{" "}
@@ -263,11 +351,15 @@ export function CreatorWizard({
               type="button"
               onClick={onResetToSample}
               style={{
-                padding: "6px 12px",
-                borderRadius: 6,
-                border: "1px solid #d6d3d1",
-                background: "#ffffff",
+                padding: "8px 14px",
+                borderRadius: 8,
+                border: "1px solid #e6dfd5",
+                background: "#fdfbf7",
+                color: "#24201d",
+                fontWeight: 600,
+                fontSize: 13,
                 cursor: "pointer",
+                transition: "all 150ms ease",
               }}
             >
               Load Sample Book

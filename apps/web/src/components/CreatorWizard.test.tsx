@@ -108,4 +108,15 @@ describe("<CreatorWizard>", () => {
     expect(screen.getByText(/Ready to Publish/i)).toBeTruthy();
     expect(screen.queryByText(/Export & Embed/i)).toBeNull();
   });
+
+  it("displays reassuring guidance banners for each step", () => {
+    const { rerender } = render(<CreatorWizard {...makeProps({ step: "upload" })} />);
+    expect(screen.getByText(/100% Client-Side/i)).toBeTruthy();
+
+    rerender(<CreatorWizard {...makeProps({ step: "arrange" })} />);
+    expect(screen.getByText(/Book Binding & Style/i)).toBeTruthy();
+
+    rerender(<CreatorWizard {...makeProps({ step: "publish" })} />);
+    expect(screen.getByText(/Ready to Share/i)).toBeTruthy();
+  });
 });
