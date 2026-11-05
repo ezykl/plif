@@ -118,4 +118,29 @@ describe("<BookSettingsPanel>", () => {
     expect(magBtn.getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByText("Active")).toBeTruthy();
   });
+
+  it("applies high-contrast focus ring when book title input is focused", () => {
+    render(
+      <BookSettingsPanel
+        title="Styled Book"
+        hasCover={true}
+        theme="magazine"
+        onChangeTitle={vi.fn()}
+        onChangeHasCover={vi.fn()}
+        onChangeTheme={vi.fn()}
+        onSelectPreset={vi.fn()}
+        onApplyBulkDensity={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByRole("textbox", { name: "Book title" });
+    expect(input.style.outline).toBe("none");
+
+    fireEvent.focus(input);
+    expect(input.style.outline).toContain("2px solid");
+    expect(input.style.outline).toContain("#c25e3e");
+
+    fireEvent.blur(input);
+    expect(input.style.outline).toBe("none");
+  });
 });

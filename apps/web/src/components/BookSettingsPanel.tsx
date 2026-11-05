@@ -45,6 +45,7 @@ export function BookSettingsPanel({
 }: BookSettingsPanelProps) {
   const [chapterTitle, setChapterTitle] = useState("");
   const [chapterPage, setChapterPage] = useState("1");
+  const [isTitleFocused, setIsTitleFocused] = useState(false);
 
   return (
     <section
@@ -80,14 +81,19 @@ export function BookSettingsPanel({
             aria-label="Book title"
             value={title}
             onChange={(e) => onChangeTitle(e.target.value)}
+            onFocus={() => setIsTitleFocused(true)}
+            onBlur={() => setIsTitleFocused(false)}
             placeholder="Untitled Book"
             style={{
               padding: "9px 12px",
               borderRadius: 8,
-              border: "1px solid #d6ccc2",
+              border: isTitleFocused ? "1px solid #c25e3e" : "1px solid #d6ccc2",
+              outline: isTitleFocused ? "2px solid #c25e3e" : "none",
+              outlineOffset: 2,
               fontSize: 14,
               color: "#24201d",
               background: "#ffffff",
+              transition: "border-color 0.15s ease, outline 0.15s ease",
             }}
           />
         </label>

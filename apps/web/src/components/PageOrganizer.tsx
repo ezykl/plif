@@ -329,6 +329,7 @@ export function PageOrganizer({
                       }
                       style={{
                         minHeight: 44,
+                        minWidth: 44,
                         borderRadius: 6,
                         border: "1px solid #e6dfd5",
                         background: "#ffffff",
@@ -346,6 +347,7 @@ export function PageOrganizer({
                       onClick={() => onChangePages(removePage(pages, i))}
                       style={{
                         minHeight: 44,
+                        minWidth: 44,
                         borderRadius: 6,
                         border: "1px solid #fee2e2",
                         background: "#fff5f5",
