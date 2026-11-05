@@ -266,7 +266,7 @@ export function PublishPanel({
                 transition: "all 0.15s ease",
               }}
             >
-              Iframe Snippet
+              Responsive &lt;iframe&gt;
             </button>
             <button
               type="button"
@@ -288,7 +288,7 @@ export function PublishPanel({
                 transition: "all 0.15s ease",
               }}
             >
-              Web Component
+              &lt;plif-book&gt; Web Component
             </button>
           </div>
           <span style={{ fontSize: 12, color: "#6b635b" }}>
@@ -327,8 +327,9 @@ export function PublishPanel({
               position: "absolute",
               top: 10,
               right: 10,
-              minHeight: 36,
-              padding: "6px 14px",
+              minHeight: 44,
+              minWidth: 44,
+              padding: "8px 16px",
               borderRadius: 6,
               border: "1px solid rgba(255, 255, 255, 0.25)",
               background: copied ? "#3e6b5c" : "rgba(255, 255, 255, 0.14)",

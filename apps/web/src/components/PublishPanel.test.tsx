@@ -51,13 +51,17 @@ describe("<PublishPanel>", () => {
 
     expect(screen.getByText(/<iframe src=/i)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Copy Embed Code" }));
+    const copyBtn = screen.getByRole("button", { name: "Copy Embed Code" });
+    expect(copyBtn.style.minHeight).toBe("44px");
+    expect(copyBtn.style.minWidth).toBe("44px");
+
+    fireEvent.click(copyBtn);
     expect(navigator.clipboard.writeText).toHaveBeenCalled();
     await waitFor(() => {
       expect(screen.getByText("Copied!")).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByRole("tab", { name: "Web Component" }));
+    fireEvent.click(screen.getByRole("tab", { name: "<plif-book> Web Component" }));
     expect(screen.getByText(/<plif-book src=/i)).toBeTruthy();
   });
 
@@ -74,7 +78,7 @@ describe("<PublishPanel>", () => {
 
     expect(screen.getByText(/https:\/\/custom\.site\/book/i)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("tab", { name: "Web Component" }));
+    fireEvent.click(screen.getByRole("tab", { name: "<plif-book> Web Component" }));
     expect(screen.getByText(/https:\/\/custom\.site\/manifest\.json/i)).toBeTruthy();
   });
 

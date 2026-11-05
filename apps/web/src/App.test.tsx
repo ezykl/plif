@@ -78,6 +78,9 @@ describe("<App>", () => {
     expect(screen.getByRole("button", { name: "Download Manifest JSON" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Copy Embed Code" })).toBeTruthy();
     expect(screen.getByText(/<iframe src=/i)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("tab", { name: "<plif-book> Web Component" }));
+    expect(screen.getByText(/<plif-book src=/i)).toBeTruthy();
   });
 
   it("renders stationery header with book logo, edition badge, and mode indicator", () => {
@@ -86,5 +89,10 @@ describe("<App>", () => {
     expect(screen.getByRole("img", { name: "Book logo" })).toBeTruthy();
     expect(screen.getByText(/Plif Flipbook Studio • Magazine Edition/i)).toBeTruthy();
     expect(screen.getByText(/Cover \+ Spread Mode • LTR/i)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: /Next: Arrange & Style/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Preset: Newspaper/i }));
+    expect(screen.getByText(/Plif Flipbook Studio • Newsprint Edition/i)).toBeTruthy();
+    expect(screen.getByText(/Newspaper Spread Mode • LTR/i)).toBeTruthy();
   });
 });

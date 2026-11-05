@@ -218,6 +218,7 @@ export function App() {
       <header
         style={{
           background: themeTokens.headerBg,
+          color: "#fdfbf7",
           borderBottom: `1px solid ${themeTokens.borderSubtle}`,
           padding: "14px 24px",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
@@ -258,6 +259,7 @@ export function App() {
                 fontWeight: 700,
                 fontFamily: 'Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif',
                 letterSpacing: "-0.01em",
+                color: "#fdfbf7",
               }}
             >
               {activeManifest.title}
@@ -272,6 +274,7 @@ export function App() {
                 borderRadius: 9999,
                 background: "rgba(255, 255, 255, 0.08)",
                 border: "1px solid rgba(255, 255, 255, 0.15)",
+                color: "#fdfbf7",
                 backdropFilter: "blur(4px)",
               }}
             >
