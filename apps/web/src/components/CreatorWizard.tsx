@@ -22,6 +22,7 @@ export interface CreatorWizardProps {
   theme: BookTheme;
   pages: readonly ImportedPage[];
   manifest?: Manifest;
+  activePreset?: BookPresetId;
   direction?: BookDirection;
   toc?: readonly TocItem[];
   isImporting?: boolean;
@@ -55,6 +56,7 @@ export function CreatorWizard({
   theme,
   pages,
   manifest,
+  activePreset,
   direction = "ltr",
   toc = [],
   isImporting = false,
@@ -100,36 +102,45 @@ export function CreatorWizard({
           boxShadow: "0 2px 6px rgba(36, 32, 29, 0.04)",
         }}
       >
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {STEPS.map((s) => {
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+          {STEPS.map((s, idx) => {
             const active = s.id === step;
             return (
-              <button
-                key={s.id}
-                role="tab"
-                type="button"
-                aria-label={s.label}
-                aria-selected={active}
-                onClick={() => onStepChange(s.id)}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "7px 16px",
-                  borderRadius: 9999,
-                  border: active ? "2px solid #c25e3e" : "1px solid #e6dfd5",
-                  background: active ? "#c25e3e" : "#ffffff",
-                  color: active ? "#ffffff" : "#24201d",
-                  fontWeight: 600,
-                  fontSize: 13,
-                  cursor: "pointer",
-                  boxShadow: active ? "0 2px 8px rgba(194, 94, 62, 0.25)" : "none",
-                  transition: "all 150ms ease",
-                }}
-              >
-                <span>{s.icon}</span>
-                <span>{s.label}</span>
-              </button>
+              <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <button
+                  role="tab"
+                  type="button"
+                  aria-label={s.label}
+                  aria-selected={active}
+                  onClick={() => onStepChange(s.id)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "7px 16px",
+                    borderRadius: 9999,
+                    border: active ? "2px solid #c25e3e" : "1px solid #e6dfd5",
+                    background: active ? "#c25e3e" : "#ffffff",
+                    color: active ? "#ffffff" : "#24201d",
+                    fontWeight: 600,
+                    fontSize: 13,
+                    cursor: "pointer",
+                    boxShadow: active ? "0 2px 8px rgba(194, 94, 62, 0.25)" : "none",
+                    transition: "all 150ms ease",
+                  }}
+                >
+                  <span>{s.icon}</span>
+                  <span>{s.label}</span>
+                </button>
+                {idx < STEPS.length - 1 && (
+                  <span
+                    aria-hidden="true"
+                    style={{ color: "#a8a29e", fontSize: 13, fontWeight: 700 }}
+                  >
+                    ›
+                  </span>
+                )}
+              </div>
             );
           })}
         </div>
@@ -251,6 +262,7 @@ export function CreatorWizard({
       {step === "upload" && (
         <PageOrganizer
           pages={pages}
+          hasCover={hasCover}
           isImporting={isImporting}
           progressText={progressText}
           errorText={errorText}
@@ -265,6 +277,7 @@ export function CreatorWizard({
             title={title}
             hasCover={hasCover}
             theme={theme}
+            activePreset={activePreset}
             direction={direction}
             toc={toc}
             onChangeTitle={onChangeTitle}
@@ -277,6 +290,7 @@ export function CreatorWizard({
           />
           <PageOrganizer
             pages={pages}
+            hasCover={hasCover}
             isImporting={isImporting}
             progressText={progressText}
             errorText={errorText}

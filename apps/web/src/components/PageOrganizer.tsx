@@ -3,6 +3,7 @@ import { movePage, removePage, setPageDensity, type ImportedPage } from "@plif/c
 
 export interface PageOrganizerProps {
   pages: readonly ImportedPage[];
+  hasCover?: boolean;
   isImporting?: boolean;
   progressText?: string | null;
   errorText?: string | null;
@@ -12,6 +13,7 @@ export interface PageOrganizerProps {
 
 export function PageOrganizer({
   pages,
+  hasCover = true,
   isImporting = false,
   progressText = null,
   errorText = null,
@@ -228,7 +230,7 @@ export function PageOrganizer({
                         border: "1px solid #e6dfd5",
                       }}
                     />
-                    {isFirst && (
+                    {isFirst && hasCover && (
                       <span
                         style={{
                           position: "absolute",
@@ -287,13 +289,14 @@ export function PageOrganizer({
                       disabled={i === 0}
                       onClick={() => onChangePages(movePage(pages, i, i - 1))}
                       style={{
-                        minHeight: 36,
+                        minHeight: 44,
+                        minWidth: 44,
                         borderRadius: 6,
                         border: "1px solid #e6dfd5",
                         background: i === 0 ? "#f5efe6" : "#ffffff",
                         color: i === 0 ? "#a8a29e" : "#24201d",
                         cursor: i === 0 ? "not-allowed" : "pointer",
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: 600,
                       }}
                     >
@@ -305,13 +308,14 @@ export function PageOrganizer({
                       disabled={i === pages.length - 1}
                       onClick={() => onChangePages(movePage(pages, i, i + 1))}
                       style={{
-                        minHeight: 36,
+                        minHeight: 44,
+                        minWidth: 44,
                         borderRadius: 6,
                         border: "1px solid #e6dfd5",
                         background: i === pages.length - 1 ? "#f5efe6" : "#ffffff",
                         color: i === pages.length - 1 ? "#a8a29e" : "#24201d",
                         cursor: i === pages.length - 1 ? "not-allowed" : "pointer",
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: 600,
                       }}
                     >
@@ -324,7 +328,7 @@ export function PageOrganizer({
                         onChangePages(setPageDensity(pages, i, isHard ? "soft" : "hard"))
                       }
                       style={{
-                        minHeight: 36,
+                        minHeight: 44,
                         borderRadius: 6,
                         border: "1px solid #e6dfd5",
                         background: "#ffffff",
@@ -341,13 +345,13 @@ export function PageOrganizer({
                       aria-label={`Remove page ${pageNum}`}
                       onClick={() => onChangePages(removePage(pages, i))}
                       style={{
-                        minHeight: 36,
+                        minHeight: 44,
                         borderRadius: 6,
                         border: "1px solid #fee2e2",
                         background: "#fff5f5",
                         color: "#dc2626",
                         cursor: "pointer",
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: 600,
                       }}
                     >

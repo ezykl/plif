@@ -13,6 +13,7 @@ export interface BookSettingsPanelProps {
   title: string;
   hasCover: boolean;
   theme: BookTheme;
+  activePreset?: BookPresetId;
   direction?: BookDirection;
   toc?: readonly TocItem[];
   onChangeTitle: (title: string) => void;
@@ -31,6 +32,7 @@ export function BookSettingsPanel({
   title,
   hasCover,
   theme,
+  activePreset,
   direction = "ltr",
   toc = [],
   onChangeTitle,
@@ -86,7 +88,6 @@ export function BookSettingsPanel({
               fontSize: 14,
               color: "#24201d",
               background: "#ffffff",
-              outline: "none",
             }}
           />
         </label>
@@ -111,7 +112,12 @@ export function BookSettingsPanel({
             onChange={(e) => onChangeHasCover(e.target.checked)}
             style={{ width: 16, height: 16, accentColor: "#c25e3e" }}
           />
-          <span>Standalone front & back cover</span>
+          <div style={{ display: "grid", gap: 2 }}>
+            <span>Standalone front & back cover</span>
+            <span style={{ fontSize: 11, color: "#6b635b", fontWeight: 400 }}>
+              Page 1 serves as single front cover before opening into spreads
+            </span>
+          </div>
         </label>
       </div>
 
@@ -134,36 +140,59 @@ export function BookSettingsPanel({
           }}
         >
           {PRESET_LIST.map((preset) => {
+            const active = preset.id === activePreset;
             return (
               <button
                 key={preset.id}
                 type="button"
                 aria-label={`Preset: ${preset.label}`}
+                aria-pressed={active}
                 onClick={() => onSelectPreset(preset.id)}
                 style={{
                   textAlign: "left",
                   padding: "12px 14px",
                   borderRadius: 8,
-                  border: "1px solid #e6dfd5",
+                  border: active ? "2px solid #c25e3e" : "1px solid #e6dfd5",
                   background: "#ffffff",
                   cursor: "pointer",
                   display: "grid",
                   gap: 4,
-                  boxShadow: "0 2px 6px rgba(36, 32, 29, 0.04)",
+                  boxShadow: active
+                    ? "0 2px 8px rgba(194, 94, 62, 0.2)"
+                    : "0 2px 6px rgba(36, 32, 29, 0.04)",
                   transition: "all 150ms ease",
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <div
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                >
                   <strong style={{ fontSize: 14, color: "#24201d" }}>{preset.label}</strong>
-                  <span style={{ fontSize: 14 }}>
-                    {preset.id === "newspaper"
-                      ? "📰"
-                      : preset.id === "magazine"
-                        ? "📖"
-                        : preset.id === "hardcover"
-                          ? "📕"
-                          : "📄"}
-                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    {active && (
+                      <span
+                        style={{
+                          padding: "2px 6px",
+                          borderRadius: 4,
+                          background: "#c25e3e",
+                          color: "#ffffff",
+                          fontSize: 10,
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Active
+                      </span>
+                    )}
+                    <span style={{ fontSize: 14 }}>
+                      {preset.id === "newspaper"
+                        ? "📰"
+                        : preset.id === "magazine"
+                          ? "📖"
+                          : preset.id === "hardcover"
+                            ? "📕"
+                            : "📄"}
+                    </span>
+                  </div>
                 </div>
                 <span style={{ fontSize: 12, color: "#6b635b", lineHeight: 1.4 }}>
                   {preset.description}
@@ -327,8 +356,8 @@ export function BookSettingsPanel({
           <button
             type="button"
             onClick={() => {
-              const pageNum = parseInt(chapterPage, 10);
-              if (chapterTitle.trim() && !Number.isNaN(pageNum)) {
+              const pageNum = Math.max(1, parseInt(chapterPage, 10) || 1);
+              if (chapterTitle.trim()) {
                 onChangeToc?.([...toc, { title: chapterTitle.trim(), page: pageNum }]);
                 setChapterTitle("");
               }

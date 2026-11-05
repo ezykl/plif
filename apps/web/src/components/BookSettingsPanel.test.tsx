@@ -98,4 +98,24 @@ describe("<BookSettingsPanel>", () => {
     fireEvent.click(screen.getByRole("button", { name: "Remove chapter Chapter 1" }));
     expect(onChangeToc).toHaveBeenCalledWith([]);
   });
+
+  it("highlights active preset with aria-pressed and Active badge", () => {
+    render(
+      <BookSettingsPanel
+        title="Active Book"
+        hasCover={true}
+        theme="magazine"
+        activePreset="magazine"
+        onChangeTitle={vi.fn()}
+        onChangeHasCover={vi.fn()}
+        onChangeTheme={vi.fn()}
+        onSelectPreset={vi.fn()}
+        onApplyBulkDensity={vi.fn()}
+      />,
+    );
+
+    const magBtn = screen.getByRole("button", { name: /Preset: Magazine/i });
+    expect(magBtn.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("Active")).toBeTruthy();
+  });
 });
