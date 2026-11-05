@@ -13,6 +13,11 @@ export interface ThemeTokens {
   headerBg: string;
   textColor: string;
   accentColor: string;
+  surfaceWarm: string;
+  cardBg: string;
+  borderSubtle: string;
+  inkMuted: string;
+  accentHover: string;
 }
 
 export const THEMES: Record<BookTheme, ThemeTokens> = {
@@ -21,9 +26,14 @@ export const THEMES: Record<BookTheme, ThemeTokens> = {
     label: "Newsprint",
     description: "Warm paper backdrop for newspapers and campus broadsheets",
     stageBg: "#f5f2eb",
-    headerBg: "#292524",
-    textColor: "#1c1917",
+    headerBg: "#24201d",
+    textColor: "#24201d",
     accentColor: "#b45309",
+    surfaceWarm: "#fdfbf7",
+    cardBg: "#ffffff",
+    borderSubtle: "#e6dfd5",
+    inkMuted: "#6b635b",
+    accentHover: "#92400e",
   },
   magazine: {
     id: "magazine",
@@ -33,6 +43,11 @@ export const THEMES: Record<BookTheme, ThemeTokens> = {
     headerBg: "#2b211c",
     textColor: "#f5f5f4",
     accentColor: "#d97706",
+    surfaceWarm: "#261e19",
+    cardBg: "#332923",
+    borderSubtle: "#453830",
+    inkMuted: "#a8a29e",
+    accentHover: "#b45309",
   },
   classic: {
     id: "classic",
@@ -42,6 +57,11 @@ export const THEMES: Record<BookTheme, ThemeTokens> = {
     headerBg: "#1c1613",
     textColor: "#fef3c7",
     accentColor: "#f59e0b",
+    surfaceWarm: "#2e2520",
+    cardBg: "#3b302a",
+    borderSubtle: "#4e4038",
+    inkMuted: "#d6cbbe",
+    accentHover: "#d97706",
   },
   studio: {
     id: "studio",
@@ -51,6 +71,11 @@ export const THEMES: Record<BookTheme, ThemeTokens> = {
     headerBg: "#1e293b",
     textColor: "#f8fafc",
     accentColor: "#38bdf8",
+    surfaceWarm: "#1e293b",
+    cardBg: "#24334a",
+    borderSubtle: "#334155",
+    inkMuted: "#94a3b8",
+    accentHover: "#0ea5e9",
   },
 };
 

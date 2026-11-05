@@ -16,6 +16,16 @@ describe("THEMES and manifest theme support", () => {
     expect(Object.keys(THEMES)).toEqual(["newsprint", "magazine", "classic", "studio"]);
   });
 
+  it("defines tactile tokens (surfaceWarm, cardBg, borderSubtle, inkMuted, accentHover) for all themes", () => {
+    for (const [key, theme] of Object.entries(THEMES)) {
+      expect(theme, `Theme ${key}`).toHaveProperty("surfaceWarm");
+      expect(theme, `Theme ${key}`).toHaveProperty("cardBg");
+      expect(theme, `Theme ${key}`).toHaveProperty("borderSubtle");
+      expect(theme, `Theme ${key}`).toHaveProperty("inkMuted");
+      expect(theme, `Theme ${key}`).toHaveProperty("accentHover");
+    }
+  });
+
   it("defaults manifest.theme to magazine and accepts valid themes", () => {
     const m1 = parseManifest({
       version: 1,
