@@ -164,4 +164,18 @@ describe("<App>", () => {
     expect(flipbook.getAttribute("data-sound-enabled")).toBe("true");
     expect(localStorage.getItem("plif_sound_enabled")).toBe("true");
   });
+
+  it("displays tactile offline badge when offline event is fired and removes it on online event", () => {
+    render(<App />);
+
+    expect(screen.queryByRole("status")).toBeNull();
+
+    fireEvent(window, new Event("offline"));
+    const statusBadge = screen.getByRole("status");
+    expect(statusBadge).toBeTruthy();
+    expect(statusBadge.textContent).toMatch(/Offline Mode/i);
+
+    fireEvent(window, new Event("online"));
+    expect(screen.queryByRole("status")).toBeNull();
+  });
 });

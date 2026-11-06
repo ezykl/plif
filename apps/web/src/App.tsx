@@ -52,6 +52,10 @@ export function App() {
     if (typeof window === "undefined") return true;
     return window.localStorage.getItem("plif_sound_enabled") !== "false";
   });
+  const [isOnline, setIsOnline] = useState(() => {
+    if (typeof navigator !== "undefined") return navigator.onLine;
+    return true;
+  });
 
   const handleToggleSound = useCallback(() => {
     setSoundEnabled((prev) => {
@@ -136,6 +140,20 @@ export function App() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [handleToggleSound]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   const updatePageIndex = (nextIndex: number) => {
     setIndex(nextIndex);
@@ -305,6 +323,23 @@ export function App() {
             </h1>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {!isOnline && (
+              <span
+                role="status"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  padding: "6px 12px",
+                  borderRadius: 9999,
+                  background: "rgba(194, 94, 62, 0.2)",
+                  border: "1px solid #c25e3e",
+                  color: "#fdfbf7",
+                  backdropFilter: "blur(4px)",
+                }}
+              >
+                📡 Offline Mode • Local Storage
+              </span>
+            )}
             <span
               style={{
                 fontSize: 12,
