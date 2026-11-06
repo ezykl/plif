@@ -1,0 +1,18 @@
+{
+  "name": "Plif Flipbook Studio",
+  "short_name": "Plif",
+  "description": "Tactile, client-side digital flipbook creator and offline reader",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fdfbf7",
+  "theme_color": "#24201d",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
