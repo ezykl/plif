@@ -3,6 +3,7 @@ import type { KeyboardEvent } from "react";
 import { PageFlip } from "page-flip";
 import { clampZoom, resolveArrowAction, type Manifest } from "@plif/core";
 import { toFlipSettings } from "./settings";
+import { playPaperTurnSound } from "./audio";
 
 export interface FlipbookHandle {
   next(): void;
@@ -16,16 +17,19 @@ export interface FlipbookProps {
   reduceMotion?: boolean;
   zoom?: number;
   className?: string;
+  soundEnabled?: boolean;
 }
 
 export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipbook(
-  { manifest, onPageChange, reduceMotion, zoom = 1, className },
+  { manifest, onPageChange, reduceMotion, zoom = 1, className, soundEnabled = true },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const flipRef = useRef<PageFlip | null>(null);
   const onPageChangeRef = useRef(onPageChange);
   onPageChangeRef.current = onPageChange;
+  const soundEnabledRef = useRef(soundEnabled);
+  soundEnabledRef.current = soundEnabled;
 
   const effectiveReduceMotion =
     reduceMotion ??
@@ -51,7 +55,12 @@ export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipb
     manifest.pages.forEach((page, i) => {
       if (page.density) flip.getPage(i)?.setDensity(page.density);
     });
-    flip.on("flip", (e) => onPageChangeRef.current?.(e.data as number));
+    flip.on("flip", (e) => {
+      if (soundEnabledRef.current !== false && !effectiveReduceMotion) {
+        playPaperTurnSound();
+      }
+      onPageChangeRef.current?.(e.data as number);
+    });
     flipRef.current = flip;
 
     return () => {

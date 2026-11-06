@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { parseManifest } from "@plif/core";
 import { Flipbook, type FlipbookHandle } from "./Flipbook";
 
-const { instance, PageFlipMock } = vi.hoisted(() => {
+const { instance, PageFlipMock, playPaperTurnSoundMock } = vi.hoisted(() => {
   const instance = {
     loadFromImages: vi.fn(),
     on: vi.fn(),
@@ -15,9 +15,13 @@ const { instance, PageFlipMock } = vi.hoisted(() => {
     getPage: vi.fn(() => ({ setDensity: vi.fn() })),
   };
   const PageFlipMock = vi.fn(() => instance);
-  return { instance, PageFlipMock };
+  const playPaperTurnSoundMock = vi.fn();
+  return { instance, PageFlipMock, playPaperTurnSoundMock };
 });
 vi.mock("page-flip", () => ({ PageFlip: PageFlipMock }));
+vi.mock("./audio", () => ({
+  playPaperTurnSound: playPaperTurnSoundMock,
+}));
 
 const manifest = parseManifest({
   version: 1,
@@ -79,6 +83,27 @@ describe("<Flipbook>", () => {
     const call = instance.on.mock.calls.find(([name]) => name === "flip");
     call?.[1]({ data: 1 });
     expect(onPageChange).toHaveBeenCalledWith(1);
+  });
+
+  it("plays paper turn sound on page flips when enabled", () => {
+    render(<Flipbook manifest={manifest} />);
+    const call = instance.on.mock.calls.find(([name]) => name === "flip");
+    call?.[1]({ data: 1 });
+    expect(playPaperTurnSoundMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not play paper turn sound when soundEnabled is false", () => {
+    render(<Flipbook manifest={manifest} soundEnabled={false} />);
+    const call = instance.on.mock.calls.find(([name]) => name === "flip");
+    call?.[1]({ data: 1 });
+    expect(playPaperTurnSoundMock).not.toHaveBeenCalled();
+  });
+
+  it("does not play paper turn sound when reduceMotion is true", () => {
+    render(<Flipbook manifest={manifest} reduceMotion={true} />);
+    const call = instance.on.mock.calls.find(([name]) => name === "flip");
+    call?.[1]({ data: 1 });
+    expect(playPaperTurnSoundMock).not.toHaveBeenCalled();
   });
 
   it("destroys the engine on unmount", () => {

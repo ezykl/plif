@@ -4,3 +4,4 @@ export * from "./settings";
 export * from "./Flipbook";
 export * from "./ReaderToolbar";
 export * from "./web-component";
+export * from "./audio";

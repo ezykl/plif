@@ -111,4 +111,84 @@ describe("<ReaderToolbar>", () => {
     fireEvent.click(screen.getByRole("button", { name: "Thumbnail page 4" }));
     expect(onGoToPage).toHaveBeenCalledWith(3);
   });
+
+  it("renders sound toggle button when onToggleSound is provided with sound enabled", () => {
+    const onToggleSound = vi.fn();
+
+    render(
+      <ReaderToolbar
+        manifest={manifest}
+        currentIndex={0}
+        zoom={1}
+        isFullscreen={false}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+        onGoToPage={vi.fn()}
+        onChangeZoom={vi.fn()}
+        onToggleFullscreen={vi.fn()}
+        soundEnabled={true}
+        onToggleSound={onToggleSound}
+      />,
+    );
+
+    const button = screen.getByRole("button", {
+      name: "Mute paper flip sound (press M)",
+    });
+    expect(button).toBeTruthy();
+    expect(screen.getByText("🔊 Sound on")).toBeTruthy();
+
+    fireEvent.click(button);
+    expect(onToggleSound).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders sound toggle button with sound disabled", () => {
+    const onToggleSound = vi.fn();
+
+    render(
+      <ReaderToolbar
+        manifest={manifest}
+        currentIndex={0}
+        zoom={1}
+        isFullscreen={false}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+        onGoToPage={vi.fn()}
+        onChangeZoom={vi.fn()}
+        onToggleFullscreen={vi.fn()}
+        soundEnabled={false}
+        onToggleSound={onToggleSound}
+      />,
+    );
+
+    const button = screen.getByRole("button", {
+      name: "Enable paper flip sound (press M)",
+    });
+    expect(button).toBeTruthy();
+    expect(screen.getByText("🔇 Sound off")).toBeTruthy();
+
+    fireEvent.click(button);
+    expect(onToggleSound).toHaveBeenCalledTimes(1);
+  });
+
+  it("omits sound toggle button when onToggleSound is not provided", () => {
+    render(
+      <ReaderToolbar
+        manifest={manifest}
+        currentIndex={0}
+        zoom={1}
+        isFullscreen={false}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+        onGoToPage={vi.fn()}
+        onChangeZoom={vi.fn()}
+        onToggleFullscreen={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("button", {
+        name: /paper flip sound/i,
+      }),
+    ).toBeNull();
+  });
 });
