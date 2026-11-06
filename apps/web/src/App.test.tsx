@@ -8,7 +8,7 @@ vi.mock("@plif/reader", async (importOriginal) => {
   return {
     ...actual,
     Flipbook: forwardRef<FlipbookHandle, FlipbookProps>(function FlipbookMock(
-      { manifest, onPageChange, zoom = 1 },
+      { manifest, onPageChange, zoom = 1, soundEnabled },
       ref,
     ) {
       useImperativeHandle(ref, () => ({
@@ -22,6 +22,7 @@ vi.mock("@plif/reader", async (importOriginal) => {
           aria-label={manifest.title}
           dir={manifest.direction}
           data-zoom={String(zoom)}
+          data-sound-enabled={String(soundEnabled ?? true)}
         />
       );
     }),
@@ -32,6 +33,7 @@ import { App } from "./App";
 
 afterEach(() => {
   window.location.hash = "";
+  localStorage.clear();
   cleanup();
 });
 
@@ -94,5 +96,72 @@ describe("<App>", () => {
     fireEvent.click(screen.getByRole("button", { name: /Preset: Newspaper/i }));
     expect(screen.getByText(/Plif Flipbook Studio • Newsprint Edition/i)).toBeTruthy();
     expect(screen.getByText(/Newspaper Spread Mode • LTR/i)).toBeTruthy();
+  });
+
+  it("clicking the toolbar sound toggle button toggles soundEnabled and updates localStorage", () => {
+    render(<App />);
+
+    const flipbook = screen.getByRole("region", { name: "Sample Magazine" });
+    expect(flipbook.getAttribute("data-sound-enabled")).toBe("true");
+
+    const soundToggle = screen.getByRole("button", {
+      name: /Mute paper flip sound \(press M\)/i,
+    });
+    expect(soundToggle).toBeTruthy();
+
+    fireEvent.click(soundToggle);
+    expect(flipbook.getAttribute("data-sound-enabled")).toBe("false");
+    expect(localStorage.getItem("plif_sound_enabled")).toBe("false");
+    expect(
+      screen.getByRole("button", { name: /Enable paper flip sound \(press M\)/i }),
+    ).toBeTruthy();
+
+    fireEvent.click(soundToggle);
+    expect(flipbook.getAttribute("data-sound-enabled")).toBe("true");
+    expect(localStorage.getItem("plif_sound_enabled")).toBe("true");
+    expect(screen.getByRole("button", { name: /Mute paper flip sound \(press M\)/i })).toBeTruthy();
+  });
+
+  it("initializes soundEnabled to false when localStorage plif_sound_enabled is 'false'", () => {
+    localStorage.setItem("plif_sound_enabled", "false");
+    render(<App />);
+
+    const flipbook = screen.getByRole("region", { name: "Sample Magazine" });
+    expect(flipbook.getAttribute("data-sound-enabled")).toBe("false");
+    expect(
+      screen.getByRole("button", { name: /Enable paper flip sound \(press M\)/i }),
+    ).toBeTruthy();
+  });
+
+  it("pressing M on the document toggles sound, but pressing M inside the book title input does not toggle sound", () => {
+    render(<App />);
+
+    const flipbook = screen.getByRole("region", { name: "Sample Magazine" });
+    expect(flipbook.getAttribute("data-sound-enabled")).toBe("true");
+
+    // Pressing 'm' on document toggles sound off
+    fireEvent.keyDown(document, { key: "m" });
+    expect(flipbook.getAttribute("data-sound-enabled")).toBe("false");
+    expect(localStorage.getItem("plif_sound_enabled")).toBe("false");
+
+    // Pressing 'M' on document toggles sound back on
+    fireEvent.keyDown(document, { key: "M" });
+    expect(flipbook.getAttribute("data-sound-enabled")).toBe("true");
+    expect(localStorage.getItem("plif_sound_enabled")).toBe("true");
+
+    // Switch to step where book title input is present
+    fireEvent.click(screen.getByRole("button", { name: /Next: Arrange & Style/i }));
+    const titleInput = screen.getByLabelText("Book title");
+    titleInput.focus();
+
+    // Pressing 'm' inside input does NOT toggle sound
+    fireEvent.keyDown(titleInput, { key: "m" });
+    expect(flipbook.getAttribute("data-sound-enabled")).toBe("true");
+    expect(localStorage.getItem("plif_sound_enabled")).toBe("true");
+
+    // Pressing 'M' inside input does NOT toggle sound
+    fireEvent.keyDown(titleInput, { key: "M" });
+    expect(flipbook.getAttribute("data-sound-enabled")).toBe("true");
+    expect(localStorage.getItem("plif_sound_enabled")).toBe("true");
   });
 });

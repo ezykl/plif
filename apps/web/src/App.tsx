@@ -48,6 +48,20 @@ export function App() {
   const [isImporting, setIsImporting] = useState(false);
   const [progressText, setProgressText] = useState<string | null>(null);
   const [errorText, setErrorText] = useState<string | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem("plif_sound_enabled") !== "false";
+  });
+
+  const handleToggleSound = () => {
+    setSoundEnabled((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("plif_sound_enabled", String(next));
+      }
+      return next;
+    });
+  };
 
   const effectivePages = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
 
@@ -96,6 +110,26 @@ export function App() {
     };
     document.addEventListener("fullscreenchange", onFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "m") return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          Boolean(target.isContentEditable))
+      ) {
+        return;
+      }
+      e.preventDefault();
+      handleToggleSound();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
   const updatePageIndex = (nextIndex: number) => {
@@ -345,6 +379,7 @@ export function App() {
             ref={book}
             manifest={activeManifest}
             zoom={zoom}
+            soundEnabled={soundEnabled}
             onPageChange={updatePageIndex}
           />
 
@@ -353,6 +388,8 @@ export function App() {
             currentIndex={index}
             zoom={zoom}
             isFullscreen={isFullscreen}
+            soundEnabled={soundEnabled}
+            onToggleSound={handleToggleSound}
             onPrev={() => book.current?.prev()}
             onNext={() => book.current?.next()}
             onGoToPage={handleGoToPage}
