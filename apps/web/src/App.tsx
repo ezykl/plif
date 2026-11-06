@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyBookPreset,
   applyBulkDensity,
@@ -53,15 +53,19 @@ export function App() {
     return window.localStorage.getItem("plif_sound_enabled") !== "false";
   });
 
-  const handleToggleSound = () => {
+  const handleToggleSound = useCallback(() => {
     setSoundEnabled((prev) => {
       const next = !prev;
       if (typeof window !== "undefined") {
-        window.localStorage.setItem("plif_sound_enabled", String(next));
+        try {
+          window.localStorage.setItem("plif_sound_enabled", String(next));
+        } catch {
+          // ignore quota/storage restrictions
+        }
       }
       return next;
     });
-  };
+  }, []);
 
   const effectivePages = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
 
@@ -116,6 +120,7 @@ export function App() {
     if (typeof window === "undefined") return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() !== "m") return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
       const target = e.target as HTMLElement | null;
       if (
         target &&
@@ -130,7 +135,7 @@ export function App() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [handleToggleSound]);
 
   const updatePageIndex = (nextIndex: number) => {
     setIndex(nextIndex);
