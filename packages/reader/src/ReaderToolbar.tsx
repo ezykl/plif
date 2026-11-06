@@ -19,6 +19,8 @@ export interface ReaderToolbarProps {
   onGoToPage: (index: number) => void;
   onChangeZoom: (nextZoom: number) => void;
   onToggleFullscreen: () => void;
+  soundEnabled?: boolean;
+  onToggleSound?: () => void;
   accentColor?: string;
   textColor?: string;
 }
@@ -33,6 +35,8 @@ export function ReaderToolbar({
   onGoToPage,
   onChangeZoom,
   onToggleFullscreen,
+  soundEnabled,
+  onToggleSound,
   accentColor = "#d97706",
   textColor = "#f5f5f4",
 }: ReaderToolbarProps) {
@@ -53,6 +57,8 @@ export function ReaderToolbar({
     fontSize: 13,
     cursor: "pointer",
   } as const;
+
+  const isSoundOn = soundEnabled !== false;
 
   return (
     <div
@@ -170,6 +176,27 @@ export function ReaderToolbar({
           >
             Thumbnails
           </button>
+
+          {onToggleSound && (
+            <button
+              type="button"
+              aria-label={
+                isSoundOn ? "Mute paper flip sound (press M)" : "Enable paper flip sound (press M)"
+              }
+              onClick={onToggleSound}
+              style={{
+                ...buttonStyle,
+                minWidth: 44,
+                minHeight: 44,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+              }}
+            >
+              {isSoundOn ? "🔊 Sound on" : "🔇 Sound off"}
+            </button>
+          )}
 
           <button
             type="button"

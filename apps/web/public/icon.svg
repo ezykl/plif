@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Soft tactile drop shadow -->
+    <filter id="tactile-shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <linearGradient id="page-shade-left" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fdfbf7"/>
+      <stop offset="85%" stop-color="#fdfbf7"/>
+      <stop offset="100%" stop-color="#f5efe6"/>
+    </linearGradient>
+    <linearGradient id="page-shade-right" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f5efe6"/>
+      <stop offset="15%" stop-color="#fdfbf7"/>
+      <stop offset="100%" stop-color="#fdfbf7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Deep ink background canvas -->
+  <rect width="512" height="512" fill="#24201d"/>
+
+  <!-- Book group with shadow -->
+  <g filter="url(#tactile-shadow)">
+    <!-- Terracotta cover exterior -->
+    <path
+      d="M 256,175 C 220,160 140,150 86,165 C 78,167 72,174 72,182 L 72,362 C 72,370 78,377 86,375 C 138,363 218,373 256,393 C 294,373 374,363 426,375 C 434,377 440,370 440,362 L 440,182 C 440,174 434,167 426,165 C 372,150 292,160 256,175 Z"
+      fill="#c25e3e"
+    />
+
+    <!-- Layered page depth / thickness (parchment) -->
+    <path
+      d="M 256,185 C 222,171 150,161 96,175 L 96,353 C 150,341 222,351 256,371 Z"
+      fill="#f5efe6"
+    />
+    <path
+      d="M 256,185 C 290,171 362,161 416,175 L 416,353 C 362,341 290,351 256,371 Z"
+      fill="#f5efe6"
+    />
+
+    <!-- Open pages spread (warm white paper) -->
+    <path
+      d="M 256,192 C 224,180 156,170 104,182 C 100,183 98,187 98,191 L 98,347 C 152,336 222,346 256,366 Z"
+      fill="url(#page-shade-left)"
+    />
+    <path
+      d="M 256,192 C 288,180 356,170 408,182 C 412,183 414,187 414,191 L 414,347 C 360,336 290,346 256,366 Z"
+      fill="url(#page-shade-right)"
+    />
+
+    <!-- Tactile flipping page effect -->
+    <path
+      d="M 256,192 C 285,178 335,174 372,192 C 342,226 322,284 358,338 C 322,328 285,338 256,366 Z"
+      fill="#f5efe6"
+      opacity="0.85"
+    />
+    <path
+      d="M 256,192 C 282,182 324,179 356,196 C 330,228 312,280 344,332 C 314,324 282,335 256,366 Z"
+      fill="#fdfbf7"
+    />
+
+    <!-- Deep ink spine seam -->
+    <path
+      d="M 256,192 L 256,368"
+      stroke="#24201d"
+      stroke-width="3.5"
+      stroke-linecap="round"
+    />
+
+    <!-- Deep ink tactile ruling / content lines -->
+    <!-- Left page lines -->
+    <path d="M 134,222 C 168,217 206,220 236,228" stroke="#24201d" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+    <path d="M 134,248 C 168,243 206,246 236,254" stroke="#24201d" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+    <path d="M 134,274 C 168,269 206,272 236,280" stroke="#24201d" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+    <path d="M 134,300 C 168,295 206,298 236,306" stroke="#24201d" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+
+    <!-- Right page lines -->
+    <path d="M 276,228 C 306,220 344,217 378,222" stroke="#24201d" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+    <path d="M 276,254 C 306,246 344,243 378,248" stroke="#24201d" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+    <path d="M 276,280 C 306,272 344,269 378,274" stroke="#24201d" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+    <path d="M 276,306 C 306,298 344,295 378,300" stroke="#24201d" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+
+    <!-- Terracotta bookmark ribbon tail -->
+    <path
+      d="M 252,367 C 252,392 238,406 246,422 L 256,414 L 266,422 C 274,406 260,392 260,367 Z"
+      fill="#c25e3e"
+    />
+  </g>
+</svg>

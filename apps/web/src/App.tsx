@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyBookPreset,
   applyBulkDensity,
@@ -48,6 +48,28 @@ export function App() {
   const [isImporting, setIsImporting] = useState(false);
   const [progressText, setProgressText] = useState<string | null>(null);
   const [errorText, setErrorText] = useState<string | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem("plif_sound_enabled") !== "false";
+  });
+  const [isOnline, setIsOnline] = useState(() => {
+    if (typeof navigator !== "undefined") return navigator.onLine;
+    return true;
+  });
+
+  const handleToggleSound = useCallback(() => {
+    setSoundEnabled((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        try {
+          window.localStorage.setItem("plif_sound_enabled", String(next));
+        } catch {
+          // ignore quota/storage restrictions
+        }
+      }
+      return next;
+    });
+  }, []);
 
   const effectivePages = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
 
@@ -96,6 +118,41 @@ export function App() {
     };
     document.addEventListener("fullscreenchange", onFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "m") return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          Boolean(target.isContentEditable))
+      ) {
+        return;
+      }
+      e.preventDefault();
+      handleToggleSound();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handleToggleSound]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
   }, []);
 
   const updatePageIndex = (nextIndex: number) => {
@@ -266,6 +323,23 @@ export function App() {
             </h1>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {!isOnline && (
+              <span
+                role="status"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  padding: "6px 12px",
+                  borderRadius: 9999,
+                  background: "rgba(194, 94, 62, 0.2)",
+                  border: "1px solid #c25e3e",
+                  color: "#fdfbf7",
+                  backdropFilter: "blur(4px)",
+                }}
+              >
+                📡 Offline Mode • Local Storage
+              </span>
+            )}
             <span
               style={{
                 fontSize: 12,
@@ -345,6 +419,7 @@ export function App() {
             ref={book}
             manifest={activeManifest}
             zoom={zoom}
+            soundEnabled={soundEnabled}
             onPageChange={updatePageIndex}
           />
 
@@ -353,6 +428,8 @@ export function App() {
             currentIndex={index}
             zoom={zoom}
             isFullscreen={isFullscreen}
+            soundEnabled={soundEnabled}
+            onToggleSound={handleToggleSound}
             onPrev={() => book.current?.prev()}
             onNext={() => book.current?.next()}
             onGoToPage={handleGoToPage}
