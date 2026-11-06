@@ -74,7 +74,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 Plif is tested with strict TypeScript, ESLint, Prettier, and Vitest.
 
 ```bash
-# Run all workspace test suites (91 tests)
+# Run all workspace test suites (99 tests)
 pnpm test
 
 # Typecheck all packages
