@@ -423,6 +423,7 @@ export function App() {
           <Flipbook
             ref={book}
             manifest={activeManifest}
+            initialPage={index}
             zoom={zoom}
             soundEnabled={soundEnabled}
             onPageChange={updatePageIndex}

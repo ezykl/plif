@@ -41,4 +41,18 @@ describe("toFlipSettings", () => {
     const s = toFlipSettings({ ...manifest, hasCover: false }, { reduceMotion: false });
     expect(s.showCover).toBe(false);
   });
+
+  it("caps minWidth/minHeight on high-res pages so dual-page landscape mode fits desktop stages", () => {
+    const hiRes = parseManifest({
+      version: 1,
+      title: "HiRes",
+      pageSize: { width: 1400, height: 1980 },
+      pages: [{ src: "a" }, { src: "b" }],
+    });
+    const s = toFlipSettings(hiRes, { reduceMotion: false, startPage: 2 });
+    expect(s.minWidth).toBe(288);
+    expect(s.minHeight).toBe(407);
+    expect(s.maxWidth).toBe(1400);
+    expect(s.startPage).toBe(2);
+  });
 });

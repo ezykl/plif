@@ -140,10 +140,17 @@ describe("<Flipbook>", () => {
     expect(instance.flipPrev).toHaveBeenCalledTimes(1);
   });
 
-  it("applies CSS scale transform when zoom prop is provided", () => {
-    const { getByRole } = render(<Flipbook manifest={manifest} zoom={1.5} />);
+  it("applies CSS scale transform and 100% width for dual-page spread sizing", () => {
+    const { getByRole } = render(<Flipbook manifest={manifest} zoom={1.5} initialPage={1} />);
     const region = getByRole("region", { name: "T" });
+    expect(region.style.width).toBe("100%");
     expect(region.style.transform).toBe("scale(1.5)");
+    expect(PageFlipMock).toHaveBeenCalledWith(
+      expect.any(HTMLElement),
+      expect.objectContaining({
+        startPage: 1,
+      }),
+    );
   });
 
   it("exposes an imperative handle", () => {

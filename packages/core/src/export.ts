@@ -66,9 +66,11 @@ export function generateStandaloneHtml(manifest: Manifest): string {
     }
     #book-container {
       width: min(960px, 94vw);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: block;
+    }
+    #flipbook {
+      width: 100%;
+      margin: 0 auto;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
@@ -91,15 +93,21 @@ ${escapedManifest}
         height: manifest.pageSize.height,
         showCover: manifest.hasCover,
         size: 'stretch',
-        minWidth: 320,
-        maxWidth: 1200,
-        minHeight: 400,
-        maxHeight: 1600,
+        minWidth: 240,
+        maxWidth: Math.max(manifest.pageSize.width, 1200),
+        minHeight: 320,
+        maxHeight: Math.max(manifest.pageSize.height, 1600),
         usePortrait: true,
         drawShadow: !reduceMotion,
         flippingTime: reduceMotion ? 1 : 700
       });
       flip.loadFromImages(manifest.pages.map(function(p) { return p.src; }));
+      var render = flip.getRender && flip.getRender();
+      if (render && render.ctx && render.canvas) {
+        render.clear = function() {
+          render.ctx.clearRect(0, 0, render.canvas.width, render.canvas.height);
+        };
+      }
       manifest.pages.forEach(function(p, i) {
         if (p.density) {
           var page = flip.getPage(i);

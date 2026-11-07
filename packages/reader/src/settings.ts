@@ -15,17 +15,21 @@ export interface FlipSettings {
   maxShadowOpacity: number;
   mobileScrollSupport: boolean;
   swipeDistance: number;
+  startPage?: number;
 }
 
-export function toFlipSettings(manifest: Manifest, opts: { reduceMotion: boolean }): FlipSettings {
+export function toFlipSettings(
+  manifest: Manifest,
+  opts: { reduceMotion: boolean; startPage?: number },
+): FlipSettings {
   const { width, height } = manifest.pageSize;
   return {
     width,
     height,
     size: "stretch",
-    minWidth: Math.round(width * 0.6),
+    minWidth: Math.min(Math.round(width * 0.6), 288),
     maxWidth: width,
-    minHeight: Math.round(height * 0.6),
+    minHeight: Math.min(Math.round(height * 0.6), 407),
     maxHeight: height,
     showCover: manifest.hasCover,
     usePortrait: true,
@@ -34,5 +38,6 @@ export function toFlipSettings(manifest: Manifest, opts: { reduceMotion: boolean
     maxShadowOpacity: 0.35,
     mobileScrollSupport: true,
     swipeDistance: 24,
+    ...(opts.startPage !== undefined ? { startPage: opts.startPage } : {}),
   };
 }
