@@ -1,12 +1,15 @@
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import type { ImportedPage } from "@plif/core";
 import { canvasToWebpUrl } from "./canvas";
+import { generatePageId } from "./id";
+
+export const PDF_WORKER_URL = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url,
+).toString();
 
 if (!GlobalWorkerOptions.workerSrc) {
-  GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url,
-  ).toString();
+  GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
 }
 
 export interface ImportPdfOptions {
@@ -74,7 +77,7 @@ export async function importPdfFile(
       page.cleanup();
 
       pages.push({
-        id: crypto.randomUUID(),
+        id: generatePageId(),
         src,
         width,
         height,

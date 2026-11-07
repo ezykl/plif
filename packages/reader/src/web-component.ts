@@ -1,4 +1,4 @@
-import { parseManifest, type Manifest } from "@plif/core";
+import { bookDirectionSchema, bookThemeSchema, parseManifest, type Manifest } from "@plif/core";
 import { PageFlip } from "page-flip";
 import { toFlipSettings } from "./settings";
 
@@ -10,6 +10,7 @@ export class PlifBookElement extends HTMLElement {
   private _container: HTMLDivElement | null = null;
   private _flip: PageFlip | null = null;
   private _currentSrc: string | null = null;
+  private _manifest: Manifest | null = null;
 
   connectedCallback(): void {
     if (!this._container) {
@@ -43,6 +44,8 @@ export class PlifBookElement extends HTMLElement {
     if (oldValue === newValue) return;
     if (name === "src" && newValue && newValue !== this._currentSrc) {
       void this.loadFromUrl(newValue);
+    } else if ((name === "theme" || name === "direction") && this._manifest) {
+      this.renderManifest(this._manifest);
     }
   }
 
@@ -59,13 +62,27 @@ export class PlifBookElement extends HTMLElement {
     }
   }
 
-  renderManifest(manifest: Manifest): void {
+  /** Element attributes take precedence over the manifest; invalid values are ignored. */
+  private applyAttributeOverrides(manifest: Manifest): Manifest {
+    const theme = bookThemeSchema.safeParse(this.getAttribute("theme"));
+    const direction = bookDirectionSchema.safeParse(this.getAttribute("direction"));
+    return {
+      ...manifest,
+      ...(theme.success ? { theme: theme.data } : {}),
+      ...(direction.success ? { direction: direction.data } : {}),
+    };
+  }
+
+  renderManifest(source: Manifest): void {
+    this._manifest = source;
     if (!this._container) return;
+    const manifest = this.applyAttributeOverrides(source);
     if (this._flip) {
       this._flip.destroy();
       this._flip = null;
     }
     this._container.innerHTML = "";
+    this._container.dir = manifest.direction;
     const bookHost = document.createElement("div");
     this._container.appendChild(bookHost);
 

@@ -77,6 +77,25 @@ describe("registerServiceWorker", () => {
 
     consoleWarnSpy.mockRestore();
   });
+
+  it("posts precache URLs to the active service worker", async () => {
+    const postMessage = vi.fn();
+    const mockRegistration = { active: { postMessage } } as unknown as ServiceWorkerRegistration;
+    Object.defineProperty(navigator, "serviceWorker", {
+      value: {
+        register: vi.fn().mockResolvedValue(mockRegistration),
+        ready: Promise.resolve(mockRegistration),
+      },
+      configurable: true,
+      writable: true,
+    });
+
+    await registerServiceWorker("/sw.js", ["/assets/pdf.worker.min.mjs"]);
+    expect(postMessage).toHaveBeenCalledWith({
+      type: "CACHE_URLS",
+      urls: ["/assets/pdf.worker.min.mjs"],
+    });
+  });
 });
 
 describe("PWA assets verification", () => {
@@ -122,14 +141,15 @@ describe("PWA assets verification", () => {
     expect(svg).toContain("#24201d");
   });
 
-  it("has sw.js with plif-studio-v1 cache name and offline caching strategies", async () => {
+  it("has sw.js with plif-studio-v2 cache name and offline caching strategies", async () => {
     const fs = await import("fs/promises");
     const path = await import("path");
 
     const swPath = path.resolve(__dirname, "../public/sw.js");
     const sw = await fs.readFile(swPath, "utf-8");
 
-    expect(sw).toContain("plif-studio-v1");
+    expect(sw).toContain("plif-studio-v2");
+    expect(sw).toContain("CACHE_URLS");
     expect(sw).toContain("skipWaiting");
     expect(sw).toContain("clients.claim");
     expect(sw).toContain("navigate");

@@ -48,6 +48,7 @@ export function ReaderToolbar({
   const zoomPercent = `${Math.round(safeZoom * 100)}%`;
 
   const buttonStyle = {
+    minHeight: 44,
     padding: "6px 12px",
     borderRadius: 999,
     border: `1px solid ${accentColor}`,
@@ -229,6 +230,7 @@ export function ReaderToolbar({
               type="button"
               onClick={() => onGoToPage(Math.max(0, Math.min(total - 1, item.page - 1)))}
               style={{
+                minHeight: 44,
                 padding: "6px 10px",
                 borderRadius: 6,
                 border: "1px solid #d6d3d1",

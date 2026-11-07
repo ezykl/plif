@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { inlineManifestPages } from "./import/inline";
 import {
   applyBookPreset,
   applyBulkDensity,
@@ -247,9 +248,14 @@ export function App() {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") || "flipbook";
 
-  const handleDownloadHtml = () => {
-    const html = generateStandaloneHtml(activeManifest);
-    downloadFile(`${sanitizeFilename(activeManifest.title)}.html`, html, "text/html");
+  const handleDownloadHtml = async () => {
+    try {
+      const portable = await inlineManifestPages(activeManifest);
+      const html = generateStandaloneHtml(portable);
+      downloadFile(`${sanitizeFilename(activeManifest.title)}.html`, html, "text/html");
+    } catch (err) {
+      setErrorText(err instanceof Error ? err.message : "Failed to export standalone HTML");
+    }
   };
 
   const handleDownloadManifest = () => {
@@ -385,12 +391,11 @@ export function App() {
           onUploadFiles={handleUploadFiles}
           onChangePages={(next) => {
             setPages(next);
-            updatePageIndex(0);
+            updatePageIndex(Math.min(index, Math.max(0, next.length - 1)));
           }}
           onChangeTitle={setTitle}
           onChangeHasCover={(next) => {
             setHasCover(next);
-            updatePageIndex(0);
           }}
           onChangeTheme={setTheme}
           onChangeDirection={setDirection}

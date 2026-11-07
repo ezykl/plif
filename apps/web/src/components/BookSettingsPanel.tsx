@@ -369,6 +369,8 @@ export function BookSettingsPanel({
               }
             }}
             style={{
+              minHeight: 44,
+              minWidth: 44,
               padding: "6px 14px",
               borderRadius: 6,
               border: "none",
@@ -416,6 +418,8 @@ export function BookSettingsPanel({
                   aria-label={`Remove chapter ${item.title}`}
                   onClick={() => onChangeToc?.(toc.filter((_, i) => i !== idx))}
                   style={{
+                    minHeight: 44,
+                    minWidth: 44,
                     padding: "2px 8px",
                     borderRadius: 4,
                     border: "1px solid #fee2e2",

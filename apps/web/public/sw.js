@@ -1,6 +1,6 @@
 /* global self, caches, fetch, URL */
 // Plif Offline Service Worker
-const CACHE_NAME = "plif-studio-v1";
+const CACHE_NAME = "plif-studio-v2";
 const PRECACHE_ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -20,6 +20,25 @@ self.addEventListener("activate", (event) => {
         Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))),
       )
       .then(() => self.clients.claim()),
+  );
+});
+
+// The app asks the worker to cache extra same-origin assets (e.g. the PDF.js worker).
+self.addEventListener("message", (event) => {
+  const data = event.data;
+  if (!data || data.type !== "CACHE_URLS" || !Array.isArray(data.urls)) return;
+  const sameOrigin = data.urls.filter((u) => {
+    try {
+      return new URL(u, self.location.href).origin === self.location.origin;
+    } catch {
+      return false;
+    }
+  });
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(sameOrigin))
+      .catch(() => {}),
   );
 });
 
