@@ -163,4 +163,83 @@ describe("<Flipbook>", () => {
     expect(instance.flipPrev).toHaveBeenCalled();
     expect(instance.flip).toHaveBeenCalledWith(3);
   });
+
+  it("erases the lifted left-page area when flipping Page 2 back to the standalone cover", () => {
+    const ctx = {
+      clearRect: vi.fn(),
+      save: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      closePath: vi.fn(),
+      clip: vi.fn(),
+      restore: vi.fn(),
+    };
+    const coverPage = { id: "cover" };
+    const origDrawBookShadow = vi.fn();
+    const origDrawOuterShadow = vi.fn();
+    const mockRender: Record<string, unknown> = {
+      ctx,
+      canvas: { width: 960, height: 679 },
+      orientation: "landscape",
+      leftPage: { id: "page2" },
+      rightPage: { id: "page3" },
+      bottomPage: coverPage,
+      flippingPage: null,
+      getRect: () => ({ left: 0, top: 0, width: 960, height: 679, pageWidth: 480 }),
+      convertToGlobal: (pt: { x: number; y: number } | null) =>
+        pt ? { x: 480 - pt.x, y: pt.y } : null,
+      setFlippingPage(page: unknown) {
+        this.flippingPage = page;
+      },
+      drawBookShadow: origDrawBookShadow,
+      drawOuterShadow: origDrawOuterShadow,
+    };
+    const animateFlippingTo = vi.fn();
+    const mockFlipController = {
+      state: "user_fold",
+      getCalculation: () => ({
+        getBottomClipArea: () => [
+          { x: 200, y: 0 },
+          { x: 480, y: 0 },
+          { x: 480, y: 679 },
+          { x: 200, y: 679 },
+        ],
+        getPosition: () => ({ x: 180, y: 20 }),
+        getCorner: () => "top",
+      }),
+      getBoundsRect: () => ({ pageWidth: 480, height: 679 }),
+      animateFlippingTo,
+      fold: vi.fn(),
+      stopMove: vi.fn(),
+    };
+
+    const instWithInternals = instance as unknown as {
+      getRender?: () => unknown;
+      getFlipController?: () => unknown;
+    };
+    instWithInternals.getRender = () => mockRender;
+    instWithInternals.getFlipController = () => mockFlipController;
+
+    try {
+      render(<Flipbook manifest={manifest} />);
+      (mockRender.setFlippingPage as (page: unknown) => void)(coverPage);
+      expect(mockRender.bottomPage).toBeNull();
+
+      (mockRender.drawBookShadow as () => void)();
+      expect(ctx.save).toHaveBeenCalled();
+      expect(ctx.clip).toHaveBeenCalled();
+      expect(ctx.clearRect).toHaveBeenCalledWith(0, 0, 960, 679);
+      expect(ctx.restore).toHaveBeenCalled();
+
+      (mockRender.drawOuterShadow as () => void)();
+      expect(origDrawOuterShadow).not.toHaveBeenCalled();
+
+      mockFlipController.stopMove();
+      expect(animateFlippingTo).toHaveBeenCalledWith({ x: 180, y: 20 }, { x: -480, y: 0 }, true);
+    } finally {
+      delete instWithInternals.getRender;
+      delete instWithInternals.getFlipController;
+    }
+  });
 });

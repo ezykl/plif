@@ -21,14 +21,52 @@ export interface FlipbookProps {
   soundEnabled?: boolean;
 }
 
+interface InternalPoint {
+  x: number;
+  y: number;
+}
+
+interface InternalCalculation {
+  getBottomClipArea?: () => Array<InternalPoint | null>;
+  getPosition?: () => InternalPoint;
+  getCorner?: () => string;
+}
+
+interface InternalFlipController {
+  state?: string;
+  getCalculation?: () => InternalCalculation | null;
+  getBoundsRect?: () => { pageWidth: number; height: number };
+  animateFlippingTo?: (
+    start: InternalPoint,
+    end: InternalPoint,
+    isTurned: boolean,
+    needReset?: boolean,
+  ) => void;
+  fold?: (pt: InternalPoint) => void;
+  stopMove?: () => void;
+}
+
 interface InternalCanvasRender {
   ctx?: CanvasRenderingContext2D;
   canvas?: HTMLCanvasElement;
   leftPage?: unknown;
   rightPage?: unknown;
+  bottomPage?: unknown;
   flippingPage?: unknown;
+  orientation?: string;
+  animation?: unknown;
+  getRect?: () => {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    pageWidth: number;
+  };
+  convertToGlobal?: (pt: InternalPoint | null, direction?: number) => InternalPoint | null;
   clear?: () => void;
   drawBookShadow?: () => void;
+  drawOuterShadow?: () => void;
+  setFlippingPage?: (page: unknown) => void;
 }
 
 export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipbook(
@@ -79,21 +117,132 @@ export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipb
     );
     flip.loadFromImages(manifest.pages.map((p) => p.src));
 
-    // Patch PageFlip's canvas clear() so closed covers don't paint an opaque white rectangle
-    // over the empty half of the dual-page stage.
-    const render = (flip as unknown as { getRender?: () => InternalCanvasRender }).getRender?.();
+    // Patch PageFlip's canvas renderer and flip controller so:
+    // 1. Closed covers don't paint an opaque white rectangle over the empty half of the stage.
+    // 2. Flipping Page 2 back to the standalone Front Cover (or flipping the last spread to a
+    //    standalone Back Cover) erases the lifted page region (getBottomClipArea) instead of
+    //    leaving Page 2 visible underneath on the left half of the dual-page stage.
+    // 3. Swiping/dragging a page at least halfway across completes the turn smoothly.
+    const internalFlip = flip as unknown as {
+      getRender?: () => InternalCanvasRender;
+      getFlipController?: () => InternalFlipController;
+    };
+    const render = internalFlip.getRender?.();
+    const flipController = internalFlip.getFlipController?.();
+
     if (render && render.ctx && render.canvas) {
       const ctx = render.ctx;
       const canvas = render.canvas;
       render.clear = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       };
+
+      const origSetFlippingPage = render.setFlippingPage?.bind(render);
+      if (origSetFlippingPage) {
+        render.setFlippingPage = (page: unknown) => {
+          if (
+            page != null &&
+            render.orientation !== "portrait" &&
+            render.bottomPage != null &&
+            render.bottomPage === page
+          ) {
+            render.bottomPage = null;
+          }
+          origSetFlippingPage(page);
+        };
+      }
+
       const origDrawBookShadow = render.drawBookShadow?.bind(render);
       if (origDrawBookShadow) {
         render.drawBookShadow = () => {
-          if ((render.leftPage && render.rightPage) || render.flippingPage) {
+          const isSingleCoverFlip =
+            render.orientation !== "portrait" &&
+            render.flippingPage != null &&
+            render.bottomPage == null;
+
+          if (isSingleCoverFlip) {
+            const calc = flipController?.getCalculation?.();
+            const area = calc?.getBottomClipArea?.();
+            const rect = render.getRect?.();
+            if (area && area.length > 0 && rect && render.convertToGlobal) {
+              ctx.save();
+              ctx.beginPath();
+              let started = false;
+              for (const pt of area) {
+                if (!pt) continue;
+                const padded: InternalPoint = {
+                  x: pt.x >= rect.pageWidth - 0.5 ? pt.x + 2 : pt.x,
+                  y: pt.y <= 0.5 ? pt.y - 2 : pt.y >= rect.height - 0.5 ? pt.y + 2 : pt.y,
+                };
+                const globalPt = render.convertToGlobal(padded);
+                if (!globalPt) continue;
+                if (!started) {
+                  ctx.moveTo(globalPt.x, globalPt.y);
+                  started = true;
+                } else {
+                  ctx.lineTo(globalPt.x, globalPt.y);
+                }
+              }
+              if (started) {
+                ctx.closePath();
+                ctx.clip();
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+              }
+              ctx.restore();
+            }
+          }
+
+          const pos = flipController?.getCalculation?.()?.getPosition?.();
+          const shouldDrawSpineShadow =
+            (render.leftPage != null && render.rightPage != null && !isSingleCoverFlip) ||
+            (render.flippingPage != null && (!isSingleCoverFlip || (pos != null && pos.x > 0)));
+
+          if (shouldDrawSpineShadow) {
             origDrawBookShadow();
           }
+        };
+      }
+
+      const origDrawOuterShadow = render.drawOuterShadow?.bind(render);
+      if (origDrawOuterShadow) {
+        render.drawOuterShadow = () => {
+          if (render.orientation === "portrait" || render.bottomPage != null) {
+            origDrawOuterShadow();
+          }
+        };
+      }
+    }
+
+    if (flipController) {
+      const origFold = flipController.fold?.bind(flipController);
+      if (origFold) {
+        flipController.fold = (pt: InternalPoint) => {
+          if (flipController.state !== "user_fold" && render?.animation) {
+            render.animation = null;
+          }
+          origFold(pt);
+        };
+      }
+
+      const origStopMove = flipController.stopMove?.bind(flipController);
+      if (origStopMove) {
+        flipController.stopMove = () => {
+          const calc = flipController.getCalculation?.();
+          const bounds = flipController.getBoundsRect?.();
+          if (
+            flipController.state === "user_fold" &&
+            calc &&
+            bounds &&
+            flipController.animateFlippingTo
+          ) {
+            const pos = calc.getPosition?.();
+            if (pos && pos.x > 0 && pos.x <= bounds.pageWidth * 0.5) {
+              const y = calc.getCorner?.() === "bottom" ? bounds.height : 0;
+              flipController.animateFlippingTo(pos, { x: -bounds.pageWidth, y }, true);
+              return;
+            }
+          }
+          origStopMove();
         };
       }
     }
