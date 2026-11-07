@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { generateIframeEmbed, generateWebComponentEmbed, type Manifest } from "@plif/core";
+import { CodeBracketIcon, DownloadExportIcon } from "./Icons";
 
 export interface PublishPanelProps {
   manifest: Manifest;
@@ -157,11 +158,16 @@ export function PublishPanel({
               fontWeight: 600,
               fontSize: 14,
               cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
               boxShadow: "0 2px 4px rgba(194, 94, 62, 0.2)",
               transition: "background 0.15s ease",
             }}
           >
-            Download Standalone HTML
+            <DownloadExportIcon size={16} />
+            <span>Download Standalone HTML</span>
           </button>
         </div>
 
@@ -226,10 +232,15 @@ export function PublishPanel({
               fontWeight: 600,
               fontSize: 14,
               cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
               transition: "border-color 0.15s ease",
             }}
           >
-            Download Manifest JSON
+            <CodeBracketIcon size={16} />
+            <span>Download Manifest JSON</span>
           </button>
         </div>
       </div>

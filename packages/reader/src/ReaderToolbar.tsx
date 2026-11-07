@@ -85,14 +85,60 @@ export function ReaderToolbar({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button type="button" aria-label="Previous page" onClick={onPrev} style={buttonStyle}>
-            Previous
+          <button
+            type="button"
+            aria-label="Previous page"
+            onClick={onPrev}
+            style={{
+              ...buttonStyle,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <svg
+              width={14}
+              height={14}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            <span>Previous</span>
           </button>
           <span style={{ fontWeight: 600, minWidth: 68, textAlign: "center" }}>
             {formatPageLabel(currentIndex, total, manifest.hasCover, false)}
           </span>
-          <button type="button" aria-label="Next page" onClick={onNext} style={buttonStyle}>
-            Next
+          <button
+            type="button"
+            aria-label="Next page"
+            onClick={onNext}
+            style={{
+              ...buttonStyle,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span>Next</span>
+            <svg
+              width={14}
+              height={14}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m9 18 6-6-6-6" />
+            </svg>
           </button>
         </div>
 
@@ -162,9 +208,32 @@ export function ReaderToolbar({
               aria-label="Table of contents"
               aria-expanded={showToc}
               onClick={() => setShowToc((prev) => !prev)}
-              style={buttonStyle}
+              style={{
+                ...buttonStyle,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
             >
-              Contents ({manifest.toc.length})
+              <svg
+                width={14}
+                height={14}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+              </svg>
+              <span>Contents ({manifest.toc.length})</span>
             </button>
           )}
 
@@ -173,9 +242,30 @@ export function ReaderToolbar({
             aria-label="Page thumbnails"
             aria-expanded={showThumbnails}
             onClick={() => setShowThumbnails((prev) => !prev)}
-            style={buttonStyle}
+            style={{
+              ...buttonStyle,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
           >
-            Thumbnails
+            <svg
+              width={14}
+              height={14}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+            </svg>
+            <span>Thumbnails</span>
           </button>
 
           {onToggleSound && (
@@ -241,9 +331,41 @@ export function ReaderToolbar({
             type="button"
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
             onClick={onToggleFullscreen}
-            style={buttonStyle}
+            style={{
+              ...buttonStyle,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
           >
-            {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            <svg
+              width={14}
+              height={14}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              {isFullscreen ? (
+                <>
+                  <path d="M8 3v3a2 2 0 0 1-2 2H3" />
+                  <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
+                  <path d="M3 16h3a2 2 0 0 1 2 2v3" />
+                  <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
+                </>
+              ) : (
+                <>
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+                  <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+                  <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+                  <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+                </>
+              )}
+            </svg>
+            <span>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
           </button>
         </div>
       </div>
