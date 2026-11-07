@@ -8,6 +8,7 @@ import {
   type BulkDensityMode,
   type TocItem,
 } from "@plif/core";
+import { BookOpenIcon, HardcoverBookIcon, NewspaperSpreadIcon, ZineBookletIcon } from "./Icons";
 
 export interface BookSettingsPanelProps {
   title: string;
@@ -173,7 +174,7 @@ export function BookSettingsPanel({
                   style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
                 >
                   <strong style={{ fontSize: 14, color: "#24201d" }}>{preset.label}</strong>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#c25e3e" }}>
                     {active && (
                       <span
                         style={{
@@ -189,15 +190,15 @@ export function BookSettingsPanel({
                         Active
                       </span>
                     )}
-                    <span style={{ fontSize: 14 }}>
-                      {preset.id === "newspaper"
-                        ? "📰"
-                        : preset.id === "magazine"
-                          ? "📖"
-                          : preset.id === "hardcover"
-                            ? "📕"
-                            : "📄"}
-                    </span>
+                    {preset.id === "newspaper" ? (
+                      <NewspaperSpreadIcon size={18} />
+                    ) : preset.id === "magazine" ? (
+                      <BookOpenIcon size={18} />
+                    ) : preset.id === "hardcover" ? (
+                      <HardcoverBookIcon size={18} />
+                    ) : (
+                      <ZineBookletIcon size={18} />
+                    )}
                   </div>
                 </div>
                 <span style={{ fontSize: 12, color: "#6b635b", lineHeight: 1.4 }}>

@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent, type DragEvent } from "react";
 import { movePage, removePage, setPageDensity, type ImportedPage } from "@plif/core";
+import { ArrowLeftIcon, ArrowRightIcon, TrashIcon, UploadDocumentIcon } from "./Icons";
 
 export interface PageOrganizerProps {
   pages: readonly ImportedPage[];
@@ -82,12 +83,12 @@ export function PageOrganizer({
               height: 44,
               borderRadius: "50%",
               background: "#f5efe6",
+              color: "#c25e3e",
               display: "grid",
               placeItems: "center",
-              fontSize: 22,
             }}
           >
-            📥
+            <UploadDocumentIcon size={22} />
           </div>
           <div style={{ display: "grid", gap: 4 }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: "#24201d" }}>
@@ -296,11 +297,12 @@ export function PageOrganizer({
                         background: i === 0 ? "#f5efe6" : "#ffffff",
                         color: i === 0 ? "#a8a29e" : "#24201d",
                         cursor: i === 0 ? "not-allowed" : "pointer",
-                        fontSize: 14,
-                        fontWeight: 600,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      ←
+                      <ArrowLeftIcon size={16} />
                     </button>
                     <button
                       type="button"
@@ -315,11 +317,12 @@ export function PageOrganizer({
                         background: i === pages.length - 1 ? "#f5efe6" : "#ffffff",
                         color: i === pages.length - 1 ? "#a8a29e" : "#24201d",
                         cursor: i === pages.length - 1 ? "not-allowed" : "pointer",
-                        fontSize: 14,
-                        fontWeight: 600,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      →
+                      <ArrowRightIcon size={16} />
                     </button>
                     <button
                       type="button"
@@ -353,11 +356,12 @@ export function PageOrganizer({
                         background: "#fff5f5",
                         color: "#dc2626",
                         cursor: "pointer",
-                        fontSize: 14,
-                        fontWeight: 600,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      ✕
+                      <TrashIcon size={15} />
                     </button>
                   </div>
                 </li>

@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { inlineManifestPages } from "./import/inline";
 import {
   applyBookPreset,
   applyBulkDensity,
+  BOOK_PRESETS,
   buildManifest,
   formatPageHash,
   generateStandaloneHtml,
@@ -17,6 +18,16 @@ import {
 } from "@plif/core";
 import { Flipbook, ReaderToolbar, type FlipbookHandle } from "@plif/reader";
 import { CreatorWizard, type WizardStep } from "./components/CreatorWizard";
+import {
+  BookOpenIcon,
+  DownloadExportIcon,
+  HardcoverBookIcon,
+  NewspaperSpreadIcon,
+  ShieldPrivacyIcon,
+  UploadDocumentIcon,
+  WifiOfflineIcon,
+  ZineBookletIcon,
+} from "./components/Icons";
 import { importFiles } from "./import";
 import { sampleManifest } from "./sample";
 
@@ -29,9 +40,13 @@ const SAMPLE_IMPORTED_PAGES: ImportedPage[] = sampleManifest.pages.map((p, idx) 
   ...(p.density !== undefined ? { density: p.density } : {}),
 }));
 
+const QUICK_PRESET_LIST = Object.values(BOOK_PRESETS);
+const QUICK_THEME_LIST = Object.values(THEMES);
+
 export function App() {
   const book = useRef<FlipbookHandle>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const quickFileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<WizardStep>("upload");
   const [title, setTitle] = useState(sampleManifest.title);
   const [hasCover, setHasCover] = useState(sampleManifest.hasCover);
@@ -41,12 +56,13 @@ export function App() {
   const [toc, setToc] = useState<TocItem[]>(sampleManifest.toc);
   const [pages, setPages] = useState<ImportedPage[]>([]);
   const [index, setIndex] = useState(() => {
-    if (typeof window === "undefined") return 0;
-    return parsePageHash(window.location.hash, SAMPLE_IMPORTED_PAGES.length) ?? 0;
+    if (typeof window === "undefined") return 1;
+    return parsePageHash(window.location.hash, SAMPLE_IMPORTED_PAGES.length) ?? 1;
   });
   const [zoom, setZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isDraggingOverStage, setIsDraggingOverStage] = useState(false);
   const [progressText, setProgressText] = useState<string | null>(null);
   const [errorText, setErrorText] = useState<string | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -201,6 +217,16 @@ export function App() {
     }
   };
 
+  const handleStageDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDraggingOverStage(false);
+    if (isImporting) return;
+    const list = e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+    if (list.length > 0) {
+      void handleUploadFiles(list);
+    }
+  };
+
   const handleSelectPreset = (presetId: BookPresetId) => {
     setActivePreset(presetId);
     const base = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
@@ -226,7 +252,7 @@ export function App() {
     setToc(sampleManifest.toc);
     setPages([]);
     setZoom(1);
-    updatePageIndex(0);
+    updatePageIndex(1);
   };
 
   const downloadFile = (filename: string, content: string, type: string) => {
@@ -283,7 +309,7 @@ export function App() {
           background: themeTokens.headerBg,
           color: "#fdfbf7",
           borderBottom: `1px solid ${themeTokens.borderSubtle}`,
-          padding: "14px 24px",
+          padding: "12px 24px",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
         }}
       >
@@ -300,8 +326,16 @@ export function App() {
         >
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 20 }} role="img" aria-label="Book logo">
-                📖
+              <span
+                role="img"
+                aria-label="Book logo"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  color: themeTokens.accentColor,
+                }}
+              >
+                <BookOpenIcon size={20} />
               </span>
               <span
                 style={{
@@ -317,7 +351,7 @@ export function App() {
             </div>
             <h1
               style={{
-                margin: "4px 0 0",
+                margin: "2px 0 0",
                 fontSize: 22,
                 fontWeight: 700,
                 fontFamily: 'Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif',
@@ -328,11 +362,15 @@ export function App() {
               {activeManifest.title}
             </h1>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
             {!isOnline && (
               <span
                 role="status"
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
                   fontSize: 12,
                   fontWeight: 600,
                   padding: "6px 12px",
@@ -343,7 +381,8 @@ export function App() {
                   backdropFilter: "blur(4px)",
                 }}
               >
-                📡 Offline Mode • Local Storage
+                <WifiOfflineIcon size={15} />
+                <span>Offline Mode • Local Storage</span>
               </span>
             )}
             <span
@@ -361,6 +400,67 @@ export function App() {
               {hasCover ? "Cover + Spread Mode" : "Newspaper Spread Mode"} •{" "}
               {direction.toUpperCase()}
             </span>
+
+            <input
+              ref={quickFileInputRef}
+              type="file"
+              aria-label="Quick upload PDF or images"
+              accept="application/pdf,image/*"
+              multiple
+              disabled={isImporting}
+              onChange={(e) => {
+                const list = e.target.files ? Array.from(e.target.files) : [];
+                if (list.length > 0) {
+                  void handleUploadFiles(list);
+                  e.target.value = "";
+                }
+              }}
+              style={{ display: "none" }}
+            />
+            <button
+              type="button"
+              onClick={() => quickFileInputRef.current?.click()}
+              disabled={isImporting}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                minHeight: 38,
+                padding: "6px 14px",
+                borderRadius: 8,
+                border: "1px solid rgba(255, 255, 255, 0.22)",
+                background: "rgba(255, 255, 255, 0.1)",
+                color: "#fdfbf7",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: isImporting ? "wait" : "pointer",
+              }}
+            >
+              <UploadDocumentIcon size={15} />
+              <span>{isImporting ? "Importing..." : "Upload PDF / Images"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleDownloadHtml()}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                minHeight: 38,
+                padding: "6px 14px",
+                borderRadius: 8,
+                border: "none",
+                background: "#c25e3e",
+                color: "#ffffff",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(194, 94, 62, 0.3)",
+              }}
+            >
+              <DownloadExportIcon size={15} />
+              <span>Export HTML</span>
+            </button>
           </div>
         </div>
       </header>
@@ -370,10 +470,207 @@ export function App() {
           flex: 1,
           display: "grid",
           placeItems: "center",
-          gap: 20,
-          padding: "20px 0 32px",
+          gap: 24,
+          padding: "16px 0 40px",
         }}
       >
+        {/* 1-Click Style & Format Bar (Above the Fold, right over the Stage) */}
+        <div
+          aria-label="Quick style switcher"
+          style={{
+            width: "min(960px, 92vw)",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            padding: "10px 16px",
+            borderRadius: 12,
+            background: "#fdfbf7",
+            color: "#24201d",
+            border: "1px solid #e6dfd5",
+            boxShadow: "0 4px 14px rgba(36, 32, 29, 0.06)",
+          }}
+        >
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6 }}>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "#6b635b",
+                marginRight: 4,
+              }}
+            >
+              Format:
+            </span>
+            {QUICK_PRESET_LIST.map((preset) => {
+              const active = preset.id === activePreset;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => handleSelectPreset(preset.id)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "6px 12px",
+                    borderRadius: 8,
+                    border: active ? "2px solid #c25e3e" : "1px solid #e6dfd5",
+                    background: active ? "#c25e3e" : "#ffffff",
+                    color: active ? "#ffffff" : "#24201d",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 150ms ease",
+                  }}
+                >
+                  {preset.id === "newspaper" ? (
+                    <NewspaperSpreadIcon size={15} />
+                  ) : preset.id === "magazine" ? (
+                    <BookOpenIcon size={15} />
+                  ) : preset.id === "hardcover" ? (
+                    <HardcoverBookIcon size={15} />
+                  ) : (
+                    <ZineBookletIcon size={15} />
+                  )}
+                  <span>{preset.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "#6b635b",
+              }}
+            >
+              Backdrop:
+            </span>
+            {QUICK_THEME_LIST.map((t) => {
+              const active = t.id === theme;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTheme(t.id)}
+                  title={`${t.label} backdrop`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "5px 10px",
+                    borderRadius: 9999,
+                    border: active ? "2px solid #c25e3e" : "1px solid #e6dfd5",
+                    background: active ? "#f5efe6" : "#ffffff",
+                    color: "#24201d",
+                    fontSize: 12,
+                    fontWeight: active ? 700 : 500,
+                    cursor: "pointer",
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      background: t.stageBg,
+                      border: `2px solid ${t.accentColor}`,
+                    }}
+                  />
+                  <span>{t.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* STAGE-FIRST: Interactive Dual-Page Flipbook Stage right at the top! */}
+        <div
+          ref={stageRef}
+          onDragOver={(e) => {
+            e.preventDefault();
+            if (!isDraggingOverStage) setIsDraggingOverStage(true);
+          }}
+          onDragLeave={() => setIsDraggingOverStage(false)}
+          onDrop={handleStageDrop}
+          style={{
+            display: "grid",
+            placeItems: "center",
+            gap: 16,
+            width: "100%",
+            background: isFullscreen ? themeTokens.stageBg : "transparent",
+            padding: isFullscreen ? 24 : 0,
+            outline: isDraggingOverStage ? "3px dashed #c25e3e" : "none",
+            outlineOffset: -8,
+            borderRadius: 12,
+            filter: isFullscreen ? "none" : "drop-shadow(0 16px 40px rgba(36, 32, 29, 0.18))",
+            transition: "filter 0.2s ease, outline 0.15s ease",
+          }}
+        >
+          <Flipbook
+            ref={book}
+            manifest={activeManifest}
+            initialPage={index}
+            zoom={zoom}
+            soundEnabled={soundEnabled}
+            onPageChange={updatePageIndex}
+          />
+
+          <ReaderToolbar
+            manifest={activeManifest}
+            currentIndex={index}
+            zoom={zoom}
+            isFullscreen={isFullscreen}
+            soundEnabled={soundEnabled}
+            onToggleSound={handleToggleSound}
+            onPrev={() => book.current?.prev()}
+            onNext={() => book.current?.next()}
+            onGoToPage={handleGoToPage}
+            onChangeZoom={setZoom}
+            onToggleFullscreen={handleToggleFullscreen}
+            accentColor={themeTokens.accentColor}
+            textColor={themeTokens.textColor}
+          />
+        </div>
+
+        {/* Privacy & Differentiator Strip */}
+        <div
+          style={{
+            width: "min(960px, 92vw)",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 10,
+            padding: "10px 16px",
+            borderRadius: 10,
+            background: "rgba(253, 251, 247, 0.92)",
+            color: "#24201d",
+            border: "1px solid #e6dfd5",
+            fontSize: 12,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 600 }}>
+            <span style={{ color: "#3e6b5c", display: "inline-flex" }}>
+              <ShieldPrivacyIcon size={16} />
+            </span>
+            <span>Zero Cloud Upload • Mix PDFs &amp; Images Locally • No Signup or Watermarks</span>
+          </div>
+          <span style={{ color: "#6b635b" }}>
+            Tip: Drag &amp; drop any PDF or images directly onto the book above, or customize below.
+          </span>
+        </div>
+
+        {/* Creator Studio (Below the Interactive Stage) */}
         <CreatorWizard
           step={step}
           onStepChange={setStep}
@@ -406,45 +703,6 @@ export function App() {
           onDownloadHtml={handleDownloadHtml}
           onDownloadManifest={handleDownloadManifest}
         />
-
-        <div
-          ref={stageRef}
-          style={{
-            display: "grid",
-            placeItems: "center",
-            gap: 16,
-            width: "100%",
-            background: isFullscreen ? themeTokens.stageBg : "transparent",
-            padding: isFullscreen ? 24 : 0,
-            filter: isFullscreen ? "none" : "drop-shadow(0 16px 40px rgba(36, 32, 29, 0.18))",
-            transition: "filter 0.2s ease",
-          }}
-        >
-          <Flipbook
-            ref={book}
-            manifest={activeManifest}
-            initialPage={index}
-            zoom={zoom}
-            soundEnabled={soundEnabled}
-            onPageChange={updatePageIndex}
-          />
-
-          <ReaderToolbar
-            manifest={activeManifest}
-            currentIndex={index}
-            zoom={zoom}
-            isFullscreen={isFullscreen}
-            soundEnabled={soundEnabled}
-            onToggleSound={handleToggleSound}
-            onPrev={() => book.current?.prev()}
-            onNext={() => book.current?.next()}
-            onGoToPage={handleGoToPage}
-            onChangeZoom={setZoom}
-            onToggleFullscreen={handleToggleFullscreen}
-            accentColor={themeTokens.accentColor}
-            textColor={themeTokens.textColor}
-          />
-        </div>
       </main>
     </div>
   );

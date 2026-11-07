@@ -42,6 +42,8 @@ describe("<App>", () => {
     render(<App />);
 
     expect(screen.getByRole("heading", { name: "Sample Magazine" })).toBeTruthy();
+    // Cold load starts on the open dual-page spread (pages 2–3 / 12) so visitors immediately see 2 pages
+    expect(screen.getByText("2–3 / 12")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /Next: Arrange & Style/i }));
 

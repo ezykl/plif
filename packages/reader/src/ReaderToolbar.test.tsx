@@ -140,7 +140,7 @@ describe("<ReaderToolbar>", () => {
       name: "Mute paper flip sound (press M)",
     });
     expect(button).toBeTruthy();
-    expect(screen.getByText("🔊 Sound on")).toBeTruthy();
+    expect(screen.getByText("Sound on")).toBeTruthy();
 
     fireEvent.click(button);
     expect(onToggleSound).toHaveBeenCalledTimes(1);
@@ -169,7 +169,7 @@ describe("<ReaderToolbar>", () => {
       name: "Enable paper flip sound (press M)",
     });
     expect(button).toBeTruthy();
-    expect(screen.getByText("🔇 Sound off")).toBeTruthy();
+    expect(screen.getByText("Sound off")).toBeTruthy();
 
     fireEvent.click(button);
     expect(onToggleSound).toHaveBeenCalledTimes(1);

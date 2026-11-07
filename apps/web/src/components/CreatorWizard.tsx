@@ -1,3 +1,4 @@
+import { type ReactNode } from "react";
 import {
   THEMES,
   type BookDirection,
@@ -9,6 +10,15 @@ import {
   type TocItem,
 } from "@plif/core";
 import { BookSettingsPanel } from "./BookSettingsPanel";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  BookOpenIcon,
+  DownloadExportIcon,
+  ShieldPrivacyIcon,
+  SlidersStyleIcon,
+  UploadDocumentIcon,
+} from "./Icons";
 import { PageOrganizer } from "./PageOrganizer";
 import { PublishPanel } from "./PublishPanel";
 
@@ -42,10 +52,10 @@ export interface CreatorWizardProps {
   onDownloadManifest?: () => void;
 }
 
-const STEPS: { id: WizardStep; label: string; icon: string }[] = [
-  { id: "upload", label: "1. Upload", icon: "📄" },
-  { id: "arrange", label: "2. Arrange & Style", icon: "🎨" },
-  { id: "publish", label: "3. Preview & Publish", icon: "🚀" },
+const STEPS: { id: WizardStep; label: string; icon: ReactNode }[] = [
+  { id: "upload", label: "1. Upload", icon: <UploadDocumentIcon size={15} /> },
+  { id: "arrange", label: "2. Arrange & Style", icon: <SlidersStyleIcon size={15} /> },
+  { id: "publish", label: "3. Preview & Publish", icon: <DownloadExportIcon size={15} /> },
 ];
 
 export function CreatorWizard({
@@ -129,7 +139,7 @@ export function CreatorWizard({
                     transition: "all 150ms ease",
                   }}
                 >
-                  <span>{s.icon}</span>
+                  {s.icon}
                   <span>{s.label}</span>
                 </button>
                 {idx < STEPS.length - 1 && (
@@ -167,7 +177,7 @@ export function CreatorWizard({
               }}
             >
               <span>Next: Arrange & Style</span>
-              <span>→</span>
+              <ArrowRightIcon size={14} />
             </button>
           )}
           {step === "arrange" && (
@@ -176,6 +186,9 @@ export function CreatorWizard({
                 type="button"
                 onClick={() => onStepChange("upload")}
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
                   padding: "8px 14px",
                   borderRadius: 8,
                   border: "1px solid #e6dfd5",
@@ -186,7 +199,8 @@ export function CreatorWizard({
                   cursor: "pointer",
                 }}
               >
-                ← Back: Upload
+                <ArrowLeftIcon size={14} />
+                <span>Back: Upload</span>
               </button>
               <button
                 type="button"
@@ -207,7 +221,7 @@ export function CreatorWizard({
                 }}
               >
                 <span>Next: Preview & Publish</span>
-                <span>→</span>
+                <ArrowRightIcon size={14} />
               </button>
             </>
           )}
@@ -216,6 +230,9 @@ export function CreatorWizard({
               type="button"
               onClick={() => onStepChange("arrange")}
               style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
                 padding: "8px 14px",
                 borderRadius: 8,
                 border: "1px solid #e6dfd5",
@@ -226,7 +243,8 @@ export function CreatorWizard({
                 cursor: "pointer",
               }}
             >
-              ← Back: Arrange & Style
+              <ArrowLeftIcon size={14} />
+              <span>Back: Arrange & Style</span>
             </button>
           )}
         </div>
@@ -246,8 +264,14 @@ export function CreatorWizard({
           color: "#6b635b",
         }}
       >
-        <span style={{ fontSize: 16 }}>
-          {step === "upload" ? "🔒" : step === "arrange" ? "📖" : "🚀"}
+        <span style={{ color: "#3e6b5c", display: "inline-flex", alignItems: "center" }}>
+          {step === "upload" ? (
+            <ShieldPrivacyIcon size={16} />
+          ) : step === "arrange" ? (
+            <BookOpenIcon size={16} />
+          ) : (
+            <DownloadExportIcon size={16} />
+          )}
         </span>
         <span>
           {step === "upload" &&
