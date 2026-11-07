@@ -178,4 +178,16 @@ describe("<App>", () => {
     fireEvent(window, new Event("online"));
     expect(screen.queryByRole("status")).toBeNull();
   });
+
+  it("preserves current reading position when toggling standalone cover mode", () => {
+    window.location.hash = "#/page/5";
+    render(<App />);
+    expect(screen.getByText("4–5 / 12")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: /Next: Arrange & Style/i }));
+    fireEvent.click(screen.getByLabelText(/standalone front & back cover/i));
+
+    // Page index 4 remains preserved (in spread mode without cover, index 4 is pages 5–6 / 12)
+    expect(screen.getByText("5–6 / 12")).toBeTruthy();
+  });
 });

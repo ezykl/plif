@@ -89,13 +89,17 @@ describe("<BookSettingsPanel>", () => {
     fireEvent.change(screen.getByLabelText("Chapter page"), {
       target: { value: "5" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Add chapter" }));
+    const addChapterBtn = screen.getByRole("button", { name: "Add chapter" });
+    expect(addChapterBtn.style.minHeight).toBe("44px");
+    fireEvent.click(addChapterBtn);
     expect(onChangeToc).toHaveBeenCalledWith([
       { title: "Chapter 1", page: 1 },
       { title: "Chapter 2", page: 5 },
     ]);
 
-    fireEvent.click(screen.getByRole("button", { name: "Remove chapter Chapter 1" }));
+    const removeChapterBtn = screen.getByRole("button", { name: "Remove chapter Chapter 1" });
+    expect(removeChapterBtn.style.minHeight).toBe("44px");
+    fireEvent.click(removeChapterBtn);
     expect(onChangeToc).toHaveBeenCalledWith([]);
   });
 

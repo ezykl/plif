@@ -103,8 +103,13 @@ describe("<ReaderToolbar>", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Table of contents" }));
-    fireEvent.click(screen.getByRole("button", { name: /Editorial/i }));
+    const tocToggleBtn = screen.getByRole("button", { name: "Table of contents" });
+    expect(tocToggleBtn.style.minHeight).toBe("44px");
+    fireEvent.click(tocToggleBtn);
+
+    const editorialBtn = screen.getByRole("button", { name: /Editorial/i });
+    expect(editorialBtn.style.minHeight).toBe("44px");
+    fireEvent.click(editorialBtn);
     expect(onGoToPage).toHaveBeenCalledWith(2);
 
     fireEvent.click(screen.getByRole("button", { name: "Page thumbnails" }));

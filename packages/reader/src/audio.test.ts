@@ -38,6 +38,7 @@ class MockAudioNode {
 
 class MockAudioBufferSourceNode extends MockAudioNode {
   buffer: MockAudioBuffer | null = null;
+  onended: (() => void) | null = null;
   start = vi.fn();
   stop = vi.fn();
 }
@@ -182,6 +183,26 @@ describe("playPaperTurnSound", () => {
     mockCtx.state = "suspended";
     playPaperTurnSound();
     expect(mockCtx.resume).toHaveBeenCalledTimes(1);
+  });
+
+  it("disconnects audio nodes when playback ends and clamps volume > 1 to 1", () => {
+    playPaperTurnSound({ volume: 5 });
+
+    const source = mockCtx.lastSource!;
+    const filter = mockCtx.lastFilter!;
+    const gain = mockCtx.lastGain!;
+
+    expect(gain.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(
+      1,
+      mockCtx.currentTime + 0.015,
+    );
+
+    expect(source.onended).toBeTypeOf("function");
+    source.onended?.();
+
+    expect(source.disconnect).toHaveBeenCalledTimes(1);
+    expect(filter.disconnect).toHaveBeenCalledTimes(1);
+    expect(gain.disconnect).toHaveBeenCalledTimes(1);
   });
 
   it("gracefully catches errors when AudioContext throws", () => {
