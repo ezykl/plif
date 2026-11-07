@@ -6,7 +6,7 @@
  * @returns The ServiceWorkerRegistration instance on success, or null if unsupported/failed.
  */
 export async function registerServiceWorker(
-  swUrl: string = "/sw.js",
+  swUrl: string = `${import.meta.env.BASE_URL ?? "/"}sw.js`,
   precacheUrls: readonly string[] = [],
 ): Promise<ServiceWorkerRegistration | null> {
   if (
