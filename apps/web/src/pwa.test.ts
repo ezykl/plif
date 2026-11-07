@@ -96,6 +96,31 @@ describe("registerServiceWorker", () => {
       urls: ["/assets/pdf.worker.min.mjs"],
     });
   });
+
+  it("supports subpath registration and precaching for GitHub Pages (/plif/sw.js)", async () => {
+    const postMessage = vi.fn();
+    const mockRegistration = {
+      scope: "/plif/",
+      active: { postMessage },
+    } as unknown as ServiceWorkerRegistration;
+    const registerMock = vi.fn().mockResolvedValue(mockRegistration);
+    Object.defineProperty(navigator, "serviceWorker", {
+      value: {
+        register: registerMock,
+        ready: Promise.resolve(mockRegistration),
+      },
+      configurable: true,
+      writable: true,
+    });
+
+    const reg = await registerServiceWorker("/plif/sw.js", ["/plif/assets/pdf.worker.min.mjs"]);
+    expect(registerMock).toHaveBeenCalledWith("/plif/sw.js");
+    expect(postMessage).toHaveBeenCalledWith({
+      type: "CACHE_URLS",
+      urls: ["/plif/assets/pdf.worker.min.mjs"],
+    });
+    expect(reg).toBe(mockRegistration);
+  });
 });
 
 describe("PWA assets verification", () => {

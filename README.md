@@ -1,6 +1,12 @@
 # Plif 📖
 
+[![CI](https://github.com/ezykl/plif/actions/workflows/ci.yml/badge.svg)](https://github.com/ezykl/plif/actions/workflows/ci.yml)
+[![Deploy to GitHub Pages](https://github.com/ezykl/plif/actions/workflows/deploy.yml/badge.svg)](https://github.com/ezykl/plif/actions/workflows/deploy.yml)
+[![Live Demo](https://img.shields.io/badge/demo-ezykl.github.io%2Fplif-c25e3e)](https://ezykl.github.io/plif/)
+
 Free, open-source, client-side flipbook creator and reader. Turn PDFs and images into realistic page-turning digital publications (newspapers, magazines, hardcovers, and zines) and embed or export them anywhere — with zero server requirements, fees, or tracking.
+
+👉 **[Try the Live Studio Demo on GitHub Pages](https://ezykl.github.io/plif/)**
 
 Built on the open-source [StPageFlip](https://github.com/Nodlik/StPageFlip) engine (MIT), replacing legacy Turn.js and jQuery dependencies with modern TypeScript and web components.
 
@@ -74,7 +80,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 Plif is tested with strict TypeScript, ESLint, Prettier, and Vitest.
 
 ```bash
-# Run all workspace test suites (135 tests)
+# Run all workspace test suites (136 tests)
 pnpm test
 
 # Typecheck all packages
