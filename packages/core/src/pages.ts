@@ -25,6 +25,7 @@ export function formatPageLabel(
   hasCover: boolean,
   portrait: boolean,
 ): string {
+  if (total <= 0) return "0 / 0";
   const pages = visiblePages(index, total, hasCover, portrait).map((i) => i + 1);
   const first = Math.min(...pages);
   const last = Math.max(...pages);

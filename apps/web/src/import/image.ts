@@ -1,5 +1,6 @@
 import type { ImportedPage } from "@plif/core";
 import { canvasToWebpUrl, scaleToFitMaxDimension } from "./canvas";
+import { generatePageId } from "./id";
 
 export interface LoadedImageSource {
   width: number;
@@ -53,7 +54,7 @@ export async function importImageFile(
   }
   const src = await canvasToWebpUrl(canvas, opts.quality);
   return {
-    id: crypto.randomUUID(),
+    id: generatePageId(),
     src,
     width,
     height,

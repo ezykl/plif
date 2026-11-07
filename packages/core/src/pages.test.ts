@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { formatPageLabel, visiblePages } from "./pages";
 
+describe("formatPageLabel empty book", () => {
+  it("shows 0 / 0 when there are no pages", () => {
+    expect(formatPageLabel(0, 0, true, false)).toBe("0 / 0");
+    expect(formatPageLabel(0, 0, false, true)).toBe("0 / 0");
+  });
+});
+
 describe("visiblePages", () => {
   it("shows the cover alone", () => {
     expect(visiblePages(0, 12, true, false)).toEqual([0]);

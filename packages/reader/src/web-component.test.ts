@@ -1,5 +1,14 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { parseManifest } from "@plif/core";
 import { PlifBookElement } from "./web-component";
+
+vi.mock("page-flip", () => ({
+  PageFlip: vi.fn(() => ({
+    destroy: vi.fn(),
+    loadFromImages: vi.fn(),
+    getPage: vi.fn(() => ({ setDensity: vi.fn() })),
+  })),
+}));
 
 const mockManifest = {
   version: "1.0.0",
@@ -43,5 +52,45 @@ describe("<plif-book> custom element", () => {
     });
 
     document.body.removeChild(el);
+  });
+  describe("attribute overrides", () => {
+    const manifest = parseManifest({
+      version: 1,
+      title: "Book",
+      pageSize: { width: 500, height: 700 },
+      direction: "ltr",
+      theme: "magazine",
+      pages: [{ src: "https://example.com/p1.jpg" }],
+    });
+
+    function mount(attrs: Record<string, string>): PlifBookElement {
+      const el = document.createElement("plif-book") as PlifBookElement;
+      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+      document.body.appendChild(el);
+      return el;
+    }
+
+    it("applies direction attribute over the manifest", () => {
+      const el = mount({ direction: "rtl" });
+      el.renderManifest(manifest);
+      expect(el.querySelector("div")?.getAttribute("dir")).toBe("rtl");
+      el.remove();
+    });
+
+    it("re-renders when the direction attribute changes", () => {
+      const el = mount({});
+      el.renderManifest(manifest);
+      expect(el.querySelector("div")?.getAttribute("dir")).toBe("ltr");
+      el.setAttribute("direction", "rtl");
+      expect(el.querySelector("div")?.getAttribute("dir")).toBe("rtl");
+      el.remove();
+    });
+
+    it("ignores invalid attribute values", () => {
+      const el = mount({ direction: "sideways" });
+      el.renderManifest(manifest);
+      expect(el.querySelector("div")?.getAttribute("dir")).toBe("ltr");
+      el.remove();
+    });
   });
 });

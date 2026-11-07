@@ -84,7 +84,7 @@ export function playPaperTurnSound(options?: PaperTurnSoundOptions): void {
     // Exponential gain envelope: 15ms attack, 85ms decay (total 100ms)
     const gainNode = ctx.createGain();
     const userVolume = options?.volume ?? 1;
-    const peakVolume = Math.max(0.0001, userVolume * 0.35);
+    const peakVolume = Math.min(1, Math.max(0.0001, userVolume * 0.35));
     const now = ctx.currentTime;
     const attackDuration = 0.015;
     const totalDuration = 0.1;
@@ -96,6 +96,12 @@ export function playPaperTurnSound(options?: PaperTurnSoundOptions): void {
     source.connect(filter);
     filter.connect(gainNode);
     gainNode.connect(ctx.destination);
+
+    source.onended = () => {
+      source.disconnect();
+      filter.disconnect();
+      gainNode.disconnect();
+    };
 
     source.start(now);
     source.stop(now + totalDuration);
