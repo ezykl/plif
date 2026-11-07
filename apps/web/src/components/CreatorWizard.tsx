@@ -52,10 +52,42 @@ export interface CreatorWizardProps {
   onDownloadManifest?: () => void;
 }
 
-const STEPS: { id: WizardStep; label: string; icon: ReactNode }[] = [
-  { id: "upload", label: "1. Upload", icon: <UploadDocumentIcon size={15} /> },
-  { id: "arrange", label: "2. Arrange & Style", icon: <SlidersStyleIcon size={15} /> },
-  { id: "publish", label: "3. Preview & Publish", icon: <DownloadExportIcon size={15} /> },
+const STEPS: {
+  id: WizardStep;
+  label: string;
+  subtitle: string;
+  bg: string;
+  activeBorder: string;
+  iconBg: string;
+  icon: ReactNode;
+}[] = [
+  {
+    id: "upload",
+    label: "1. Upload",
+    subtitle: "Drop PDFs or images & reorder pages",
+    bg: "#fdebd2",
+    activeBorder: "#141413",
+    iconBg: "rgba(255, 255, 255, 0.75)",
+    icon: <UploadDocumentIcon size={18} />,
+  },
+  {
+    id: "arrange",
+    label: "2. Arrange & Style",
+    subtitle: "Format presets, backdrops & chapters",
+    bg: "#dce8dc",
+    activeBorder: "#141413",
+    iconBg: "rgba(255, 255, 255, 0.75)",
+    icon: <SlidersStyleIcon size={18} />,
+  },
+  {
+    id: "publish",
+    label: "3. Preview & Publish",
+    subtitle: "1-click offline HTML & embed code",
+    bg: "#d8ecfa",
+    activeBorder: "#141413",
+    iconBg: "rgba(255, 255, 255, 0.75)",
+    icon: <DownloadExportIcon size={18} />,
+  },
 ];
 
 export function CreatorWizard({
@@ -92,67 +124,120 @@ export function CreatorWizard({
       style={{
         width: "min(960px, 92vw)",
         display: "grid",
-        gap: 16,
+        gap: 18,
       }}
     >
-      {/* Top Stationery Nav Bar */}
+      {/* Option C Pastel Bento Step Switcher Cards */}
       <div
         role="tablist"
         aria-label="Flipbook creation steps"
         style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 10,
-          alignItems: "center",
-          justifyContent: "space-between",
-          background: "#fdfbf7",
-          padding: "10px 16px",
-          borderRadius: 10,
-          border: "1px solid #e6dfd5",
-          boxShadow: "0 2px 6px rgba(36, 32, 29, 0.04)",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+          gap: 14,
         }}
       >
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
-          {STEPS.map((s, idx) => {
-            const active = s.id === step;
-            return (
-              <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <button
-                  role="tab"
-                  type="button"
-                  aria-label={s.label}
-                  aria-selected={active}
-                  onClick={() => onStepChange(s.id)}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "7px 16px",
-                    borderRadius: 9999,
-                    border: active ? "2px solid #c25e3e" : "1px solid #e6dfd5",
-                    background: active ? "#c25e3e" : "#ffffff",
-                    color: active ? "#ffffff" : "#24201d",
-                    fontWeight: 600,
-                    fontSize: 13,
-                    cursor: "pointer",
-                    boxShadow: active ? "0 2px 8px rgba(194, 94, 62, 0.25)" : "none",
-                    transition: "all 150ms ease",
-                  }}
-                >
-                  {s.icon}
-                  <span>{s.label}</span>
-                </button>
-                {idx < STEPS.length - 1 && (
-                  <span
-                    aria-hidden="true"
-                    style={{ color: "#a8a29e", fontSize: 13, fontWeight: 700 }}
-                  >
-                    ›
-                  </span>
-                )}
-              </div>
-            );
-          })}
+        {STEPS.map((s) => {
+          const active = s.id === step;
+          return (
+            <button
+              key={s.id}
+              role="tab"
+              type="button"
+              aria-label={s.label}
+              aria-selected={active}
+              onClick={() => onStepChange(s.id)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                padding: "16px 18px",
+                borderRadius: 18,
+                border: active ? `2px solid ${s.activeBorder}` : "2px solid transparent",
+                background: s.bg,
+                color: "#141413",
+                textAlign: "left",
+                cursor: "pointer",
+                boxShadow: active
+                  ? "0 10px 24px rgba(20, 20, 19, 0.10)"
+                  : "0 2px 8px rgba(20, 20, 19, 0.04)",
+                transition: "transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease",
+              }}
+            >
+              <span
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 12,
+                  background: active ? "#141413" : s.iconBg,
+                  color: active ? "#ffffff" : "#141413",
+                  display: "grid",
+                  placeItems: "center",
+                  flexShrink: 0,
+                }}
+              >
+                {s.icon}
+              </span>
+              <span style={{ display: "grid", gap: 2 }}>
+                <strong style={{ fontSize: 15, fontWeight: 700, color: "#141413" }}>
+                  {s.label}
+                </strong>
+                <span style={{ fontSize: 12, color: "#44403c", lineHeight: 1.35 }}>
+                  {s.subtitle}
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Step Guidance & Quick Pill Navigation Bar */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          padding: "12px 18px",
+          borderRadius: 9999,
+          background: "#ffffff",
+          border: "1px solid #e7e5e4",
+          boxShadow: "0 2px 10px rgba(20, 20, 19, 0.04)",
+          fontSize: 13,
+          color: "#44403c",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: "50%",
+              background: "#e0f2fe",
+              color: "#0369a1",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            {step === "upload" ? (
+              <ShieldPrivacyIcon size={15} />
+            ) : step === "arrange" ? (
+              <BookOpenIcon size={15} />
+            ) : (
+              <DownloadExportIcon size={15} />
+            )}
+          </span>
+          <span>
+            {step === "upload" &&
+              "100% Client-Side: Drop in your PDF or images. Files process in-memory and never leave your browser."}
+            {step === "arrange" &&
+              "Book Binding & Style: Customize page density, standalone covers, themes, and reading direction."}
+            {step === "publish" &&
+              "Ready to Share: Download a portable standalone flipbook or grab embed code for your website."}
+          </span>
         </div>
 
         <div style={{ display: "flex", gap: 8 }}>
@@ -164,15 +249,14 @@ export function CreatorWizard({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "8px 16px",
-                borderRadius: 8,
+                padding: "8px 18px",
+                borderRadius: 9999,
                 border: "none",
-                background: "#c25e3e",
+                background: "#141413",
                 color: "#ffffff",
                 fontWeight: 600,
                 fontSize: 13,
                 cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(194, 94, 62, 0.25)",
                 transition: "all 150ms ease",
               }}
             >
@@ -189,11 +273,11 @@ export function CreatorWizard({
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
-                  padding: "8px 14px",
-                  borderRadius: 8,
-                  border: "1px solid #e6dfd5",
+                  padding: "8px 16px",
+                  borderRadius: 9999,
+                  border: "1.5px solid #141413",
                   background: "#ffffff",
-                  color: "#24201d",
+                  color: "#141413",
                   fontWeight: 600,
                   fontSize: 13,
                   cursor: "pointer",
@@ -209,15 +293,14 @@ export function CreatorWizard({
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
-                  padding: "8px 16px",
-                  borderRadius: 8,
+                  padding: "8px 18px",
+                  borderRadius: 9999,
                   border: "none",
-                  background: "#c25e3e",
+                  background: "#141413",
                   color: "#ffffff",
                   fontWeight: 600,
                   fontSize: 13,
                   cursor: "pointer",
-                  boxShadow: "0 2px 8px rgba(194, 94, 62, 0.25)",
                 }}
               >
                 <span>Next: Preview & Publish</span>
@@ -233,11 +316,11 @@ export function CreatorWizard({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "8px 14px",
-                borderRadius: 8,
-                border: "1px solid #e6dfd5",
+                padding: "8px 16px",
+                borderRadius: 9999,
+                border: "1.5px solid #141413",
                 background: "#ffffff",
-                color: "#24201d",
+                color: "#141413",
                 fontWeight: 600,
                 fontSize: 13,
                 cursor: "pointer",
@@ -248,39 +331,6 @@ export function CreatorWizard({
             </button>
           )}
         </div>
-      </div>
-
-      {/* Step Reassuring Guidance Banner */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "10px 16px",
-          borderRadius: 8,
-          background: "#f5efe6",
-          border: "1px solid #e6dfd5",
-          fontSize: 13,
-          color: "#6b635b",
-        }}
-      >
-        <span style={{ color: "#3e6b5c", display: "inline-flex", alignItems: "center" }}>
-          {step === "upload" ? (
-            <ShieldPrivacyIcon size={16} />
-          ) : step === "arrange" ? (
-            <BookOpenIcon size={16} />
-          ) : (
-            <DownloadExportIcon size={16} />
-          )}
-        </span>
-        <span>
-          {step === "upload" &&
-            "100% Client-Side: Drop in your PDF or images. Files process in-memory and never leave your browser."}
-          {step === "arrange" &&
-            "Book Binding & Style: Customize page density, standalone covers, themes, and reading direction."}
-          {step === "publish" &&
-            "Ready to Share: Download a portable standalone flipbook or grab embed code for your website."}
-        </span>
       </div>
 
       {step === "upload" && (

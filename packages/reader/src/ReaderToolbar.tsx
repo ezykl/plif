@@ -49,14 +49,15 @@ export function ReaderToolbar({
 
   const buttonStyle = {
     minHeight: 44,
-    padding: "6px 12px",
+    padding: "6px 14px",
     borderRadius: 999,
-    border: `1px solid ${accentColor}`,
-    background: "transparent",
+    border: "1px solid rgba(255, 255, 255, 0.16)",
+    background: "rgba(255, 255, 255, 0.08)",
     color: textColor,
     fontWeight: 600,
     fontSize: 13,
     cursor: "pointer",
+    transition: "background 150ms ease, border-color 150ms ease",
   } as const;
 
   const isSoundOn = soundEnabled !== false;
@@ -64,9 +65,9 @@ export function ReaderToolbar({
   return (
     <div
       style={{
-        width: "min(960px, 92vw)",
+        width: "min(920px, 94vw)",
         display: "grid",
-        gap: 10,
+        gap: 12,
       }}
     >
       <div
@@ -78,10 +79,13 @@ export function ReaderToolbar({
           gap: 10,
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "10px 16px",
-          borderRadius: 12,
-          background: "rgba(0, 0, 0, 0.18)",
+          padding: "8px 16px",
+          borderRadius: 999,
+          background: "rgba(20, 20, 19, 0.92)",
+          color: "#ffffff",
+          backdropFilter: "blur(16px)",
           border: "1px solid rgba(255, 255, 255, 0.14)",
+          boxShadow: "0 14px 34px rgba(20, 20, 19, 0.22)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
