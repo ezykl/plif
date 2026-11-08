@@ -54,15 +54,25 @@ export function ReaderToolbar({
 
   const buttonStyle = {
     minHeight: 44,
-    padding: "6px 14px",
-    borderRadius: 999,
-    border: "1px solid rgba(255, 255, 255, 0.16)",
-    background: "rgba(255, 255, 255, 0.08)",
+    padding: "0 10px",
+    borderRadius: 9,
+    border: "1px solid rgba(255, 255, 255, 0.12)",
+    background: "rgba(255, 255, 255, 0.07)",
     color: textColor,
     fontWeight: 600,
-    fontSize: 13,
+    fontSize: 12,
+    lineHeight: 1,
+    whiteSpace: "nowrap",
     cursor: "pointer",
     transition: "background 150ms ease, border-color 150ms ease",
+  } as const;
+
+  const dividerStyle = {
+    width: 1,
+    height: 22,
+    background: "rgba(255, 255, 255, 0.14)",
+    flexShrink: 0,
+    margin: "0 2px",
   } as const;
 
   const isSoundOn = soundEnabled !== false;
@@ -70,9 +80,10 @@ export function ReaderToolbar({
   return (
     <div
       style={{
-        width: "min(920px, 94vw)",
+        width: "min(1080px, 96vw)",
         display: "grid",
-        gap: 12,
+        justifyItems: "center",
+        gap: 10,
       }}
     >
       <div
@@ -81,19 +92,21 @@ export function ReaderToolbar({
         style={{
           display: "flex",
           flexWrap: "wrap",
-          gap: 10,
+          gap: 6,
           alignItems: "center",
-          justifyContent: "space-between",
-          padding: "8px 16px",
-          borderRadius: 999,
+          justifyContent: "center",
+          width: "fit-content",
+          maxWidth: "100%",
+          padding: "6px 10px",
+          borderRadius: 14,
           background: "rgba(20, 20, 19, 0.92)",
           color: "#ffffff",
           backdropFilter: "blur(16px)",
           border: "1px solid rgba(255, 255, 255, 0.14)",
-          boxShadow: "0 14px 34px rgba(20, 20, 19, 0.22)",
+          boxShadow: "0 12px 28px rgba(20, 20, 19, 0.2)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
           {canPrev && (
             <button
               type="button"
@@ -104,12 +117,12 @@ export function ReaderToolbar({
                 ...buttonStyle,
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 5,
               }}
             >
               <svg
-                width={15}
-                height={15}
+                width={14}
+                height={14}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -124,7 +137,17 @@ export function ReaderToolbar({
               <span>Previous</span>
             </button>
           )}
-          <span style={{ fontWeight: 600, minWidth: 68, textAlign: "center" }}>
+          <span
+            style={{
+              fontWeight: 600,
+              fontSize: 12.5,
+              fontVariantNumeric: "tabular-nums",
+              minWidth: 62,
+              textAlign: "center",
+              padding: "0 4px",
+              whiteSpace: "nowrap",
+            }}
+          >
             {formatPageLabel(currentIndex, total, manifest.hasCover, false)}
           </span>
           {canNext && (
@@ -137,13 +160,13 @@ export function ReaderToolbar({
                 ...buttonStyle,
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 5,
               }}
             >
               <span>Next</span>
               <svg
-                width={15}
-                height={15}
+                width={14}
+                height={14}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -159,14 +182,18 @@ export function ReaderToolbar({
           )}
         </div>
 
+        <span aria-hidden="true" style={dividerStyle} />
+
         <label
           style={{
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
-            gap: 8,
+            gap: 6,
             fontSize: 12,
-            flex: "1 1 160px",
-            maxWidth: 260,
+            fontWeight: 500,
+            color: "rgba(255, 255, 255, 0.82)",
+            padding: "0 4px",
+            whiteSpace: "nowrap",
           }}
         >
           <span>Page</span>
@@ -182,22 +209,37 @@ export function ReaderToolbar({
                 onGoToPage(pageNumber - 1);
               }
             }}
-            style={{ width: "100%", accentColor }}
+            style={{ width: 88, accentColor, cursor: "pointer" }}
           />
         </label>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+        <span aria-hidden="true" style={dividerStyle} />
+
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
           <button
             type="button"
             aria-label="Zoom out"
             title="Zoom out (-)"
             disabled={safeZoom <= MIN_ZOOM}
             onClick={() => onChangeZoom(stepZoom(safeZoom, -ZOOM_STEP))}
-            style={buttonStyle}
+            style={{
+              ...buttonStyle,
+              minWidth: 34,
+              padding: "0 8px",
+              opacity: safeZoom <= MIN_ZOOM ? 0.45 : 1,
+            }}
           >
             −
           </button>
-          <span style={{ fontSize: 13, fontWeight: 600, minWidth: 44, textAlign: "center" }}>
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              fontVariantNumeric: "tabular-nums",
+              minWidth: 40,
+              textAlign: "center",
+            }}
+          >
             {zoomPercent}
           </span>
           <button
@@ -206,7 +248,12 @@ export function ReaderToolbar({
             title="Zoom in (+)"
             disabled={safeZoom >= MAX_ZOOM}
             onClick={() => onChangeZoom(stepZoom(safeZoom, ZOOM_STEP))}
-            style={buttonStyle}
+            style={{
+              ...buttonStyle,
+              minWidth: 34,
+              padding: "0 8px",
+              opacity: safeZoom >= MAX_ZOOM ? 0.45 : 1,
+            }}
           >
             +
           </button>
@@ -221,7 +268,11 @@ export function ReaderToolbar({
               Reset
             </button>
           )}
+        </div>
 
+        <span aria-hidden="true" style={dividerStyle} />
+
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           {manifest.toc.length > 0 && (
             <button
               type="button"
@@ -230,14 +281,16 @@ export function ReaderToolbar({
               onClick={() => setShowToc((prev) => !prev)}
               style={{
                 ...buttonStyle,
+                background: showToc ? "rgba(255, 255, 255, 0.2)" : buttonStyle.background,
+                borderColor: showToc ? "rgba(255, 255, 255, 0.34)" : buttonStyle.border,
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 5,
               }}
             >
               <svg
-                width={14}
-                height={14}
+                width={13}
+                height={13}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -264,14 +317,16 @@ export function ReaderToolbar({
             onClick={() => setShowThumbnails((prev) => !prev)}
             style={{
               ...buttonStyle,
+              background: showThumbnails ? "rgba(255, 255, 255, 0.2)" : buttonStyle.background,
+              borderColor: showThumbnails ? "rgba(255, 255, 255, 0.34)" : buttonStyle.border,
               display: "inline-flex",
               alignItems: "center",
-              gap: 6,
+              gap: 5,
             }}
           >
             <svg
-              width={14}
-              height={14}
+              width={13}
+              height={13}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -303,14 +358,14 @@ export function ReaderToolbar({
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 6,
+                gap: 5,
               }}
             >
               {isSoundOn ? (
                 <>
                   <svg
-                    width={15}
-                    height={15}
+                    width={14}
+                    height={14}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -328,8 +383,8 @@ export function ReaderToolbar({
               ) : (
                 <>
                   <svg
-                    width={15}
-                    height={15}
+                    width={14}
+                    height={14}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -357,12 +412,12 @@ export function ReaderToolbar({
               ...buttonStyle,
               display: "inline-flex",
               alignItems: "center",
-              gap: 6,
+              gap: 5,
             }}
           >
             <svg
-              width={14}
-              height={14}
+              width={13}
+              height={13}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
