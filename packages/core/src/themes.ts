@@ -113,8 +113,8 @@ export const BOOK_PRESETS: Record<BookPresetId, BookPreset> = {
   newspaper: {
     id: "newspaper",
     label: "Newspaper",
-    description: "Soft paper pages from page 1, no stiff cover",
-    hasCover: false,
+    description: "Standalone front page with soft newsprint paper spreads",
+    hasCover: true,
     densityMode: "all-soft",
     theme: "newsprint",
   },

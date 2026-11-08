@@ -62,9 +62,9 @@ describe("applyBulkDensity", () => {
 });
 
 describe("applyBookPreset", () => {
-  it("configures newspaper preset as coverless, all-soft, newsprint theme", () => {
+  it("configures newspaper preset with standalone front cover, all-soft, newsprint theme", () => {
     const res = applyBookPreset("newspaper", samplePages);
-    expect(res.hasCover).toBe(false);
+    expect(res.hasCover).toBe(true);
     expect(res.theme).toBe("newsprint");
     expect(res.pages.map((p) => p.density)).toEqual(["soft", "soft", "soft", "soft"]);
   });

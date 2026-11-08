@@ -53,7 +53,7 @@ describe("<App>", () => {
     expect(screen.getByRole("heading", { name: "The Campus Chronicle" })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /Preset: Newspaper/i }));
-    expect(screen.getByText("1–2 / 12")).toBeTruthy();
+    expect(screen.getByText("1 / 12")).toBeTruthy();
   });
 
   it("zooms, jumps via Table of Contents, and syncs #/page/N deep links", () => {
@@ -97,7 +97,7 @@ describe("<App>", () => {
     fireEvent.click(screen.getByRole("button", { name: /Next: Arrange & Style/i }));
     fireEvent.click(screen.getByRole("button", { name: /Preset: Newspaper/i }));
     expect(screen.getByText(/Plif Flipbook Studio • Newsprint Edition/i)).toBeTruthy();
-    expect(screen.getByText(/Newspaper Spread Mode • LTR/i)).toBeTruthy();
+    expect(screen.getByText(/Cover \+ Spread Mode • LTR/i)).toBeTruthy();
   });
 
   it("clicking the toolbar sound toggle button toggles soundEnabled and updates localStorage", () => {
