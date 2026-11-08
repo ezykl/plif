@@ -22,15 +22,15 @@ const manifest = parseManifest({
 });
 
 describe("<ReaderToolbar>", () => {
-  it("navigates with Prev, Next, and the page slider", () => {
+  it("navigates with Prev, Next, and the page slider, and hides Prev/Next at book boundaries", () => {
     const onPrev = vi.fn();
     const onNext = vi.fn();
     const onGoToPage = vi.fn();
 
-    render(
+    const { rerender } = render(
       <ReaderToolbar
         manifest={manifest}
-        currentIndex={0}
+        currentIndex={1}
         zoom={1}
         isFullscreen={false}
         onPrev={onPrev}
@@ -51,6 +51,40 @@ describe("<ReaderToolbar>", () => {
       target: { value: "3" },
     });
     expect(onGoToPage).toHaveBeenCalledWith(2);
+
+    // At first page (index 0), Previous button is hidden
+    rerender(
+      <ReaderToolbar
+        manifest={manifest}
+        currentIndex={0}
+        zoom={1}
+        isFullscreen={false}
+        onPrev={onPrev}
+        onNext={onNext}
+        onGoToPage={onGoToPage}
+        onChangeZoom={vi.fn()}
+        onToggleFullscreen={vi.fn()}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: "Previous page" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Next page" })).toBeTruthy();
+
+    // At last page (index 3), Next button is hidden
+    rerender(
+      <ReaderToolbar
+        manifest={manifest}
+        currentIndex={3}
+        zoom={1}
+        isFullscreen={false}
+        onPrev={onPrev}
+        onNext={onNext}
+        onGoToPage={onGoToPage}
+        onChangeZoom={vi.fn()}
+        onToggleFullscreen={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Previous page" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Next page" })).toBeNull();
   });
 
   it("controls zoom in, zoom out, reset zoom, and fullscreen", () => {

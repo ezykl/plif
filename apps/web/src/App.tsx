@@ -783,104 +783,135 @@ export function App() {
               transition: "filter 0.2s ease, outline 0.15s ease",
             }}
           >
-            <div
-              style={{
-                position: "relative",
-                width: "min(1040px, 96vw)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <button
-                type="button"
-                aria-label="Turn to previous page"
-                title="Previous page (Left Arrow)"
-                onClick={() => book.current?.prev()}
-                style={{
-                  position: "absolute",
-                  left: 4,
-                  zIndex: 15,
-                  width: 46,
-                  height: 46,
-                  borderRadius: "50%",
-                  border: "1px solid rgba(255, 255, 255, 0.22)",
-                  background: "rgba(20, 20, 19, 0.86)",
-                  color: "#ffffff",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  backdropFilter: "blur(10px)",
-                  boxShadow: "0 8px 24px rgba(20, 20, 19, 0.28)",
-                  transition: "transform 150ms ease, background 150ms ease",
-                }}
-              >
-                <svg
-                  width={20}
-                  height={20}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M19 12H5" />
-                  <path d="m12 19-7-7 7-7" />
-                </svg>
-              </button>
+            {(() => {
+              const remainingAfterCover = activeManifest.hasCover ? total - 1 : total;
+              const lastSpreadSize =
+                remainingAfterCover > 0 && remainingAfterCover % 2 === 0 ? 2 : 1;
+              const lastSpreadStartIndex = Math.max(0, total - lastSpreadSize);
+              const canPrev = index > 0;
+              const canNext = index < lastSpreadStartIndex;
 
-              <Flipbook
-                ref={book}
-                manifest={activeManifest}
-                initialPage={index}
-                zoom={zoom}
-                soundEnabled={soundEnabled}
-                onPageChange={updatePageIndex}
-              />
-
-              <button
-                type="button"
-                aria-label="Turn to next page"
-                title="Next page (Right Arrow)"
-                onClick={() => book.current?.next()}
-                style={{
-                  position: "absolute",
-                  right: 4,
-                  zIndex: 15,
-                  width: 46,
-                  height: 46,
-                  borderRadius: "50%",
-                  border: "1px solid rgba(255, 255, 255, 0.22)",
-                  background: "rgba(20, 20, 19, 0.86)",
-                  color: "#ffffff",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  backdropFilter: "blur(10px)",
-                  boxShadow: "0 8px 24px rgba(20, 20, 19, 0.28)",
-                  transition: "transform 150ms ease, background 150ms ease",
-                }}
-              >
-                <svg
-                  width={20}
-                  height={20}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+              return (
+                <div
+                  style={{
+                    width: "min(1180px, 98vw)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "clamp(16px, 3vw, 36px)",
+                  }}
                 >
-                  <path d="M5 12h14" />
-                  <path d="m12 5 7 7-7 7" />
-                </svg>
-              </button>
-            </div>
+                  <div
+                    style={{
+                      width: 48,
+                      flex: "0 0 48px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {canPrev && (
+                      <button
+                        type="button"
+                        aria-label="Turn to previous page"
+                        title="Previous page (Left Arrow)"
+                        onClick={() => book.current?.prev()}
+                        style={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: "50%",
+                          border: "1px solid rgba(255, 255, 255, 0.22)",
+                          background: "rgba(20, 20, 19, 0.88)",
+                          color: "#ffffff",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          backdropFilter: "blur(10px)",
+                          boxShadow: "0 8px 24px rgba(20, 20, 19, 0.28)",
+                          transition: "transform 150ms ease, background 150ms ease",
+                        }}
+                      >
+                        <svg
+                          width={20}
+                          height={20}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M19 12H5" />
+                          <path d="m12 19-7-7 7-7" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={{ flex: "1 1 auto", maxWidth: 960, minWidth: 0 }}>
+                    <Flipbook
+                      ref={book}
+                      manifest={activeManifest}
+                      initialPage={index}
+                      zoom={zoom}
+                      soundEnabled={soundEnabled}
+                      onPageChange={updatePageIndex}
+                    />
+                  </div>
+
+                  <div
+                    style={{
+                      width: 48,
+                      flex: "0 0 48px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {canNext && (
+                      <button
+                        type="button"
+                        aria-label="Turn to next page"
+                        title="Next page (Right Arrow)"
+                        onClick={() => book.current?.next()}
+                        style={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: "50%",
+                          border: "1px solid rgba(255, 255, 255, 0.22)",
+                          background: "rgba(20, 20, 19, 0.88)",
+                          color: "#ffffff",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          backdropFilter: "blur(10px)",
+                          boxShadow: "0 8px 24px rgba(20, 20, 19, 0.28)",
+                          transition: "transform 150ms ease, background 150ms ease",
+                        }}
+                      >
+                        <svg
+                          width={20}
+                          height={20}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M5 12h14" />
+                          <path d="m12 5 7 7-7 7" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
 
             <ReaderToolbar
               manifest={activeManifest}
