@@ -544,6 +544,33 @@ export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipb
     [],
   );
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onWindowKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          Boolean(target.isContentEditable))
+      ) {
+        return;
+      }
+      const action = resolveArrowAction(e.key, manifest.direction);
+      if (action === "next") {
+        e.preventDefault();
+        flipRef.current?.flipNext();
+      } else if (action === "prev") {
+        e.preventDefault();
+        flipRef.current?.flipPrev();
+      }
+    };
+    window.addEventListener("keydown", onWindowKeyDown);
+    return () => window.removeEventListener("keydown", onWindowKeyDown);
+  }, [manifest.direction]);
+
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const action = resolveArrowAction(e.key, manifest.direction);
     if (action === "next") {
@@ -564,8 +591,10 @@ export const Flipbook = forwardRef<FlipbookHandle, FlipbookProps>(function Flipb
       tabIndex={0}
       className={className}
       onKeyDown={onKeyDown}
+      onMouseDown={() => containerRef.current?.focus({ preventScroll: true })}
       style={{
         width: "100%",
+        outline: "none",
         transform: `scale(${safeZoom})`,
         transformOrigin: "center top",
         transition: effectiveReduceMotion ? "none" : "transform 0.15s ease",

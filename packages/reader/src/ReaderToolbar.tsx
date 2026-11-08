@@ -92,6 +92,7 @@ export function ReaderToolbar({
           <button
             type="button"
             aria-label="Previous page"
+            title="Previous page (Left Arrow)"
             onClick={onPrev}
             style={{
               ...buttonStyle,
@@ -101,17 +102,18 @@ export function ReaderToolbar({
             }}
           >
             <svg
-              width={14}
-              height={14}
+              width={15}
+              height={15}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
               aria-hidden="true"
             >
-              <path d="m15 18-6-6 6-6" />
+              <path d="M19 12H5" />
+              <path d="m12 19-7-7 7-7" />
             </svg>
             <span>Previous</span>
           </button>
@@ -121,6 +123,7 @@ export function ReaderToolbar({
           <button
             type="button"
             aria-label="Next page"
+            title="Next page (Right Arrow)"
             onClick={onNext}
             style={{
               ...buttonStyle,
@@ -131,17 +134,18 @@ export function ReaderToolbar({
           >
             <span>Next</span>
             <svg
-              width={14}
-              height={14}
+              width={15}
+              height={15}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
               aria-hidden="true"
             >
-              <path d="m9 18 6-6-6-6" />
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
             </svg>
           </button>
         </div>
@@ -177,6 +181,7 @@ export function ReaderToolbar({
           <button
             type="button"
             aria-label="Zoom out"
+            title="Zoom out (-)"
             disabled={safeZoom <= MIN_ZOOM}
             onClick={() => onChangeZoom(stepZoom(safeZoom, -ZOOM_STEP))}
             style={buttonStyle}
@@ -189,6 +194,7 @@ export function ReaderToolbar({
           <button
             type="button"
             aria-label="Zoom in"
+            title="Zoom in (+)"
             disabled={safeZoom >= MAX_ZOOM}
             onClick={() => onChangeZoom(stepZoom(safeZoom, ZOOM_STEP))}
             style={buttonStyle}
@@ -199,6 +205,7 @@ export function ReaderToolbar({
             <button
               type="button"
               aria-label="Reset zoom"
+              title="Reset zoom (0)"
               onClick={() => onChangeZoom(MIN_ZOOM)}
               style={buttonStyle}
             >
@@ -278,6 +285,7 @@ export function ReaderToolbar({
               aria-label={
                 isSoundOn ? "Mute paper flip sound (press M)" : "Enable paper flip sound (press M)"
               }
+              title={isSoundOn ? "Mute sound (M)" : "Enable sound (M)"}
               onClick={onToggleSound}
               style={{
                 ...buttonStyle,
@@ -334,6 +342,7 @@ export function ReaderToolbar({
           <button
             type="button"
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            title={isFullscreen ? "Exit fullscreen (F)" : "Enter fullscreen (F)"}
             onClick={onToggleFullscreen}
             style={{
               ...buttonStyle,
@@ -372,6 +381,132 @@ export function ReaderToolbar({
             <span>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
           </button>
         </div>
+      </div>
+
+      {/* Keyboard Shortcuts & Arrow Navigation Legend */}
+      <div
+        aria-label="Keyboard shortcuts"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 14,
+          fontSize: 12,
+          fontWeight: 600,
+          color: "#141413",
+          background: "rgba(255, 255, 255, 0.85)",
+          backdropFilter: "blur(10px)",
+          padding: "6px 16px",
+          borderRadius: 999,
+          border: "1px solid rgba(20, 20, 19, 0.12)",
+          justifySelf: "center",
+        }}
+      >
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <kbd
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "2px 6px",
+              borderRadius: 5,
+              background: "#141413",
+              color: "#ffffff",
+              fontSize: 11,
+              fontFamily: "inherit",
+            }}
+          >
+            <svg
+              width={11}
+              height={11}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M19 12H5" />
+              <path d="m12 19-7-7 7-7" />
+            </svg>
+          </kbd>
+          <kbd
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "2px 6px",
+              borderRadius: 5,
+              background: "#141413",
+              color: "#ffffff",
+              fontSize: 11,
+              fontFamily: "inherit",
+            }}
+          >
+            <svg
+              width={11}
+              height={11}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </kbd>
+          <span>Arrow keys to flip</span>
+        </span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <kbd
+            style={{
+              padding: "1px 6px",
+              borderRadius: 5,
+              background: "#141413",
+              color: "#ffffff",
+              fontSize: 11,
+              fontFamily: "inherit",
+            }}
+          >
+            M
+          </kbd>
+          <span>Sound</span>
+        </span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <kbd
+            style={{
+              padding: "1px 6px",
+              borderRadius: 5,
+              background: "#141413",
+              color: "#ffffff",
+              fontSize: 11,
+              fontFamily: "inherit",
+            }}
+          >
+            F
+          </kbd>
+          <span>Fullscreen</span>
+        </span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <kbd
+            style={{
+              padding: "1px 6px",
+              borderRadius: 5,
+              background: "#141413",
+              color: "#ffffff",
+              fontSize: 11,
+              fontFamily: "inherit",
+            }}
+          >
+            + / −
+          </kbd>
+          <span>Zoom</span>
+        </span>
       </div>
 
       {showToc && manifest.toc.length > 0 && (

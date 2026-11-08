@@ -7,8 +7,11 @@ import {
   buildManifest,
   formatPageHash,
   generateStandaloneHtml,
+  MIN_ZOOM,
   parsePageHash,
+  stepZoom,
   THEMES,
+  ZOOM_STEP,
   type BookDirection,
   type BookPresetId,
   type BookTheme,
@@ -137,26 +140,75 @@ export function App() {
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
+  const updatePageIndex = useCallback((nextIndex: number) => {
+    setIndex(nextIndex);
+    if (typeof window !== "undefined") {
+      window.location.hash = formatPageHash(nextIndex);
+    }
+  }, []);
+
+  const handleGoToPage = useCallback(
+    (targetIndex: number) => {
+      book.current?.goTo(targetIndex);
+      updatePageIndex(targetIndex);
+    },
+    [updatePageIndex],
+  );
+
+  const handleToggleFullscreen = useCallback(() => {
+    if (typeof document === "undefined") return;
+    if (document.fullscreenElement) {
+      void document.exitFullscreen?.();
+      setIsFullscreen(false);
+    } else if (stageRef.current?.requestFullscreen) {
+      void stageRef.current.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      setIsFullscreen((prev) => !prev);
+    }
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() !== "m") return;
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
       const target = e.target as HTMLElement | null;
       if (
         target &&
         (target.tagName === "INPUT" ||
           target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
           Boolean(target.isContentEditable))
       ) {
         return;
       }
-      e.preventDefault();
-      handleToggleSound();
+      const key = e.key.toLowerCase();
+      if (key === "m") {
+        e.preventDefault();
+        handleToggleSound();
+      } else if (key === "f") {
+        e.preventDefault();
+        handleToggleFullscreen();
+      } else if (e.key === "+" || e.key === "=") {
+        e.preventDefault();
+        setZoom((z) => stepZoom(z, ZOOM_STEP));
+      } else if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        setZoom((z) => stepZoom(z, -ZOOM_STEP));
+      } else if (e.key === "0") {
+        e.preventDefault();
+        setZoom(MIN_ZOOM);
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        handleGoToPage(0);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        handleGoToPage(Math.max(0, total - 1));
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handleToggleSound]);
+  }, [handleToggleSound, handleToggleFullscreen, handleGoToPage, total]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -171,31 +223,6 @@ export function App() {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
-
-  const updatePageIndex = (nextIndex: number) => {
-    setIndex(nextIndex);
-    if (typeof window !== "undefined") {
-      window.location.hash = formatPageHash(nextIndex);
-    }
-  };
-
-  const handleGoToPage = (targetIndex: number) => {
-    book.current?.goTo(targetIndex);
-    updatePageIndex(targetIndex);
-  };
-
-  const handleToggleFullscreen = () => {
-    if (typeof document === "undefined") return;
-    if (document.fullscreenElement) {
-      void document.exitFullscreen?.();
-      setIsFullscreen(false);
-    } else if (stageRef.current?.requestFullscreen) {
-      void stageRef.current.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      setIsFullscreen((prev) => !prev);
-    }
-  };
 
   const handleUploadFiles = async (files: File[]) => {
     setIsImporting(true);
@@ -756,14 +783,104 @@ export function App() {
               transition: "filter 0.2s ease, outline 0.15s ease",
             }}
           >
-            <Flipbook
-              ref={book}
-              manifest={activeManifest}
-              initialPage={index}
-              zoom={zoom}
-              soundEnabled={soundEnabled}
-              onPageChange={updatePageIndex}
-            />
+            <div
+              style={{
+                position: "relative",
+                width: "min(1040px, 96vw)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <button
+                type="button"
+                aria-label="Turn to previous page"
+                title="Previous page (Left Arrow)"
+                onClick={() => book.current?.prev()}
+                style={{
+                  position: "absolute",
+                  left: 4,
+                  zIndex: 15,
+                  width: 46,
+                  height: 46,
+                  borderRadius: "50%",
+                  border: "1px solid rgba(255, 255, 255, 0.22)",
+                  background: "rgba(20, 20, 19, 0.86)",
+                  color: "#ffffff",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  backdropFilter: "blur(10px)",
+                  boxShadow: "0 8px 24px rgba(20, 20, 19, 0.28)",
+                  transition: "transform 150ms ease, background 150ms ease",
+                }}
+              >
+                <svg
+                  width={20}
+                  height={20}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M19 12H5" />
+                  <path d="m12 19-7-7 7-7" />
+                </svg>
+              </button>
+
+              <Flipbook
+                ref={book}
+                manifest={activeManifest}
+                initialPage={index}
+                zoom={zoom}
+                soundEnabled={soundEnabled}
+                onPageChange={updatePageIndex}
+              />
+
+              <button
+                type="button"
+                aria-label="Turn to next page"
+                title="Next page (Right Arrow)"
+                onClick={() => book.current?.next()}
+                style={{
+                  position: "absolute",
+                  right: 4,
+                  zIndex: 15,
+                  width: 46,
+                  height: 46,
+                  borderRadius: "50%",
+                  border: "1px solid rgba(255, 255, 255, 0.22)",
+                  background: "rgba(20, 20, 19, 0.86)",
+                  color: "#ffffff",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  backdropFilter: "blur(10px)",
+                  boxShadow: "0 8px 24px rgba(20, 20, 19, 0.28)",
+                  transition: "transform 150ms ease, background 150ms ease",
+                }}
+              >
+                <svg
+                  width={20}
+                  height={20}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </button>
+            </div>
 
             <ReaderToolbar
               manifest={activeManifest}
