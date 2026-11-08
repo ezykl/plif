@@ -242,4 +242,90 @@ describe("<Flipbook>", () => {
       delete instWithInternals.getFlipController;
     }
   });
+
+  it("renders a rigid 3D spine-hinged board instead of a soft paper curl when flipping a hard cover", () => {
+    const ctx = {
+      clearRect: vi.fn(),
+      save: vi.fn(),
+      beginPath: vi.fn(),
+      rect: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      closePath: vi.fn(),
+      clip: vi.fn(),
+      drawImage: vi.fn(),
+      fill: vi.fn(),
+      stroke: vi.fn(),
+      strokeRect: vi.fn(),
+      fillRect: vi.fn(),
+      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      restore: vi.fn(),
+      fillStyle: "",
+      strokeStyle: "",
+      lineWidth: 1,
+    };
+    const origDrawFrame = vi.fn();
+    const origDrawBookShadow = vi.fn();
+    const hardCoverPage = {
+      isLoad: true,
+      image: {} as CanvasImageSource,
+      simpleDraw: vi.fn(),
+      getDensity: () => "hard" as const,
+      getDrawingDensity: () => "hard" as const,
+    };
+    const page2 = {
+      isLoad: true,
+      image: {} as CanvasImageSource,
+      simpleDraw: vi.fn(),
+      getDensity: () => "soft" as const,
+      getDrawingDensity: () => "hard" as const,
+    };
+    const page3 = {
+      isLoad: true,
+      image: {} as CanvasImageSource,
+      simpleDraw: vi.fn(),
+      getDensity: () => "soft" as const,
+      getDrawingDensity: () => "soft" as const,
+    };
+
+    const mockRender: Record<string, unknown> = {
+      ctx,
+      canvas: { width: 960, height: 679 },
+      orientation: "landscape",
+      leftPage: null,
+      rightPage: hardCoverPage,
+      bottomPage: page3,
+      flippingPage: page2,
+      getDirection: () => 0,
+      getRect: () => ({ left: 0, top: 0, width: 960, height: 679, pageWidth: 480 }),
+      drawFrame: origDrawFrame,
+      drawBookShadow: origDrawBookShadow,
+    };
+    const mockFlipController = {
+      state: "flipping",
+      getCalculation: () => ({
+        getPosition: () => ({ x: 120, y: 0 }),
+      }),
+    };
+
+    const instWithInternals = instance as unknown as {
+      getRender?: () => unknown;
+      getFlipController?: () => unknown;
+    };
+    instWithInternals.getRender = () => mockRender;
+    instWithInternals.getFlipController = () => mockFlipController;
+
+    try {
+      render(<Flipbook manifest={manifest} />);
+      (mockRender.drawFrame as () => void)();
+
+      expect(origDrawFrame).not.toHaveBeenCalled();
+      expect(page3.simpleDraw).toHaveBeenCalledWith(1);
+      expect(ctx.drawImage).toHaveBeenCalled();
+      expect(ctx.fill).toHaveBeenCalled();
+    } finally {
+      delete instWithInternals.getRender;
+      delete instWithInternals.getFlipController;
+    }
+  });
 });
