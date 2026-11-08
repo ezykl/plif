@@ -22,69 +22,29 @@ const manifest = parseManifest({
 });
 
 describe("<ReaderToolbar>", () => {
-  it("navigates with Prev, Next, and the page slider, and hides Prev/Next at book boundaries", () => {
-    const onPrev = vi.fn();
-    const onNext = vi.fn();
+  it("navigates with the page slider, displays the page label, and omits redundant Prev/Next buttons", () => {
     const onGoToPage = vi.fn();
 
-    const { rerender } = render(
+    render(
       <ReaderToolbar
         manifest={manifest}
         currentIndex={1}
         zoom={1}
         isFullscreen={false}
-        onPrev={onPrev}
-        onNext={onNext}
         onGoToPage={onGoToPage}
         onChangeZoom={vi.fn()}
         onToggleFullscreen={vi.fn()}
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Previous page" }));
-    expect(onPrev).toHaveBeenCalledTimes(1);
-
-    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
-    expect(onNext).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("button", { name: "Previous page" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Next page" })).toBeNull();
+    expect(screen.getByText("2–3 / 4")).toBeTruthy();
 
     fireEvent.change(screen.getByLabelText("Go to page"), {
       target: { value: "3" },
     });
     expect(onGoToPage).toHaveBeenCalledWith(2);
-
-    // At first page (index 0), Previous button is hidden
-    rerender(
-      <ReaderToolbar
-        manifest={manifest}
-        currentIndex={0}
-        zoom={1}
-        isFullscreen={false}
-        onPrev={onPrev}
-        onNext={onNext}
-        onGoToPage={onGoToPage}
-        onChangeZoom={vi.fn()}
-        onToggleFullscreen={vi.fn()}
-      />,
-    );
-    expect(screen.queryByRole("button", { name: "Previous page" })).toBeNull();
-    expect(screen.getByRole("button", { name: "Next page" })).toBeTruthy();
-
-    // At last page (index 3), Next button is hidden
-    rerender(
-      <ReaderToolbar
-        manifest={manifest}
-        currentIndex={3}
-        zoom={1}
-        isFullscreen={false}
-        onPrev={onPrev}
-        onNext={onNext}
-        onGoToPage={onGoToPage}
-        onChangeZoom={vi.fn()}
-        onToggleFullscreen={vi.fn()}
-      />,
-    );
-    expect(screen.getByRole("button", { name: "Previous page" })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Next page" })).toBeNull();
   });
 
   it("controls zoom in, zoom out, reset zoom, and fullscreen", () => {

@@ -14,8 +14,8 @@ export interface ReaderToolbarProps {
   currentIndex: number;
   zoom: number;
   isFullscreen: boolean;
-  onPrev: () => void;
-  onNext: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
   onGoToPage: (index: number) => void;
   onChangeZoom: (nextZoom: number) => void;
   onToggleFullscreen: () => void;
@@ -30,8 +30,6 @@ export function ReaderToolbar({
   currentIndex,
   zoom,
   isFullscreen,
-  onPrev,
-  onNext,
   onGoToPage,
   onChangeZoom,
   onToggleFullscreen,
@@ -44,11 +42,6 @@ export function ReaderToolbar({
   const [showThumbnails, setShowThumbnails] = useState(false);
 
   const total = manifest.pages.length;
-  const remainingAfterCover = manifest.hasCover ? total - 1 : total;
-  const lastSpreadSize = remainingAfterCover > 0 && remainingAfterCover % 2 === 0 ? 2 : 1;
-  const lastSpreadStartIndex = Math.max(0, total - lastSpreadSize);
-  const canPrev = currentIndex > 0;
-  const canNext = currentIndex < lastSpreadStartIndex;
   const safeZoom = clampZoom(zoom);
   const zoomPercent = `${Math.round(safeZoom * 100)}%`;
 
@@ -80,7 +73,7 @@ export function ReaderToolbar({
   return (
     <div
       style={{
-        width: "min(1080px, 96vw)",
+        width: "min(980px, 96vw)",
         display: "grid",
         justifyItems: "center",
         gap: 10,
@@ -97,7 +90,7 @@ export function ReaderToolbar({
           justifyContent: "center",
           width: "fit-content",
           maxWidth: "100%",
-          padding: "6px 10px",
+          padding: "6px 12px",
           borderRadius: 14,
           background: "rgba(20, 20, 19, 0.92)",
           color: "#ffffff",
@@ -106,89 +99,11 @@ export function ReaderToolbar({
           boxShadow: "0 12px 28px rgba(20, 20, 19, 0.2)",
         }}
       >
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-          {canPrev && (
-            <button
-              type="button"
-              aria-label="Previous page"
-              title="Previous page (Left Arrow)"
-              onClick={onPrev}
-              style={{
-                ...buttonStyle,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-              }}
-            >
-              <svg
-                width={14}
-                height={14}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M19 12H5" />
-                <path d="m12 19-7-7 7-7" />
-              </svg>
-              <span>Previous</span>
-            </button>
-          )}
-          <span
-            style={{
-              fontWeight: 600,
-              fontSize: 12.5,
-              fontVariantNumeric: "tabular-nums",
-              minWidth: 62,
-              textAlign: "center",
-              padding: "0 4px",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {formatPageLabel(currentIndex, total, manifest.hasCover, false)}
-          </span>
-          {canNext && (
-            <button
-              type="button"
-              aria-label="Next page"
-              title="Next page (Right Arrow)"
-              onClick={onNext}
-              style={{
-                ...buttonStyle,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-              }}
-            >
-              <span>Next</span>
-              <svg
-                width={14}
-                height={14}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
-            </button>
-          )}
-        </div>
-
-        <span aria-hidden="true" style={dividerStyle} />
-
         <label
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: 6,
+            gap: 8,
             fontSize: 12,
             fontWeight: 500,
             color: "rgba(255, 255, 255, 0.82)",
@@ -209,8 +124,20 @@ export function ReaderToolbar({
                 onGoToPage(pageNumber - 1);
               }
             }}
-            style={{ width: 88, accentColor, cursor: "pointer" }}
+            style={{ width: 96, accentColor, cursor: "pointer" }}
           />
+          <span
+            style={{
+              fontWeight: 600,
+              fontSize: 12,
+              color: "#ffffff",
+              fontVariantNumeric: "tabular-nums",
+              minWidth: 52,
+              textAlign: "right",
+            }}
+          >
+            {formatPageLabel(currentIndex, total, manifest.hasCover, false)}
+          </span>
         </label>
 
         <span aria-hidden="true" style={dividerStyle} />
