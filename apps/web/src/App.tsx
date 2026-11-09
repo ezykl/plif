@@ -5,6 +5,7 @@ import {
   applyBulkDensity,
   BOOK_PRESETS,
   buildManifest,
+  DEFAULT_COVER_DESIGN,
   formatPageHash,
   generateStandaloneHtml,
   MIN_ZOOM,
@@ -16,6 +17,7 @@ import {
   type BookPresetId,
   type BookTheme,
   type BulkDensityMode,
+  type CoverDesign,
   type ImportedPage,
   type TocItem,
 } from "@plif/core";
@@ -32,6 +34,7 @@ import {
   ZineBookletIcon,
 } from "./components/Icons";
 import { importFiles } from "./import";
+import { COVER_FONT_STACKS, renderCoverDataUrl } from "./cover/renderCover";
 import { sampleManifest } from "./sample";
 
 const SAMPLE_IMPORTED_PAGES: ImportedPage[] = sampleManifest.pages.map((p, idx) => ({
@@ -91,11 +94,64 @@ export function App() {
     });
   }, []);
 
-  const effectivePages = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
+  const basePages = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
+  const [coverDesign, setCoverDesign] = useState<CoverDesign>(DEFAULT_COVER_DESIGN);
+  const [coverSrc, setCoverSrc] = useState<string | null>(null);
+
+  const coverTitle = coverDesign.title.trim() ? coverDesign.title : title;
+  const firstPage = basePages[0];
+  const coverWidth = firstPage?.width ?? sampleManifest.pageSize.width;
+  const coverHeight = firstPage?.height ?? sampleManifest.pageSize.height;
+
+  useEffect(() => {
+    if (!coverDesign.enabled) {
+      setCoverSrc(null);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const family = COVER_FONT_STACKS[coverDesign.font];
+          await document.fonts?.load(`${family.weight} 32px ${family.family}`);
+        } catch {
+          // fall back to the system serif stack
+        }
+        let logo: HTMLImageElement | null = null;
+        if (coverDesign.logoSrc) {
+          logo = await new Promise<HTMLImageElement | null>((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(null);
+            img.src = coverDesign.logoSrc ?? "";
+          });
+        }
+        if (cancelled) return;
+        setCoverSrc(
+          renderCoverDataUrl(
+            { ...coverDesign, title: coverTitle },
+            { width: coverWidth, height: coverHeight, scale: 2 },
+            logo,
+          ),
+        );
+      })();
+    }, 150);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [coverDesign, coverTitle, coverWidth, coverHeight]);
+
+  const effectivePages = useMemo<ImportedPage[]>(() => {
+    if (!coverDesign.enabled || !coverSrc || basePages.length === 0) return basePages;
+    const [first, ...rest] = basePages;
+    if (!first) return basePages;
+    return [{ ...first, src: coverSrc, alt: "Front cover", density: "hard" }, ...rest];
+  }, [coverDesign.enabled, coverSrc, basePages]);
 
   const activeManifest = useMemo(
-    () =>
-      buildManifest({
+    () => ({
+      ...buildManifest({
         title,
         hasCover,
         theme,
@@ -103,7 +159,9 @@ export function App() {
         toc,
         pages: effectivePages,
       }),
-    [title, hasCover, theme, direction, toc, effectivePages],
+      ...(coverDesign.enabled ? { coverDesign } : {}),
+    }),
+    [title, hasCover, theme, direction, toc, effectivePages, coverDesign],
   );
 
   const total = activeManifest.pages.length;
@@ -950,6 +1008,8 @@ export function App() {
             theme={theme}
             direction={direction}
             toc={toc}
+            coverDesign={coverDesign}
+            onChangeCoverDesign={setCoverDesign}
             pages={pages}
             manifest={activeManifest}
             isImporting={isImporting}

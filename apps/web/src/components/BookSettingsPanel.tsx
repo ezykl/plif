@@ -6,9 +6,11 @@ import {
   type BookPresetId,
   type BookTheme,
   type BulkDensityMode,
+  type CoverDesign,
   type TocItem,
 } from "@plif/core";
 import { BookOpenIcon, HardcoverBookIcon, NewspaperSpreadIcon, ZineBookletIcon } from "./Icons";
+import { CoverDesigner } from "./CoverDesigner";
 
 export interface BookSettingsPanelProps {
   title: string;
@@ -17,6 +19,8 @@ export interface BookSettingsPanelProps {
   activePreset?: BookPresetId;
   direction?: BookDirection;
   toc?: readonly TocItem[];
+  coverDesign?: CoverDesign;
+  onChangeCoverDesign?: (design: CoverDesign) => void;
   onChangeTitle: (title: string) => void;
   onChangeHasCover: (hasCover: boolean) => void;
   onChangeTheme: (theme: BookTheme) => void;
@@ -36,6 +40,8 @@ export function BookSettingsPanel({
   activePreset,
   direction = "ltr",
   toc = [],
+  coverDesign,
+  onChangeCoverDesign,
   onChangeTitle,
   onChangeHasCover,
   onChangeTheme,
@@ -127,6 +133,10 @@ export function BookSettingsPanel({
           </div>
         </label>
       </div>
+
+      {coverDesign && onChangeCoverDesign && (
+        <CoverDesigner design={coverDesign} fallbackTitle={title} onChange={onChangeCoverDesign} />
+      )}
 
       {/* Preset Pickers */}
       <div style={{ display: "grid", gap: 10 }}>

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { bookDirectionSchema, tocItemSchema } from "./extras";
+import { coverDesignSchema } from "./cover";
 import { bookThemeSchema } from "./themes";
 
 export const pageSchema = z.object({
@@ -19,6 +20,7 @@ export const manifestSchema = z.object({
   theme: bookThemeSchema.default("magazine"),
   direction: bookDirectionSchema.default("ltr"),
   toc: z.array(tocItemSchema).default([]),
+  coverDesign: coverDesignSchema.optional(),
   pages: z.array(pageSchema).min(1),
 });
 

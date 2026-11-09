@@ -5,6 +5,7 @@ import {
   type BookPresetId,
   type BookTheme,
   type BulkDensityMode,
+  type CoverDesign,
   type ImportedPage,
   type Manifest,
   type TocItem,
@@ -35,6 +36,8 @@ export interface CreatorWizardProps {
   activePreset?: BookPresetId;
   direction?: BookDirection;
   toc?: readonly TocItem[];
+  coverDesign?: CoverDesign;
+  onChangeCoverDesign?: (design: CoverDesign) => void;
   isImporting?: boolean;
   progressText?: string | null;
   errorText?: string | null;
@@ -101,6 +104,8 @@ export function CreatorWizard({
   activePreset,
   direction = "ltr",
   toc = [],
+  coverDesign,
+  onChangeCoverDesign,
   isImporting = false,
   progressText = null,
   errorText = null,
@@ -354,6 +359,8 @@ export function CreatorWizard({
             activePreset={activePreset}
             direction={direction}
             toc={toc}
+            {...(coverDesign ? { coverDesign } : {})}
+            {...(onChangeCoverDesign ? { onChangeCoverDesign } : {})}
             onChangeTitle={onChangeTitle}
             onChangeHasCover={onChangeHasCover}
             onChangeTheme={onChangeTheme}
