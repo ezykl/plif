@@ -5,16 +5,20 @@ import {
   COVER_FOILS,
   COVER_MATERIALS,
   FOIL_STYLES,
+  resolveCoverTitle,
+  type CoverArtMode,
   type CoverDesign,
   type CoverFont,
   type CoverMaterial,
 } from "@plif/core";
-import { drawCover } from "../cover/renderCover";
+import { drawCover, loadImage } from "../cover/renderCover";
 
 export interface CoverDesignerProps {
   design: CoverDesign;
-  /** Used for the lettering when the cover title field is left empty. */
+  /** Used for the lettering when the cover title field is left empty and no artwork is stamped. */
   fallbackTitle: string;
+  /** The imported page 1 image. When present the designer can stamp or wrap it. */
+  coverArtSrc?: string;
   onChange: (next: CoverDesign) => void;
 }
 
@@ -31,23 +35,52 @@ const FONT_LABELS: Record<CoverFont, string> = {
   cormorant: "Cormorant Garamond",
 };
 
+const ART_LABELS: Record<CoverArtMode, { label: string; hint: string }> = {
+  none: { label: "Lettering only", hint: "Stamp just the title" },
+  silhouette: {
+    label: "Stamp my cover as silhouette",
+    hint: "Turns your page 1 into a one-color foil mark",
+  },
+  full: { label: "Wrap my cover artwork", hint: "Keeps the full print on a cloth-wrapped board" },
+};
+
 const PREVIEW_SIZE = { width: 240, height: 340 };
 
-export function CoverDesigner({ design, fallbackTitle, onChange }: CoverDesignerProps) {
+export function CoverDesigner({
+  design,
+  fallbackTitle,
+  coverArtSrc,
+  onChange,
+}: CoverDesignerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [logo, setLogo] = useState<HTMLImageElement | null>(null);
-  const resolvedTitle = design.title.trim() ? design.title : fallbackTitle;
+  const [art, setArt] = useState<HTMLImageElement | null>(null);
+  const resolvedTitle = resolveCoverTitle(design, fallbackTitle);
   const patch = (partial: Partial<CoverDesign>) => onChange({ ...design, ...partial });
 
   useEffect(() => {
+    let alive = true;
     if (!design.logoSrc) {
       setLogo(null);
       return;
     }
-    const img = new Image();
-    img.onload = () => setLogo(img);
-    img.src = design.logoSrc;
+    void loadImage(design.logoSrc).then((img) => alive && setLogo(img));
+    return () => {
+      alive = false;
+    };
   }, [design.logoSrc]);
+
+  useEffect(() => {
+    let alive = true;
+    if (!coverArtSrc) {
+      setArt(null);
+      return;
+    }
+    void loadImage(coverArtSrc).then((img) => alive && setArt(img));
+    return () => {
+      alive = false;
+    };
+  }, [coverArtSrc]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -60,7 +93,7 @@ export function CoverDesigner({ design, fallbackTitle, onChange }: CoverDesigner
           canvas,
           { ...design, title: resolvedTitle },
           { ...PREVIEW_SIZE, scale: 1.5 },
-          logo,
+          { logo, art },
         );
       } catch {
         // canvas unsupported in this environment
@@ -72,7 +105,7 @@ export function CoverDesigner({ design, fallbackTitle, onChange }: CoverDesigner
     return () => {
       cancelled = true;
     };
-  }, [design, resolvedTitle, logo]);
+  }, [design, resolvedTitle, logo, art]);
 
   const onLogoFile = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -118,13 +151,22 @@ export function CoverDesigner({ design, fallbackTitle, onChange }: CoverDesigner
           type="checkbox"
           aria-label="Use designed hardbound cover"
           checked={design.enabled}
-          onChange={(e) => patch({ enabled: e.target.checked })}
+          onChange={(e) =>
+            patch({
+              enabled: e.target.checked,
+              ...(e.target.checked && coverArtSrc && design.artMode === "none"
+                ? { artMode: "silhouette" as const }
+                : {}),
+            })
+          }
           style={{ width: 16, height: 16, accentColor: "#c25e3e" }}
         />
         <span style={{ display: "grid", gap: 2 }}>
           <span style={fieldLabel}>Hardbound cover</span>
           <span style={{ fontSize: 12, color: "#6b635b", fontWeight: 400 }}>
-            Generate a cloth or leather cover with stamped foil lettering and use it as page 1
+            {coverArtSrc
+              ? "Turn your page 1 into a stamped hardbound cover"
+              : "Generate a cloth or leather cover with stamped foil lettering and use it as page 1"}
           </span>
         </span>
       </label>
@@ -144,6 +186,57 @@ export function CoverDesigner({ design, fallbackTitle, onChange }: CoverDesigner
             }}
           />
           <div style={{ display: "grid", gap: 14, flex: "1 1 300px" }}>
+            {coverArtSrc && (
+              <div style={{ display: "grid", gap: 6 }}>
+                <span style={fieldLabel}>Your cover artwork</span>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {(["silhouette", "full", "none"] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      aria-label={`Artwork: ${ART_LABELS[mode].label}`}
+                      aria-pressed={design.artMode === mode}
+                      title={ART_LABELS[mode].hint}
+                      onClick={() => patch({ artMode: mode })}
+                      style={tile(design.artMode === mode)}
+                    >
+                      {ART_LABELS[mode].label}
+                    </button>
+                  ))}
+                </div>
+                {design.artMode === "silhouette" && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "center" }}>
+                    <label
+                      style={{ display: "inline-flex", gap: 8, alignItems: "center", fontSize: 13 }}
+                    >
+                      <span>Detail</span>
+                      <input
+                        type="range"
+                        aria-label="Silhouette detail"
+                        min={5}
+                        max={95}
+                        value={design.artThreshold}
+                        onChange={(e) => patch({ artThreshold: Number(e.target.value) })}
+                        style={{ width: 140, accentColor: "#c25e3e" }}
+                      />
+                    </label>
+                    <label
+                      style={{ display: "inline-flex", gap: 8, alignItems: "center", fontSize: 13 }}
+                    >
+                      <input
+                        type="checkbox"
+                        aria-label="Invert silhouette"
+                        checked={design.artInvert}
+                        onChange={(e) => patch({ artInvert: e.target.checked })}
+                        style={{ width: 16, height: 16, accentColor: "#c25e3e" }}
+                      />
+                      Invert
+                    </label>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div style={{ display: "grid", gap: 6 }}>
               <span style={fieldLabel}>Cover color</span>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
@@ -219,7 +312,9 @@ export function CoverDesigner({ design, fallbackTitle, onChange }: CoverDesigner
                 type="text"
                 aria-label="Cover title"
                 value={design.title}
-                placeholder={fallbackTitle || "Uses the book title"}
+                placeholder={
+                  design.artMode === "none" ? fallbackTitle || "Uses the book title" : "Optional"
+                }
                 onChange={(e) => patch({ title: e.target.value })}
                 style={input}
               />
@@ -267,9 +362,28 @@ export function CoverDesigner({ design, fallbackTitle, onChange }: CoverDesigner
                 Stamped border
               </label>
               <label style={{ display: "inline-flex", gap: 8, alignItems: "center", fontSize: 13 }}>
-                <span>Logo (stamped as one color)</span>
-                <input type="file" accept="image/*" aria-label="Cover logo" onChange={onLogoFile} />
+                <input
+                  type="checkbox"
+                  aria-label="Matching back cover"
+                  checked={design.backCover}
+                  onChange={(e) => patch({ backCover: e.target.checked })}
+                  style={{ width: 16, height: 16, accentColor: "#c25e3e" }}
+                />
+                Matching back cover
               </label>
+              {design.artMode === "none" && (
+                <label
+                  style={{ display: "inline-flex", gap: 8, alignItems: "center", fontSize: 13 }}
+                >
+                  <span>Logo (stamped as one color)</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    aria-label="Cover logo"
+                    onChange={onLogoFile}
+                  />
+                </label>
+              )}
               {design.logoSrc && (
                 <button
                   type="button"

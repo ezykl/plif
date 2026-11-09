@@ -20,6 +20,7 @@ export interface BookSettingsPanelProps {
   direction?: BookDirection;
   toc?: readonly TocItem[];
   coverDesign?: CoverDesign;
+  coverArtSrc?: string;
   onChangeCoverDesign?: (design: CoverDesign) => void;
   onChangeTitle: (title: string) => void;
   onChangeHasCover: (hasCover: boolean) => void;
@@ -41,6 +42,7 @@ export function BookSettingsPanel({
   direction = "ltr",
   toc = [],
   coverDesign,
+  coverArtSrc,
   onChangeCoverDesign,
   onChangeTitle,
   onChangeHasCover,
@@ -135,7 +137,12 @@ export function BookSettingsPanel({
       </div>
 
       {coverDesign && onChangeCoverDesign && (
-        <CoverDesigner design={coverDesign} fallbackTitle={title} onChange={onChangeCoverDesign} />
+        <CoverDesigner
+          design={coverDesign}
+          fallbackTitle={title}
+          {...(coverArtSrc ? { coverArtSrc } : {})}
+          onChange={onChangeCoverDesign}
+        />
       )}
 
       {/* Preset Pickers */}

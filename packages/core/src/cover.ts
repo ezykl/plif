@@ -3,10 +3,13 @@ import { z } from "zod";
 export const COVER_MATERIALS = ["cloth", "leather", "linen", "smooth"] as const;
 export const COVER_FOILS = ["gold", "silver", "white", "blind"] as const;
 export const COVER_FONTS = ["cinzel", "playfair", "cormorant"] as const;
+/** none: lettering only. silhouette: page 1 artwork stamped as one color. full: artwork wrapped on the board. */
+export const COVER_ART_MODES = ["none", "silhouette", "full"] as const;
 
 export type CoverMaterial = (typeof COVER_MATERIALS)[number];
 export type CoverFoil = (typeof COVER_FOILS)[number];
 export type CoverFont = (typeof COVER_FONTS)[number];
+export type CoverArtMode = (typeof COVER_ART_MODES)[number];
 
 export const coverDesignSchema = z.object({
   enabled: z.boolean().default(false),
@@ -18,6 +21,11 @@ export const coverDesignSchema = z.object({
   font: z.enum(COVER_FONTS).default("cinzel"),
   logoSrc: z.string().optional(),
   frame: z.boolean().default(true),
+  artMode: z.enum(COVER_ART_MODES).default("none"),
+  /** 5 to 95: higher keeps only the strongest contrast of the artwork. */
+  artThreshold: z.number().min(5).max(95).default(45),
+  artInvert: z.boolean().default(false),
+  backCover: z.boolean().default(true),
 });
 
 export type CoverDesign = z.infer<typeof coverDesignSchema>;
@@ -30,7 +38,24 @@ export const DEFAULT_COVER_DESIGN: CoverDesign = {
   title: "",
   font: "cinzel",
   frame: true,
+  artMode: "none",
+  artThreshold: 45,
+  artInvert: false,
+  backCover: true,
 };
+
+/**
+ * The lettering shown on the front cover. When artwork is used the book title is
+ * not stamped automatically (the artwork usually already contains it); only an
+ * explicitly typed cover title is.
+ */
+export function resolveCoverTitle(
+  design: Pick<CoverDesign, "title" | "artMode">,
+  bookTitle: string,
+): string {
+  if (design.title.trim()) return design.title;
+  return design.artMode === "none" ? bookTitle : "";
+}
 
 /** Classic bookbinding cloth colors. */
 export const COVER_COLOR_SWATCHES = [

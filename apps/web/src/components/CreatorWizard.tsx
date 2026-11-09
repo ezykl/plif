@@ -37,6 +37,7 @@ export interface CreatorWizardProps {
   direction?: BookDirection;
   toc?: readonly TocItem[];
   coverDesign?: CoverDesign;
+  coverArtSrc?: string;
   onChangeCoverDesign?: (design: CoverDesign) => void;
   isImporting?: boolean;
   progressText?: string | null;
@@ -105,6 +106,7 @@ export function CreatorWizard({
   direction = "ltr",
   toc = [],
   coverDesign,
+  coverArtSrc,
   onChangeCoverDesign,
   isImporting = false,
   progressText = null,
@@ -360,6 +362,7 @@ export function CreatorWizard({
             direction={direction}
             toc={toc}
             {...(coverDesign ? { coverDesign } : {})}
+            {...(coverArtSrc ? { coverArtSrc } : {})}
             {...(onChangeCoverDesign ? { onChangeCoverDesign } : {})}
             onChangeTitle={onChangeTitle}
             onChangeHasCover={onChangeHasCover}

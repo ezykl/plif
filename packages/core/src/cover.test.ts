@@ -6,6 +6,7 @@ import {
   coverSeed,
   createRng,
   isLightColor,
+  resolveCoverTitle,
 } from "./cover";
 import { parseManifest } from "./manifest";
 
@@ -14,6 +15,24 @@ describe("cover design", () => {
     const parsed = coverDesignSchema.parse({ color: "#112233" });
     expect(parsed).toMatchObject({ enabled: false, material: "cloth", foil: "gold", frame: true });
     expect(() => coverDesignSchema.parse({ color: "navy" })).toThrow();
+  });
+
+  it("defaults artwork off, with the back cover on", () => {
+    const parsed = coverDesignSchema.parse({ color: "#112233" });
+    expect(parsed).toMatchObject({
+      artMode: "none",
+      artThreshold: 45,
+      artInvert: false,
+      backCover: true,
+    });
+    expect(() => coverDesignSchema.parse({ color: "#112233", artThreshold: 120 })).toThrow();
+  });
+
+  it("stamps the book title only when no artwork is used, unless a cover title is typed", () => {
+    expect(resolveCoverTitle({ title: "", artMode: "none" }, "My Book")).toBe("My Book");
+    expect(resolveCoverTitle({ title: "", artMode: "silhouette" }, "My Book")).toBe("");
+    expect(resolveCoverTitle({ title: "", artMode: "full" }, "My Book")).toBe("");
+    expect(resolveCoverTitle({ title: "Typed", artMode: "silhouette" }, "My Book")).toBe("Typed");
   });
 
   it("defines a foil style for every foil, and blind deboss is unfilled", () => {

@@ -10,6 +10,7 @@ import {
   generateStandaloneHtml,
   MIN_ZOOM,
   parsePageHash,
+  resolveCoverTitle,
   stepZoom,
   THEMES,
   ZOOM_STEP,
@@ -34,7 +35,7 @@ import {
   ZineBookletIcon,
 } from "./components/Icons";
 import { importFiles } from "./import";
-import { COVER_FONT_STACKS, renderCoverDataUrl } from "./cover/renderCover";
+import { COVER_FONT_STACKS, loadImage, renderCoverDataUrl } from "./cover/renderCover";
 import { sampleManifest } from "./sample";
 
 const SAMPLE_IMPORTED_PAGES: ImportedPage[] = sampleManifest.pages.map((p, idx) => ({
@@ -96,16 +97,20 @@ export function App() {
 
   const basePages = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
   const [coverDesign, setCoverDesign] = useState<CoverDesign>(DEFAULT_COVER_DESIGN);
-  const [coverSrc, setCoverSrc] = useState<string | null>(null);
+  const [coverImages, setCoverImages] = useState<{ front: string; back: string | null } | null>(
+    null,
+  );
 
-  const coverTitle = coverDesign.title.trim() ? coverDesign.title : title;
+  const coverTitle = resolveCoverTitle(coverDesign, title);
   const firstPage = basePages[0];
   const coverWidth = firstPage?.width ?? sampleManifest.pageSize.width;
   const coverHeight = firstPage?.height ?? sampleManifest.pageSize.height;
+  const coverArtSrc = basePages[0]?.src;
+  const wantsBack = coverDesign.backCover && hasCover && basePages.length > 1;
 
   useEffect(() => {
     if (!coverDesign.enabled) {
-      setCoverSrc(null);
+      setCoverImages(null);
       return;
     }
     let cancelled = false;
@@ -117,37 +122,44 @@ export function App() {
         } catch {
           // fall back to the system serif stack
         }
-        let logo: HTMLImageElement | null = null;
-        if (coverDesign.logoSrc) {
-          logo = await new Promise<HTMLImageElement | null>((resolve) => {
-            const img = new Image();
-            img.onload = () => resolve(img);
-            img.onerror = () => resolve(null);
-            img.src = coverDesign.logoSrc ?? "";
-          });
-        }
+        const logo = coverDesign.logoSrc ? await loadImage(coverDesign.logoSrc) : null;
+        const art =
+          coverDesign.artMode !== "none" && coverArtSrc ? await loadImage(coverArtSrc) : null;
         if (cancelled) return;
-        setCoverSrc(
-          renderCoverDataUrl(
-            { ...coverDesign, title: coverTitle },
-            { width: coverWidth, height: coverHeight, scale: 2 },
-            logo,
-          ),
-        );
+        const size = { width: coverWidth, height: coverHeight, scale: 2 };
+        const front = renderCoverDataUrl({ ...coverDesign, title: coverTitle }, size, {
+          logo,
+          art,
+        });
+        if (!front) {
+          setCoverImages(null);
+          return;
+        }
+        const back = wantsBack
+          ? renderCoverDataUrl(coverDesign, { ...size, variant: "back" }, { art })
+          : null;
+        setCoverImages({ front, back });
       })();
     }, 150);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [coverDesign, coverTitle, coverWidth, coverHeight]);
+  }, [coverDesign, coverTitle, coverWidth, coverHeight, coverArtSrc, wantsBack]);
 
   const effectivePages = useMemo<ImportedPage[]>(() => {
-    if (!coverDesign.enabled || !coverSrc || basePages.length === 0) return basePages;
-    const [first, ...rest] = basePages;
-    if (!first) return basePages;
-    return [{ ...first, src: coverSrc, alt: "Front cover", density: "hard" }, ...rest];
-  }, [coverDesign.enabled, coverSrc, basePages]);
+    if (!coverDesign.enabled || !coverImages || basePages.length === 0) return basePages;
+    const next = basePages.map((p, i) => {
+      if (i === 0) {
+        return { ...p, src: coverImages.front, alt: "Front cover", density: "hard" as const };
+      }
+      if (i === basePages.length - 1 && coverImages.back) {
+        return { ...p, src: coverImages.back, alt: "Back cover", density: "hard" as const };
+      }
+      return p;
+    });
+    return next;
+  }, [coverDesign.enabled, coverImages, basePages]);
 
   const activeManifest = useMemo(
     () => ({
@@ -319,6 +331,15 @@ export function App() {
     setHasCover(next.hasCover);
     setTheme(next.theme);
     setPages(next.pages);
+    setCoverDesign((prev) =>
+      presetId === "hardcover"
+        ? {
+            ...prev,
+            enabled: true,
+            artMode: pages.length > 0 && prev.artMode === "none" ? "silhouette" : prev.artMode,
+          }
+        : { ...prev, enabled: false },
+    );
     updatePageIndex(0);
   };
 
@@ -335,6 +356,7 @@ export function App() {
     setActivePreset("magazine");
     setDirection(sampleManifest.direction);
     setToc(sampleManifest.toc);
+    setCoverDesign(DEFAULT_COVER_DESIGN);
     setPages([]);
     setZoom(1);
     updatePageIndex(1);
@@ -1009,6 +1031,7 @@ export function App() {
             direction={direction}
             toc={toc}
             coverDesign={coverDesign}
+            {...(coverArtSrc ? { coverArtSrc } : {})}
             onChangeCoverDesign={setCoverDesign}
             pages={pages}
             manifest={activeManifest}
