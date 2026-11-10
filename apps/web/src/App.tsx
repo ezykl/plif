@@ -96,6 +96,7 @@ export function App() {
   }, []);
 
   const basePages = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
+  const userPages = useMemo(() => pages.filter((p) => !p.id.startsWith("sample-")), [pages]);
   const [coverDesign, setCoverDesign] = useState<CoverDesign>(DEFAULT_COVER_DESIGN);
   const [coverImages, setCoverImages] = useState<{ front: string; back: string | null } | null>(
     null,
@@ -105,7 +106,7 @@ export function App() {
   const firstPage = basePages[0];
   const coverWidth = firstPage?.width ?? sampleManifest.pageSize.width;
   const coverHeight = firstPage?.height ?? sampleManifest.pageSize.height;
-  const coverArtSrc = basePages[0]?.src;
+  const coverArtSrc = userPages[0]?.src;
   const wantsBack = coverDesign.backCover && hasCover && basePages.length > 1;
 
   useEffect(() => {
@@ -136,7 +137,7 @@ export function App() {
           return;
         }
         const back = wantsBack
-          ? renderCoverDataUrl(coverDesign, { ...size, variant: "back" }, { art })
+          ? renderCoverDataUrl(coverDesign, { ...size, variant: "back" }, { logo, art })
           : null;
         setCoverImages({ front, back });
       })();
@@ -183,9 +184,7 @@ export function App() {
   indexRef.current = index;
 
   useEffect(() => {
-    if (indexRef.current > 0) {
-      book.current?.goTo(indexRef.current);
-    }
+    book.current?.goTo(indexRef.current);
   }, [activeManifest]);
 
   useEffect(() => {
@@ -294,6 +293,16 @@ export function App() {
     };
   }, []);
 
+  const handleChangeCoverDesign = useCallback(
+    (next: CoverDesign) => {
+      setCoverDesign(next);
+      if (next.enabled) {
+        handleGoToPage(0);
+      }
+    },
+    [handleGoToPage],
+  );
+
   const handleUploadFiles = async (files: File[]) => {
     setIsImporting(true);
     setErrorText(null);
@@ -302,8 +311,32 @@ export function App() {
       const imported = await importFiles(files, {
         onProgress: (cur, max) => setProgressText(`Rendering PDF page ${cur} / ${max}...`),
       });
-      setPages((prev) => [...prev, ...imported]);
-      updatePageIndex(0);
+      const isSingleImageFile =
+        imported.length === 1 &&
+        files.length === 1 &&
+        Boolean(files[0]) &&
+        !files[0]!.name.toLowerCase().endsWith(".pdf");
+
+      if (isSingleImageFile && userPages.length === 0) {
+        // User uploaded 1 single image while on the sample book -> detect as Cover Silhouette!
+        const nextPreset = applyBookPreset("hardcover", SAMPLE_IMPORTED_PAGES);
+        setActivePreset("hardcover");
+        setHasCover(nextPreset.hasCover);
+        setTheme(nextPreset.theme);
+        setPages(nextPreset.pages);
+        setCoverDesign((prev) => ({
+          ...prev,
+          enabled: true,
+          logoSrc: imported[0]!.src,
+          artMode: "silhouette",
+        }));
+      } else {
+        setPages((prev) => [...prev.filter((p) => !p.id.startsWith("sample-")), ...imported]);
+        setCoverDesign((prev) =>
+          prev.enabled && prev.artMode === "none" ? { ...prev, artMode: "silhouette" } : prev,
+        );
+      }
+      handleGoToPage(0);
       setProgressText(null);
       setStep("arrange");
     } catch (err) {
@@ -326,7 +359,7 @@ export function App() {
 
   const handleSelectPreset = (presetId: BookPresetId) => {
     setActivePreset(presetId);
-    const base = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
+    const base = userPages.length > 0 ? userPages : SAMPLE_IMPORTED_PAGES;
     const next = applyBookPreset(presetId, base);
     setHasCover(next.hasCover);
     setTheme(next.theme);
@@ -336,17 +369,23 @@ export function App() {
         ? {
             ...prev,
             enabled: true,
-            artMode: pages.length > 0 && prev.artMode === "none" ? "silhouette" : prev.artMode,
+            artMode:
+              (userPages.length > 0 || Boolean(prev.logoSrc)) && prev.artMode === "none"
+                ? "silhouette"
+                : prev.artMode,
           }
         : { ...prev, enabled: false },
     );
-    updatePageIndex(0);
+    if (presetId === "hardcover") {
+      setStep("arrange");
+    }
+    handleGoToPage(0);
   };
 
   const handleApplyBulkDensity = (mode: BulkDensityMode) => {
-    const base = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
+    const base = userPages.length > 0 ? userPages : SAMPLE_IMPORTED_PAGES;
     setPages(applyBulkDensity(base, mode));
-    updatePageIndex(0);
+    handleGoToPage(0);
   };
 
   const handleResetToSample = () => {
@@ -1032,8 +1071,8 @@ export function App() {
             toc={toc}
             coverDesign={coverDesign}
             {...(coverArtSrc ? { coverArtSrc } : {})}
-            onChangeCoverDesign={setCoverDesign}
-            pages={pages}
+            onChangeCoverDesign={handleChangeCoverDesign}
+            pages={userPages}
             manifest={activeManifest}
             isImporting={isImporting}
             progressText={progressText}

@@ -29,6 +29,9 @@ describe("<CoverDesigner>", () => {
     fireEvent.click(screen.getByLabelText("Material: Leather"));
     expect(onChange).toHaveBeenLastCalledWith({ ...enabled, material: "leather" });
 
+    fireEvent.click(screen.getByLabelText("Depth: Embossed (Raised)"));
+    expect(onChange).toHaveBeenLastCalledWith({ ...enabled, relief: "emboss" });
+
     fireEvent.click(screen.getByLabelText("Finish: Silver foil"));
     expect(onChange).toHaveBeenLastCalledWith({ ...enabled, foil: "silver" });
 
@@ -38,7 +41,7 @@ describe("<CoverDesigner>", () => {
     expect((screen.getByLabelText("Cover title") as HTMLInputElement).placeholder).toBe("My Book");
   });
 
-  it("offers artwork modes only for imported art and defaults to the silhouette when enabled", () => {
+  it("offers artwork modes for imported art or uploaded silhouette and defaults to silhouette when enabled", () => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
     const onChange = vi.fn();
     const art = "data:image/png;base64,AAAA";
@@ -74,11 +77,11 @@ describe("<CoverDesigner>", () => {
     expect(onChange).toHaveBeenLastCalledWith({ ...enabled, artInvert: true });
     fireEvent.click(screen.getByLabelText("Artwork: Wrap my cover artwork"));
     expect(onChange).toHaveBeenLastCalledWith({ ...enabled, artMode: "full" });
-    expect(screen.queryByLabelText("Cover logo")).toBeNull();
+    expect(screen.getByLabelText("Cover logo")).toBeTruthy();
     expect((screen.getByLabelText("Cover title") as HTMLInputElement).placeholder).toBe("Optional");
   });
 
-  it("hides artwork controls when there is no imported cover", () => {
+  it("hides artwork mode controls when there is no imported cover or uploaded logo", () => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
     render(
       <CoverDesigner
@@ -89,6 +92,7 @@ describe("<CoverDesigner>", () => {
     );
     expect(screen.queryByLabelText("Silhouette detail")).toBeNull();
     expect(screen.queryByText("Your cover artwork")).toBeNull();
+    expect(screen.getByLabelText("Cover logo")).toBeTruthy();
     expect(screen.getByLabelText("Matching back cover")).toBeTruthy();
   });
 });

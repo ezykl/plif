@@ -192,4 +192,19 @@ describe("<App>", () => {
     // Page index 4 remains preserved (in spread mode without cover, index 4 is pages 5–6 / 12)
     expect(screen.getByText("5–6 / 12")).toBeTruthy();
   });
+
+  it("opens the Hardbound Cover Studio and jumps to Page 1 when selecting the Hardcover preset", () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+    render(<App />);
+    expect(screen.getByText("2–3 / 12")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Hardcover Book" }));
+
+    expect(screen.getByText("1 / 12")).toBeTruthy();
+    expect(screen.getByLabelText("Hardbound cover designer")).toBeTruthy();
+    expect(screen.getByLabelText("Depth: Debossed (Pressed in)")).toBeTruthy();
+    expect(screen.getByLabelText("Depth: Embossed (Raised)")).toBeTruthy();
+    expect(screen.getByLabelText("Cover logo")).toBeTruthy();
+    vi.restoreAllMocks();
+  });
 });

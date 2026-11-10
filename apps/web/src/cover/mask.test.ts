@@ -82,6 +82,20 @@ describe("computeMaskAlpha", () => {
     const centre = (1 * low.w + 1) * 4 + 3;
     expect(low.data[centre]).toBeGreaterThan(high.data[centre] ?? 0);
   });
+
+  it("extracts silhouette from opaque white background even if a few interior pixels have alpha < 245", () => {
+    const { data, w, h } = pixels([
+      [255, 255, 255, 255, 255],
+      [255, 0, 0, 0, 255],
+      [255, 0, 0, 0, 255],
+      [255, 0, 0, 0, 255],
+      [255, 255, 255, 255, 255],
+    ]);
+    data[(1 * w + 1) * 4 + 3] = 220;
+    computeMaskAlpha(data, w, h, 45, false);
+    expect(data[0 * 4 + 3]).toBe(0);
+    expect(data[(2 * w + 2) * 4 + 3]).toBe(255);
+  });
 });
 
 describe("containSize", () => {

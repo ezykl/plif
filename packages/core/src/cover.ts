@@ -2,12 +2,14 @@ import { z } from "zod";
 
 export const COVER_MATERIALS = ["cloth", "leather", "linen", "smooth"] as const;
 export const COVER_FOILS = ["gold", "silver", "white", "blind"] as const;
+export const COVER_RELIEFS = ["deboss", "emboss"] as const;
 export const COVER_FONTS = ["cinzel", "playfair", "cormorant"] as const;
 /** none: lettering only. silhouette: page 1 artwork stamped as one color. full: artwork wrapped on the board. */
 export const COVER_ART_MODES = ["none", "silhouette", "full"] as const;
 
 export type CoverMaterial = (typeof COVER_MATERIALS)[number];
 export type CoverFoil = (typeof COVER_FOILS)[number];
+export type CoverRelief = (typeof COVER_RELIEFS)[number];
 export type CoverFont = (typeof COVER_FONTS)[number];
 export type CoverArtMode = (typeof COVER_ART_MODES)[number];
 
@@ -16,6 +18,7 @@ export const coverDesignSchema = z.object({
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Expected a #rrggbb color"),
   material: z.enum(COVER_MATERIALS).default("cloth"),
   foil: z.enum(COVER_FOILS).default("gold"),
+  relief: z.enum(COVER_RELIEFS).default("deboss"),
   title: z.string().default(""),
   subtitle: z.string().optional(),
   font: z.enum(COVER_FONTS).default("cinzel"),
@@ -35,6 +38,7 @@ export const DEFAULT_COVER_DESIGN: CoverDesign = {
   color: "#1f2a44",
   material: "cloth",
   foil: "gold",
+  relief: "deboss",
   title: "",
   font: "cinzel",
   frame: true,

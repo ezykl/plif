@@ -13,7 +13,14 @@ import { parseManifest } from "./manifest";
 describe("cover design", () => {
   it("parses with defaults and rejects non-hex colors", () => {
     const parsed = coverDesignSchema.parse({ color: "#112233" });
-    expect(parsed).toMatchObject({ enabled: false, material: "cloth", foil: "gold", frame: true });
+    expect(parsed).toMatchObject({
+      enabled: false,
+      material: "cloth",
+      foil: "gold",
+      relief: "deboss",
+      frame: true,
+    });
+    expect(coverDesignSchema.parse({ color: "#112233", relief: "emboss" }).relief).toBe("emboss");
     expect(() => coverDesignSchema.parse({ color: "navy" })).toThrow();
   });
 

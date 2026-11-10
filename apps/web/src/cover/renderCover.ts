@@ -99,7 +99,7 @@ function foilGradient(
 
 type StampDraw = (fill: string | CanvasGradient, mode: "fill" | "stroke") => void;
 
-/** Stamps a shape (drawn by `draw`) with deboss shading and optional foil fill. */
+/** Stamps a shape (drawn by `draw`) with deboss (sunken) or emboss (raised) shading and optional foil fill. */
 function stamp(
   ctx: CanvasRenderingContext2D,
   design: CoverDesign,
@@ -109,34 +109,71 @@ function stamp(
   draw: StampDraw,
 ): void {
   const light = isLightColor(design.color);
-  // 1. recessed shadow (die pressed into the cover)
+  const emboss = design.relief === "emboss";
+
+  if (emboss) {
+    // EMBOSS (Raised relief): top-left specular highlight + bottom-right cast drop shadow
+    ctx.save();
+    ctx.shadowColor = light ? "rgba(60, 40, 20, 0.5)" : "rgba(0, 0, 0, 0.85)";
+    ctx.shadowBlur = 4 * px;
+    ctx.shadowOffsetX = 2 * px;
+    ctx.shadowOffsetY = 2.5 * px;
+    draw(light ? "rgba(60, 40, 20, 0.45)" : "rgba(0, 0, 0, 0.75)", "fill");
+    ctx.restore();
+
+    ctx.save();
+    ctx.shadowColor = light ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 0.35)";
+    ctx.shadowBlur = 1.2 * px;
+    ctx.shadowOffsetX = -1.2 * px;
+    ctx.shadowOffsetY = -1.5 * px;
+    ctx.lineWidth = 1 * px;
+    draw(light ? "rgba(255, 255, 255, 0.65)" : "rgba(255, 255, 255, 0.22)", "fill");
+    ctx.restore();
+
+    if (FOIL_STYLES[design.foil].filled) {
+      ctx.save();
+      ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
+      ctx.shadowBlur = 2 * px;
+      ctx.shadowOffsetX = 1 * px;
+      ctx.shadowOffsetY = 1.5 * px;
+      draw(foilGradient(ctx, design, w, h), "fill");
+      ctx.restore();
+    }
+    return;
+  }
+
+  // DEBOSS (Pressed in / Sunken):
+  // 1. Bottom-right bevel catchlight where overhead light hits the lower lip of the cavity
   ctx.save();
-  ctx.shadowColor = light ? "rgba(60, 40, 20, 0.55)" : "rgba(0, 0, 0, 0.85)";
-  ctx.shadowBlur = 4 * px;
-  ctx.shadowOffsetX = 1.5 * px;
-  ctx.shadowOffsetY = 2 * px;
-  draw(light ? "rgba(60, 40, 20, 0.55)" : "rgba(0, 0, 0, 0.8)", "fill");
+  ctx.shadowColor = light ? "rgba(255, 255, 255, 0.85)" : "rgba(255, 255, 255, 0.34)";
+  ctx.shadowBlur = 1.2 * px;
+  ctx.shadowOffsetX = 1.2 * px;
+  ctx.shadowOffsetY = 1.8 * px;
+  draw(light ? "rgba(255, 255, 255, 0.55)" : "rgba(255, 255, 255, 0.18)", "fill");
   ctx.restore();
-  // 2. light rim on the lower edge of the impression
+
+  // 2. Deep recessed cavity floor + top-left inner wall shadow cast downward into the groove
   ctx.save();
-  ctx.shadowColor = "rgba(255, 255, 255, 0.28)";
-  ctx.shadowBlur = 1 * px;
-  ctx.shadowOffsetY = -1 * px;
-  ctx.lineWidth = 1 * px;
-  draw(light ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.14)", "stroke");
+  ctx.shadowColor = light ? "rgba(45, 28, 12, 0.7)" : "rgba(0, 0, 0, 0.92)";
+  ctx.shadowBlur = 2.8 * px;
+  ctx.shadowOffsetX = -1.5 * px;
+  ctx.shadowOffsetY = -2 * px;
+  draw(light ? "rgba(55, 36, 18, 0.62)" : "rgba(0, 0, 0, 0.82)", "fill");
   ctx.restore();
-  // 3. foil fill sitting inside the pocket
+
+  // 3. Foil fill recessed inside the pocket (inner top-left shadow from cavity lip)
   if (FOIL_STYLES[design.foil].filled) {
     ctx.save();
-    ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
-    ctx.shadowBlur = 2 * px;
-    ctx.shadowOffsetY = 1 * px;
+    ctx.shadowColor = "rgba(0, 0, 0, 0.68)";
+    ctx.shadowBlur = 1.8 * px;
+    ctx.shadowOffsetX = -1 * px;
+    ctx.shadowOffsetY = -1.5 * px;
     draw(foilGradient(ctx, design, w, h), "fill");
     ctx.restore();
   }
 }
 
-/** Stamps an alpha mask (black shape on transparent) at (x, y) through the deboss + foil passes. */
+/** Stamps an alpha mask (black shape on transparent) at (x, y) through the deboss/emboss + foil passes. */
 function stampMask(
   ctx: CanvasRenderingContext2D,
   design: CoverDesign,
@@ -254,7 +291,7 @@ export function drawCover(
 
   const px = scale;
   const rng = createRng(coverSeed(design));
-  const art = assets.art ?? null;
+  const art = assets.logo ?? assets.art ?? null;
   const wrapArt = !back && design.artMode === "full" && art !== null;
   const silhouetteArt = design.artMode === "silhouette" && art !== null;
 
