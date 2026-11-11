@@ -207,4 +207,15 @@ describe("<App>", () => {
     expect(screen.getByLabelText("Cover logo")).toBeTruthy();
     vi.restoreAllMocks();
   });
+
+  it("swaps sample publications and titles when switching presets on sample mode", () => {
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "Sample Magazine" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Newspaper" }));
+    expect(screen.getByRole("heading", { name: "The Morning Chronicle" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Studio Zine" }));
+    expect(screen.getByRole("heading", { name: "Kinetic Risograph & Sound" })).toBeTruthy();
+  });
 });

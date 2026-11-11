@@ -36,16 +36,7 @@ import {
 } from "./components/Icons";
 import { importFiles } from "./import";
 import { COVER_FONT_STACKS, loadImage, renderCoverDataUrl } from "./cover/renderCover";
-import { sampleManifest } from "./sample";
-
-const SAMPLE_IMPORTED_PAGES: ImportedPage[] = sampleManifest.pages.map((p, idx) => ({
-  id: `sample-${idx + 1}`,
-  src: p.src,
-  width: sampleManifest.pageSize.width,
-  height: sampleManifest.pageSize.height,
-  alt: p.alt ?? `Page ${idx + 1}`,
-  ...(p.density !== undefined ? { density: p.density } : {}),
-}));
+import { getSamplePublication, sampleManifest } from "./sample";
 
 const QUICK_PRESET_LIST = Object.values(BOOK_PRESETS);
 const QUICK_THEME_LIST = Object.values(THEMES);
@@ -64,7 +55,7 @@ export function App() {
   const [pages, setPages] = useState<ImportedPage[]>([]);
   const [index, setIndex] = useState(() => {
     if (typeof window === "undefined") return 1;
-    return parsePageHash(window.location.hash, SAMPLE_IMPORTED_PAGES.length) ?? 1;
+    return parsePageHash(window.location.hash, 12) ?? 1;
   });
   const [zoom, setZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -95,7 +86,8 @@ export function App() {
     });
   }, []);
 
-  const basePages = pages.length > 0 ? pages : SAMPLE_IMPORTED_PAGES;
+  const samplePub = useMemo(() => getSamplePublication(activePreset ?? "magazine"), [activePreset]);
+  const basePages = pages.length > 0 ? pages : samplePub.pages;
   const userPages = useMemo(() => pages.filter((p) => !p.id.startsWith("sample-")), [pages]);
   const [coverDesign, setCoverDesign] = useState<CoverDesign>(DEFAULT_COVER_DESIGN);
   const [coverImages, setCoverImages] = useState<{ front: string; back: string | null } | null>(
@@ -319,7 +311,7 @@ export function App() {
 
       if (isSingleImageFile && userPages.length === 0) {
         // User uploaded 1 single image while on the sample book -> detect as Cover Silhouette!
-        const nextPreset = applyBookPreset("hardcover", SAMPLE_IMPORTED_PAGES);
+        const nextPreset = applyBookPreset("hardcover", samplePub.pages);
         setActivePreset("hardcover");
         setHasCover(nextPreset.hasCover);
         setTheme(nextPreset.theme);
@@ -358,24 +350,49 @@ export function App() {
   };
 
   const handleSelectPreset = (presetId: BookPresetId) => {
+    const prevPreset = activePreset ?? "magazine";
+    const prevDefaultTitle = getSamplePublication(prevPreset).title;
     setActivePreset(presetId);
-    const base = userPages.length > 0 ? userPages : SAMPLE_IMPORTED_PAGES;
-    const next = applyBookPreset(presetId, base);
-    setHasCover(next.hasCover);
-    setTheme(next.theme);
-    setPages(next.pages);
-    setCoverDesign((prev) =>
-      presetId === "hardcover"
-        ? {
-            ...prev,
-            enabled: true,
-            artMode:
-              (userPages.length > 0 || Boolean(prev.logoSrc)) && prev.artMode === "none"
-                ? "silhouette"
-                : prev.artMode,
-          }
-        : { ...prev, enabled: false },
-    );
+
+    if (userPages.length === 0) {
+      const pub = getSamplePublication(presetId);
+      if (title === prevDefaultTitle) {
+        setTitle(pub.title);
+      }
+      setHasCover(pub.hasCover);
+      setTheme(pub.theme);
+      setDirection(pub.direction);
+      setToc(pub.toc);
+      setPages([]);
+      setCoverDesign((prev) =>
+        presetId === "hardcover"
+          ? {
+              ...prev,
+              enabled: true,
+              title: title === prevDefaultTitle ? pub.title : title,
+              artMode: prev.logoSrc ? "silhouette" : "none",
+            }
+          : { ...prev, enabled: false },
+      );
+    } else {
+      const base = userPages;
+      const next = applyBookPreset(presetId, base);
+      setHasCover(next.hasCover);
+      setTheme(next.theme);
+      setPages(next.pages);
+      setCoverDesign((prev) =>
+        presetId === "hardcover"
+          ? {
+              ...prev,
+              enabled: true,
+              artMode:
+                (userPages.length > 0 || Boolean(prev.logoSrc)) && prev.artMode === "none"
+                  ? "silhouette"
+                  : prev.artMode,
+            }
+          : { ...prev, enabled: false },
+      );
+    }
     if (presetId === "hardcover") {
       setStep("arrange");
     }
@@ -383,22 +400,23 @@ export function App() {
   };
 
   const handleApplyBulkDensity = (mode: BulkDensityMode) => {
-    const base = userPages.length > 0 ? userPages : SAMPLE_IMPORTED_PAGES;
+    const base = userPages.length > 0 ? userPages : samplePub.pages;
     setPages(applyBulkDensity(base, mode));
     handleGoToPage(0);
   };
 
   const handleResetToSample = () => {
-    setTitle(sampleManifest.title);
-    setHasCover(sampleManifest.hasCover);
-    setTheme(sampleManifest.theme);
+    const pub = getSamplePublication("magazine");
+    setTitle(pub.title);
+    setHasCover(pub.hasCover);
+    setTheme(pub.theme);
     setActivePreset("magazine");
-    setDirection(sampleManifest.direction);
-    setToc(sampleManifest.toc);
+    setDirection(pub.direction);
+    setToc(pub.toc);
     setCoverDesign(DEFAULT_COVER_DESIGN);
     setPages([]);
     setZoom(1);
-    updatePageIndex(1);
+    handleGoToPage(1);
   };
 
   const downloadFile = (filename: string, content: string, type: string) => {
