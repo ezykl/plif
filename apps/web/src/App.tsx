@@ -20,6 +20,7 @@ import {
   type BulkDensityMode,
   type CoverDesign,
   type ImportedPage,
+  type PageDimensions,
   type TocItem,
 } from "@plif/core";
 import { Flipbook, ReaderToolbar, type FlipbookHandle } from "@plif/reader";
@@ -53,6 +54,8 @@ export function App() {
   const [direction, setDirection] = useState<BookDirection>(sampleManifest.direction);
   const [toc, setToc] = useState<TocItem[]>(sampleManifest.toc);
   const [pages, setPages] = useState<ImportedPage[]>([]);
+  const [customPageSize, setCustomPageSize] = useState<PageDimensions | null>(null);
+  const [originalUploadSize, setOriginalUploadSize] = useState<PageDimensions | null>(null);
   const [index, setIndex] = useState(() => {
     if (typeof window === "undefined") return 1;
     return parsePageHash(window.location.hash, 12) ?? 1;
@@ -94,10 +97,16 @@ export function App() {
     null,
   );
 
+  const activePageSize = useMemo<PageDimensions>(() => {
+    if (customPageSize) return customPageSize;
+    if (activePreset) return BOOK_PRESETS[activePreset].defaultPageSize;
+    const first = basePages[0];
+    return first ? { width: first.width, height: first.height } : sampleManifest.pageSize;
+  }, [customPageSize, activePreset, basePages]);
+
   const coverTitle = resolveCoverTitle(coverDesign, title);
-  const firstPage = basePages[0];
-  const coverWidth = firstPage?.width ?? sampleManifest.pageSize.width;
-  const coverHeight = firstPage?.height ?? sampleManifest.pageSize.height;
+  const coverWidth = activePageSize.width;
+  const coverHeight = activePageSize.height;
   const coverArtSrc = userPages[0]?.src;
   const wantsBack = coverDesign.backCover && hasCover && basePages.length > 1;
 
@@ -163,10 +172,11 @@ export function App() {
         direction,
         toc,
         pages: effectivePages,
+        pageSize: activePageSize,
       }),
       ...(coverDesign.enabled ? { coverDesign } : {}),
     }),
-    [title, hasCover, theme, direction, toc, effectivePages, coverDesign],
+    [title, hasCover, theme, direction, toc, effectivePages, activePageSize, coverDesign],
   );
 
   const total = activeManifest.pages.length;
@@ -309,6 +319,12 @@ export function App() {
         Boolean(files[0]) &&
         !files[0]!.name.toLowerCase().endsWith(".pdf");
 
+      if (imported.length > 0 && imported[0]) {
+        const detected = { width: imported[0].width, height: imported[0].height };
+        setOriginalUploadSize(detected);
+        setCustomPageSize(detected);
+      }
+
       if (isSingleImageFile && userPages.length === 0) {
         // User uploaded 1 single image while on the sample book -> detect as Cover Silhouette!
         const nextPreset = applyBookPreset("hardcover", samplePub.pages);
@@ -353,6 +369,7 @@ export function App() {
     const prevPreset = activePreset ?? "magazine";
     const prevDefaultTitle = getSamplePublication(prevPreset).title;
     setActivePreset(presetId);
+    setCustomPageSize(BOOK_PRESETS[presetId].defaultPageSize);
 
     if (userPages.length === 0) {
       const pub = getSamplePublication(presetId);
@@ -411,6 +428,8 @@ export function App() {
     setHasCover(pub.hasCover);
     setTheme(pub.theme);
     setActivePreset("magazine");
+    setCustomPageSize(null);
+    setOriginalUploadSize(null);
     setDirection(pub.direction);
     setToc(pub.toc);
     setCoverDesign(DEFAULT_COVER_DESIGN);
@@ -537,7 +556,7 @@ export function App() {
                 }}
               >
                 {hasCover ? "Cover + Spread Mode" : "Newspaper Spread Mode"} •{" "}
-                {direction.toUpperCase()}
+                {activePageSize.width} × {activePageSize.height} • {direction.toUpperCase()}
               </span>
             </div>
           </div>
@@ -1085,6 +1104,9 @@ export function App() {
             title={title}
             hasCover={hasCover}
             theme={theme}
+            pageSize={activePageSize}
+            originalPageSize={originalUploadSize}
+            onChangePageSize={setCustomPageSize}
             direction={direction}
             toc={toc}
             coverDesign={coverDesign}

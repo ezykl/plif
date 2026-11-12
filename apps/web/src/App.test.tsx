@@ -92,12 +92,12 @@ describe("<App>", () => {
 
     expect(screen.getByRole("img", { name: "Book logo" })).toBeTruthy();
     expect(screen.getByText(/Plif Flipbook Studio • Magazine Edition/i)).toBeTruthy();
-    expect(screen.getByText(/Cover \+ Spread Mode • LTR/i)).toBeTruthy();
+    expect(screen.getByText(/Cover \+ Spread Mode • 480 × 679 • LTR/i)).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /Next: Arrange & Style/i }));
     fireEvent.click(screen.getByRole("button", { name: /Preset: Newspaper/i }));
     expect(screen.getByText(/Plif Flipbook Studio • Newsprint Edition/i)).toBeTruthy();
-    expect(screen.getByText(/Cover \+ Spread Mode • LTR/i)).toBeTruthy();
+    expect(screen.getByText(/Cover \+ Spread Mode • 480 × 740 • LTR/i)).toBeTruthy();
   });
 
   it("clicking the toolbar sound toggle button toggles soundEnabled and updates localStorage", () => {

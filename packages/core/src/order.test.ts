@@ -76,4 +76,13 @@ describe("buildManifest", () => {
     expect(manifest.title).toBe("Untitled Book");
     expect(() => buildManifest({ title: "Empty", pages: [] })).toThrow(/at least one page/i);
   });
+
+  it("respects explicit pageSize override", () => {
+    const manifest = buildManifest({
+      title: "Custom Size",
+      pages: samplePages,
+      pageSize: { width: 500, height: 500 },
+    });
+    expect(manifest.pageSize).toEqual({ width: 500, height: 500 });
+  });
 });

@@ -147,3 +147,12 @@ export function CodeBracketIcon({ size = 18, ...props }: IconProps) {
     </svg>
   );
 }
+
+export function AspectRatioIcon({ size = 18, ...props }: IconProps) {
+  return (
+    <svg {...baseProps(size, props)}>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+      <path d="M7.5 8.5h2v2M16.5 15.5h-2v-2" />
+    </svg>
+  );
+}

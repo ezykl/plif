@@ -1,6 +1,6 @@
 import type { BookDirection, TocItem } from "./extras";
 import { parseManifest, type Manifest } from "./manifest";
-import type { BookTheme } from "./themes";
+import type { BookTheme, PageDimensions } from "./themes";
 
 export interface ImportedPage {
   id: string;
@@ -18,6 +18,7 @@ export interface BuildManifestOptions {
   direction?: BookDirection;
   toc?: readonly TocItem[];
   pages: readonly ImportedPage[];
+  pageSize?: PageDimensions;
 }
 
 export function movePage<T>(items: readonly T[], fromIndex: number, toIndex: number): T[] {
@@ -60,10 +61,15 @@ export function buildManifest(opts: BuildManifestOptions): Manifest {
   return parseManifest({
     version: 1,
     title: opts.title.trim() || "Untitled Book",
-    pageSize: {
-      width: Math.round(first.width),
-      height: Math.round(first.height),
-    },
+    pageSize: opts.pageSize
+      ? {
+          width: Math.round(opts.pageSize.width),
+          height: Math.round(opts.pageSize.height),
+        }
+      : {
+          width: Math.round(first.width),
+          height: Math.round(first.height),
+        },
     hasCover: opts.hasCover ?? true,
     theme: opts.theme ?? "magazine",
     direction: opts.direction ?? "ltr",

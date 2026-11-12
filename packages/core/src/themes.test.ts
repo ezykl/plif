@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { ImportedPage } from "./order";
-import { applyBookPreset, applyBulkDensity, BOOK_PRESETS, THEMES } from "./themes";
+import {
+  applyBookPreset,
+  applyBulkDensity,
+  BOOK_PRESETS,
+  formatAspectRatio,
+  PAGE_FORMATS,
+  THEMES,
+} from "./themes";
 import { parseManifest } from "./manifest";
 import { buildManifest } from "./order";
 
@@ -66,14 +73,34 @@ describe("applyBookPreset", () => {
     const res = applyBookPreset("newspaper", samplePages);
     expect(res.hasCover).toBe(true);
     expect(res.theme).toBe("newsprint");
+    expect(res.pageSize).toEqual({ width: 480, height: 740 });
     expect(res.pages.map((p) => p.density)).toEqual(["soft", "soft", "soft", "soft"]);
   });
 
   it("configures hardcover preset with cover, hard front/back, classic theme", () => {
     expect(BOOK_PRESETS.hardcover.label).toBe("Hardcover Book");
+    expect(BOOK_PRESETS.hardcover.defaultPageSize).toEqual({ width: 460, height: 690 });
     const res = applyBookPreset("hardcover", samplePages);
     expect(res.hasCover).toBe(true);
     expect(res.theme).toBe("classic");
+    expect(res.pageSize).toEqual({ width: 460, height: 690 });
     expect(res.pages.map((p) => p.density)).toEqual(["hard", "soft", "soft", "hard"]);
+  });
+});
+
+describe("PAGE_FORMATS and formatAspectRatio", () => {
+  it("defines standard publication formats", () => {
+    expect(PAGE_FORMATS.a4.dimensions).toEqual({ width: 480, height: 679 });
+    expect(PAGE_FORMATS["us-letter"].dimensions).toEqual({ width: 480, height: 621 });
+    expect(PAGE_FORMATS.octavo.dimensions).toEqual({ width: 460, height: 690 });
+    expect(PAGE_FORMATS.broadsheet.dimensions).toEqual({ width: 480, height: 740 });
+    expect(PAGE_FORMATS.square.dimensions).toEqual({ width: 500, height: 500 });
+  });
+
+  it("formats aspect ratios cleanly", () => {
+    expect(formatAspectRatio(480, 679)).toBe("1 : 1.41");
+    expect(formatAspectRatio(500, 500)).toBe("1 : 1");
+    expect(formatAspectRatio(460, 690)).toBe("1 : 1.50");
+    expect(formatAspectRatio(0, 500)).toBe("1 : 1");
   });
 });

@@ -98,6 +98,70 @@ export function applyBulkDensity(
   });
 }
 
+export interface PageDimensions {
+  width: number;
+  height: number;
+}
+
+export type PageFormatId = "a4" | "us-letter" | "octavo" | "broadsheet" | "square";
+
+export interface PageFormatPreset {
+  id: PageFormatId;
+  label: string;
+  description: string;
+  dimensions: PageDimensions;
+  aspectRatioLabel: string;
+}
+
+export const PAGE_FORMATS: Record<PageFormatId, PageFormatPreset> = {
+  a4: {
+    id: "a4",
+    label: "A4 Portrait",
+    description: "Standard international paper (magazine & catalog)",
+    dimensions: { width: 480, height: 679 },
+    aspectRatioLabel: "1 : 1.41",
+  },
+  "us-letter": {
+    id: "us-letter",
+    label: "US Letter",
+    description: "8.5 × 11 in (editorial & business reports)",
+    dimensions: { width: 480, height: 621 },
+    aspectRatioLabel: "1 : 1.29",
+  },
+  octavo: {
+    id: "octavo",
+    label: "Trade Book (6×9)",
+    description: "Octavo hardcover & fiction proportion",
+    dimensions: { width: 460, height: 690 },
+    aspectRatioLabel: "1 : 1.50",
+  },
+  broadsheet: {
+    id: "broadsheet",
+    label: "Newspaper Broadsheet",
+    description: "Tall multi-column newsprint format",
+    dimensions: { width: 480, height: 740 },
+    aspectRatioLabel: "1 : 1.54",
+  },
+  square: {
+    id: "square",
+    label: "Square",
+    description: "Art zine, photo album, and vinyl booklet",
+    dimensions: { width: 500, height: 500 },
+    aspectRatioLabel: "1 : 1",
+  },
+};
+
+export function formatAspectRatio(width: number, height: number): string {
+  if (width <= 0 || height <= 0 || !Number.isFinite(width) || !Number.isFinite(height)) {
+    return "1 : 1";
+  }
+  if (width === height) {
+    return "1 : 1";
+  }
+  const ratio = height / width;
+  return `1 : ${ratio.toFixed(2)}`;
+}
+
 export type BookPresetId = "newspaper" | "magazine" | "hardcover" | "zine";
 
 export interface BookPreset {
@@ -107,6 +171,7 @@ export interface BookPreset {
   hasCover: boolean;
   densityMode: BulkDensityMode;
   theme: BookTheme;
+  defaultPageSize: PageDimensions;
 }
 
 export const BOOK_PRESETS: Record<BookPresetId, BookPreset> = {
@@ -117,6 +182,7 @@ export const BOOK_PRESETS: Record<BookPresetId, BookPreset> = {
     hasCover: true,
     densityMode: "all-soft",
     theme: "newsprint",
+    defaultPageSize: PAGE_FORMATS.broadsheet.dimensions,
   },
   magazine: {
     id: "magazine",
@@ -125,6 +191,7 @@ export const BOOK_PRESETS: Record<BookPresetId, BookPreset> = {
     hasCover: true,
     densityMode: "all-soft",
     theme: "magazine",
+    defaultPageSize: PAGE_FORMATS.a4.dimensions,
   },
   hardcover: {
     id: "hardcover",
@@ -133,6 +200,7 @@ export const BOOK_PRESETS: Record<BookPresetId, BookPreset> = {
     hasCover: true,
     densityMode: "hard-covers",
     theme: "classic",
+    defaultPageSize: PAGE_FORMATS.octavo.dimensions,
   },
   zine: {
     id: "zine",
@@ -141,17 +209,19 @@ export const BOOK_PRESETS: Record<BookPresetId, BookPreset> = {
     hasCover: true,
     densityMode: "all-soft",
     theme: "studio",
+    defaultPageSize: PAGE_FORMATS.square.dimensions,
   },
 };
 
 export function applyBookPreset(
   presetId: BookPresetId,
   pages: readonly ImportedPage[],
-): { hasCover: boolean; theme: BookTheme; pages: ImportedPage[] } {
+): { hasCover: boolean; theme: BookTheme; pageSize: PageDimensions; pages: ImportedPage[] } {
   const preset = BOOK_PRESETS[presetId];
   return {
     hasCover: preset.hasCover,
     theme: preset.theme,
+    pageSize: preset.defaultPageSize,
     pages: applyBulkDensity(pages, preset.densityMode),
   };
 }

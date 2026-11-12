@@ -55,4 +55,26 @@ describe("toFlipSettings", () => {
     expect(s.maxWidth).toBe(1400);
     expect(s.startPage).toBe(2);
   });
+
+  it("scales minBounds proportionally for square and broadsheet formats", () => {
+    const square = parseManifest({
+      version: 1,
+      title: "Square",
+      pageSize: { width: 500, height: 500 },
+      pages: [{ src: "a" }, { src: "b" }],
+    });
+    const sq = toFlipSettings(square, { reduceMotion: false });
+    expect(sq.minWidth).toBe(288);
+    expect(sq.minHeight).toBe(288);
+
+    const broadsheet = parseManifest({
+      version: 1,
+      title: "Broadsheet",
+      pageSize: { width: 480, height: 740 },
+      pages: [{ src: "a" }, { src: "b" }],
+    });
+    const bs = toFlipSettings(broadsheet, { reduceMotion: false });
+    expect(bs.minWidth).toBe(288);
+    expect(bs.minHeight).toBe(444);
+  });
 });

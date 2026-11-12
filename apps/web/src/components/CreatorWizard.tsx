@@ -8,6 +8,7 @@ import {
   type CoverDesign,
   type ImportedPage,
   type Manifest,
+  type PageDimensions,
   type TocItem,
 } from "@plif/core";
 import { BookSettingsPanel } from "./BookSettingsPanel";
@@ -31,6 +32,9 @@ export interface CreatorWizardProps {
   title: string;
   hasCover: boolean;
   theme: BookTheme;
+  pageSize?: PageDimensions;
+  originalPageSize?: PageDimensions | null;
+  onChangePageSize?: (size: PageDimensions) => void;
   pages: readonly ImportedPage[];
   manifest?: Manifest;
   activePreset?: BookPresetId;
@@ -100,6 +104,9 @@ export function CreatorWizard({
   title,
   hasCover,
   theme,
+  pageSize,
+  originalPageSize,
+  onChangePageSize,
   pages,
   manifest,
   activePreset,
@@ -358,6 +365,9 @@ export function CreatorWizard({
             title={title}
             hasCover={hasCover}
             theme={theme}
+            {...(pageSize ? { pageSize } : {})}
+            {...(originalPageSize !== undefined ? { originalPageSize } : {})}
+            {...(onChangePageSize ? { onChangePageSize } : {})}
             activePreset={activePreset}
             direction={direction}
             toc={toc}

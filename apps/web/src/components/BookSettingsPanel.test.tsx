@@ -147,4 +147,90 @@ describe("<BookSettingsPanel>", () => {
     fireEvent.blur(input);
     expect(input.style.outline).toBe("none");
   });
+
+  it("selects page format presets and fires onChangePageSize", () => {
+    const onChangePageSize = vi.fn();
+    render(
+      <BookSettingsPanel
+        title="Format Book"
+        hasCover={true}
+        theme="magazine"
+        pageSize={{ width: 480, height: 679 }}
+        onChangePageSize={onChangePageSize}
+        onChangeTitle={vi.fn()}
+        onChangeHasCover={vi.fn()}
+        onChangeTheme={vi.fn()}
+        onSelectPreset={vi.fn()}
+        onApplyBulkDensity={vi.fn()}
+      />,
+    );
+
+    const a4Btn = screen.getByRole("button", { name: "Page Format: A4 Portrait" });
+    expect(a4Btn.getAttribute("aria-pressed")).toBe("true");
+
+    const squareBtn = screen.getByRole("button", { name: "Page Format: Square" });
+    fireEvent.click(squareBtn);
+    expect(onChangePageSize).toHaveBeenCalledWith({ width: 500, height: 500 });
+  });
+
+  it("renders detected original upload size button and allows restoring it", () => {
+    const onChangePageSize = vi.fn();
+    render(
+      <BookSettingsPanel
+        title="Original Size Book"
+        hasCover={true}
+        theme="magazine"
+        pageSize={{ width: 480, height: 679 }}
+        originalPageSize={{ width: 612, height: 792 }}
+        onChangePageSize={onChangePageSize}
+        onChangeTitle={vi.fn()}
+        onChangeHasCover={vi.fn()}
+        onChangeTheme={vi.fn()}
+        onSelectPreset={vi.fn()}
+        onApplyBulkDensity={vi.fn()}
+      />,
+    );
+
+    const origBtn = screen.getByRole("button", {
+      name: "Original Uploaded Dimensions: 612 by 792",
+    });
+    expect(origBtn).toBeTruthy();
+    fireEvent.click(origBtn);
+    expect(onChangePageSize).toHaveBeenCalledWith({ width: 612, height: 792 });
+  });
+
+  it("supports custom dimension inputs and swapping orientation", () => {
+    const onChangePageSize = vi.fn();
+    render(
+      <BookSettingsPanel
+        title="Custom Size Book"
+        hasCover={true}
+        theme="magazine"
+        pageSize={{ width: 480, height: 679 }}
+        onChangePageSize={onChangePageSize}
+        onChangeTitle={vi.fn()}
+        onChangeHasCover={vi.fn()}
+        onChangeTheme={vi.fn()}
+        onSelectPreset={vi.fn()}
+        onApplyBulkDensity={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Custom Dimensions\.\.\./i }));
+
+    const widthInput = screen.getByRole("spinbutton", { name: "Custom page width" });
+    const heightInput = screen.getByRole("spinbutton", { name: "Custom page height" });
+    expect(widthInput).toBeTruthy();
+    expect(heightInput).toBeTruthy();
+
+    fireEvent.change(widthInput, { target: { value: "600" } });
+    expect(onChangePageSize).toHaveBeenCalledWith({ width: 600, height: 679 });
+
+    fireEvent.change(heightInput, { target: { value: "900" } });
+    expect(onChangePageSize).toHaveBeenCalledWith({ width: 480, height: 900 });
+
+    const swapBtn = screen.getByRole("button", { name: "Swap width and height orientation" });
+    fireEvent.click(swapBtn);
+    expect(onChangePageSize).toHaveBeenCalledWith({ width: 679, height: 480 });
+  });
 });

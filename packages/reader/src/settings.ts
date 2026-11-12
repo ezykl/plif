@@ -29,7 +29,7 @@ export function toFlipSettings(
     size: "stretch",
     minWidth: Math.min(Math.round(width * 0.6), 288),
     maxWidth: width,
-    minHeight: Math.min(Math.round(height * 0.6), 407),
+    minHeight: Math.min(Math.round(height * 0.6), Math.round(288 * (height / width))),
     maxHeight: height,
     showCover: manifest.hasCover,
     usePortrait: true,

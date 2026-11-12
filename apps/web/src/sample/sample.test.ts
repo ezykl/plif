@@ -8,6 +8,7 @@ describe("Sample publications", () => {
       const pub = getSamplePublication(presetId);
       expect(pub).toBeDefined();
       expect(pub.id).toBe(presetId);
+      expect(pub.pageSize).toEqual(BOOK_PRESETS[presetId].defaultPageSize);
       expect(pub.title.length).toBeGreaterThan(0);
       expect(pub.pages.length).toBe(12);
       expect(pub.toc.length).toBeGreaterThanOrEqual(3);

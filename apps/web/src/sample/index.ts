@@ -1,10 +1,12 @@
 import {
+  BOOK_PRESETS,
   parseManifest,
   type BookDirection,
   type BookPresetId,
   type BookTheme,
   type ImportedPage,
   type Manifest,
+  type PageDimensions,
   type TocItem,
 } from "@plif/core";
 import { createHardcoverPages, HARDCOVER_TITLE, HARDCOVER_TOC } from "./hardcover";
@@ -21,6 +23,7 @@ export interface SamplePublication {
   direction: BookDirection;
   toc: TocItem[];
   pages: ImportedPage[];
+  pageSize: PageDimensions;
 }
 
 export const SAMPLE_PUBLICATIONS: Record<BookPresetId, SamplePublication> = {
@@ -32,6 +35,7 @@ export const SAMPLE_PUBLICATIONS: Record<BookPresetId, SamplePublication> = {
     direction: "ltr",
     toc: MAGAZINE_TOC,
     pages: createMagazinePages(),
+    pageSize: BOOK_PRESETS.magazine.defaultPageSize,
   },
   newspaper: {
     id: "newspaper",
@@ -41,6 +45,7 @@ export const SAMPLE_PUBLICATIONS: Record<BookPresetId, SamplePublication> = {
     direction: "ltr",
     toc: NEWSPAPER_TOC,
     pages: createNewspaperPages(),
+    pageSize: BOOK_PRESETS.newspaper.defaultPageSize,
   },
   hardcover: {
     id: "hardcover",
@@ -50,6 +55,7 @@ export const SAMPLE_PUBLICATIONS: Record<BookPresetId, SamplePublication> = {
     direction: "ltr",
     toc: HARDCOVER_TOC,
     pages: createHardcoverPages(),
+    pageSize: BOOK_PRESETS.hardcover.defaultPageSize,
   },
   zine: {
     id: "zine",
@@ -59,6 +65,7 @@ export const SAMPLE_PUBLICATIONS: Record<BookPresetId, SamplePublication> = {
     direction: "ltr",
     toc: ZINE_TOC,
     pages: createZinePages(),
+    pageSize: BOOK_PRESETS.zine.defaultPageSize,
   },
 };
 
