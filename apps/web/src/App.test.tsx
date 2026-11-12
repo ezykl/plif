@@ -38,7 +38,23 @@ afterEach(() => {
 });
 
 describe("<App>", () => {
-  it("switches wizard steps, applies presets/themes, and updates the live Flipbook stage", () => {
+  it("renders the landing page with scenic hero, interactive sample, and transitions to studio mode", () => {
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: "Sample Magazine" })).toBeTruthy();
+    expect(screen.getByText("2–3 / 12")).toBeTruthy();
+    expect(screen.getByText(/100% Client-Side • Zero Cloud Upload/i)).toBeTruthy();
+
+    const openStudioBtn = screen.getByRole("button", { name: /Open Flipbook Studio/i });
+    expect(openStudioBtn).toBeTruthy();
+
+    fireEvent.click(openStudioBtn);
+    expect(screen.getByRole("button", { name: /Back to Showcase/i })).toBeTruthy();
+    expect(screen.getByRole("region", { name: /Flipbook creator wizard/i })).toBeTruthy();
+  });
+
+  it("switches wizard steps, applies presets/themes, and updates the live Flipbook stage in studio mode", () => {
+    window.location.hash = "#/studio";
     render(<App />);
 
     expect(screen.getByRole("heading", { name: "Sample Magazine" })).toBeTruthy();
@@ -73,7 +89,8 @@ describe("<App>", () => {
     expect(screen.getByText("4–5 / 12")).toBeTruthy();
   });
 
-  it("navigates to publish step and renders standalone download and embed tools", () => {
+  it("navigates to publish step and renders standalone download and embed tools in studio mode", () => {
+    window.location.hash = "#/studio";
     render(<App />);
 
     fireEvent.click(screen.getByRole("tab", { name: "3. Preview & Publish" }));
@@ -87,17 +104,16 @@ describe("<App>", () => {
     expect(screen.getByText(/<plif-book src=/i)).toBeTruthy();
   });
 
-  it("renders stationery header with book logo, edition badge, and mode indicator", () => {
+  it("renders stationery header with book logo, edition badge, and mode indicator in studio mode", () => {
+    window.location.hash = "#/studio";
     render(<App />);
 
     expect(screen.getByRole("img", { name: "Book logo" })).toBeTruthy();
-    expect(screen.getByText(/Plif Flipbook Studio • Magazine Edition/i)).toBeTruthy();
-    expect(screen.getByText(/Cover \+ Spread Mode • 480 × 679 • LTR/i)).toBeTruthy();
+    expect(screen.getByText(/Plif Flipbook Studio • Magazine Edition • 480 × 679/i)).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /Next: Arrange & Style/i }));
     fireEvent.click(screen.getByRole("button", { name: /Preset: Newspaper/i }));
-    expect(screen.getByText(/Plif Flipbook Studio • Newsprint Edition/i)).toBeTruthy();
-    expect(screen.getByText(/Cover \+ Spread Mode • 480 × 740 • LTR/i)).toBeTruthy();
+    expect(screen.getByText(/Plif Flipbook Studio • Newsprint Edition • 480 × 740/i)).toBeTruthy();
   });
 
   it("clicking the toolbar sound toggle button toggles soundEnabled and updates localStorage", () => {
@@ -136,6 +152,7 @@ describe("<App>", () => {
   });
 
   it("pressing M on the document toggles sound, but pressing M inside the book title input does not toggle sound", () => {
+    window.location.hash = "#/studio";
     render(<App />);
 
     const flipbook = screen.getByRole("region", { name: "Sample Magazine" });
@@ -186,6 +203,7 @@ describe("<App>", () => {
     render(<App />);
     expect(screen.getByText("4–5 / 12")).toBeTruthy();
 
+    fireEvent.click(screen.getByRole("button", { name: /Open Flipbook Studio/i }));
     fireEvent.click(screen.getByRole("button", { name: /Next: Arrange & Style/i }));
     fireEvent.click(screen.getByLabelText(/standalone front & back cover/i));
 
@@ -193,7 +211,8 @@ describe("<App>", () => {
     expect(screen.getByText("5–6 / 12")).toBeTruthy();
   });
 
-  it("opens the Hardbound Cover Studio and jumps to Page 1 when selecting the Hardcover preset", () => {
+  it("opens the Hardbound Cover Studio and jumps to Page 1 when selecting the Hardcover preset in studio mode", () => {
+    window.location.hash = "#/studio";
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
     render(<App />);
     expect(screen.getByText("2–3 / 12")).toBeTruthy();

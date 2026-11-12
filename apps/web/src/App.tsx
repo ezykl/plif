@@ -25,12 +25,13 @@ import {
 } from "@plif/core";
 import { Flipbook, ReaderToolbar, type FlipbookHandle } from "@plif/reader";
 import { CreatorWizard, type WizardStep } from "./components/CreatorWizard";
+import { LandingPage } from "./components/LandingPage";
 import {
+  ArrowLeftIcon,
   BookOpenIcon,
   DownloadExportIcon,
   HardcoverBookIcon,
   NewspaperSpreadIcon,
-  ShieldPrivacyIcon,
   UploadDocumentIcon,
   WifiOfflineIcon,
   ZineBookletIcon,
@@ -39,6 +40,8 @@ import { importFiles } from "./import";
 import { COVER_FONT_STACKS, loadImage, renderCoverDataUrl } from "./cover/renderCover";
 import { getSamplePublication, sampleManifest } from "./sample";
 
+export type ViewMode = "landing" | "studio";
+
 const QUICK_PRESET_LIST = Object.values(BOOK_PRESETS);
 const QUICK_THEME_LIST = Object.values(THEMES);
 
@@ -46,6 +49,12 @@ export function App() {
   const book = useRef<FlipbookHandle>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const quickFileInputRef = useRef<HTMLInputElement>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (typeof window !== "undefined" && window.location.hash.toLowerCase().includes("studio")) {
+      return "studio";
+    }
+    return "landing";
+  });
   const [step, setStep] = useState<WizardStep>("upload");
   const [title, setTitle] = useState(sampleManifest.title);
   const [hasCover, setHasCover] = useState(sampleManifest.hasCover);
@@ -347,6 +356,10 @@ export function App() {
       handleGoToPage(0);
       setProgressText(null);
       setStep("arrange");
+      setViewMode("studio");
+      if (typeof window !== "undefined") {
+        window.location.hash = "#/studio";
+      }
     } catch (err) {
       setErrorText(err instanceof Error ? err.message : "Failed to import files");
       setProgressText(null);
@@ -436,7 +449,23 @@ export function App() {
     setPages([]);
     setZoom(1);
     handleGoToPage(1);
+    setViewMode("landing");
+    if (typeof window !== "undefined") {
+      window.location.hash = "";
+    }
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onHashChange = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.includes("studio")) {
+        setViewMode("studio");
+      }
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   const downloadFile = (filename: string, content: string, type: string) => {
     if (typeof window === "undefined" || typeof document === "undefined") return;
@@ -476,13 +505,63 @@ export function App() {
     );
   };
 
-  const heroBgUrl = `${import.meta.env.BASE_URL}hero-valley.jpg`;
+  if (viewMode === "landing") {
+    return (
+      <>
+        <input
+          ref={quickFileInputRef}
+          type="file"
+          aria-label="Quick upload PDF or images"
+          accept="application/pdf,image/*"
+          multiple
+          disabled={isImporting}
+          onChange={(e) => {
+            const list = e.target.files ? Array.from(e.target.files) : [];
+            if (list.length > 0) {
+              void handleUploadFiles(list);
+              e.target.value = "";
+            }
+          }}
+          style={{ display: "none" }}
+        />
+        <LandingPage
+          manifest={activeManifest}
+          theme={theme}
+          themeTokens={themeTokens}
+          activePreset={activePreset ?? "magazine"}
+          index={index}
+          zoom={zoom}
+          soundEnabled={soundEnabled}
+          isOnline={isOnline}
+          isImporting={isImporting}
+          bookRef={book}
+          stageRef={stageRef}
+          onSelectPreset={handleSelectPreset}
+          onChangeTheme={setTheme}
+          onToggleSound={handleToggleSound}
+          onOpenStudio={() => {
+            setViewMode("studio");
+            if (typeof window !== "undefined") {
+              window.location.hash = "#/studio";
+            }
+          }}
+          onUploadClick={() => quickFileInputRef.current?.click()}
+          onDownloadHtml={() => void handleDownloadHtml()}
+          onPageChange={updatePageIndex}
+          onGoToPage={handleGoToPage}
+          onChangeZoom={setZoom}
+          onToggleFullscreen={handleToggleFullscreen}
+          isFullscreen={isFullscreen}
+        />
+      </>
+    );
+  }
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: "#ffffff",
+        background: "#fcfbf7",
         color: "#141413",
         display: "flex",
         flexDirection: "column",
@@ -490,78 +569,115 @@ export function App() {
           'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
       }}
     >
-      {/* Option A + C: Crisp White Top Navigation Bar with Floating SVG Format Switcher */}
+      <input
+        ref={quickFileInputRef}
+        type="file"
+        aria-label="Quick upload PDF or images"
+        accept="application/pdf,image/*"
+        multiple
+        disabled={isImporting}
+        onChange={(e) => {
+          const list = e.target.files ? Array.from(e.target.files) : [];
+          if (list.length > 0) {
+            void handleUploadFiles(list);
+            e.target.value = "";
+          }
+        }}
+        style={{ display: "none" }}
+      />
+
+      {/* Studio Header Bar */}
       <header
         style={{
           position: "sticky",
           top: 0,
           zIndex: 30,
-          background: "rgba(255, 255, 255, 0.92)",
+          background: "rgba(255, 255, 255, 0.94)",
           backdropFilter: "blur(14px)",
           color: "#141413",
           borderBottom: "1px solid rgba(20, 20, 19, 0.08)",
-          padding: "12px 24px",
+          padding: "10px 24px",
         }}
       >
         <div
           style={{
-            maxWidth: 1240,
+            maxWidth: 1680,
             margin: "0 auto",
             display: "flex",
             flexWrap: "wrap",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 16,
+            gap: 14,
           }}
         >
-          {/* Left Brand & Edition Metadata */}
+          {/* Left: Back to Showcase + Book Meta */}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span
-              role="img"
-              aria-label="Book logo"
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("landing");
+                if (typeof window !== "undefined") {
+                  window.location.hash = "";
+                }
+              }}
               style={{
-                width: 38,
-                height: 38,
-                borderRadius: 10,
-                background: "#141413",
-                color: "#ffffff",
                 display: "inline-flex",
                 alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
+                gap: 6,
+                padding: "6px 12px",
+                borderRadius: 9999,
+                border: "1px solid rgba(20, 20, 19, 0.12)",
+                background: "#ffffff",
+                color: "#141413",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 150ms ease",
               }}
+              aria-label="Back to Showcase"
             >
-              <BookOpenIcon size={20} />
-            </span>
-            <div style={{ display: "grid", gap: 2 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <strong style={{ fontSize: 17, fontWeight: 800, letterSpacing: "-0.02em" }}>
-                  Plif
-                </strong>
-                <span
-                  style={{
-                    fontSize: 11,
-                    color: "#57534e",
-                    fontWeight: 600,
-                  }}
-                >
-                  Plif Flipbook Studio • {themeTokens.label} Edition
-                </span>
-              </div>
+              <ArrowLeftIcon size={14} />
+              <span>Back to Showcase</span>
+            </button>
+
+            <span
+              role="separator"
+              style={{ width: 1, height: 20, background: "rgba(20, 20, 19, 0.12)" }}
+            />
+
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span
+                role="img"
+                aria-label="Book logo"
                 style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "#78716c",
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: "#141413",
+                  color: "#ffffff",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
                 }}
               >
-                {hasCover ? "Cover + Spread Mode" : "Newspaper Spread Mode"} •{" "}
-                {activePageSize.width} × {activePageSize.height} • {direction.toUpperCase()}
+                <BookOpenIcon size={16} />
               </span>
+              <div>
+                <strong
+                  style={{ fontSize: 14, fontWeight: 700, display: "block", lineHeight: 1.2 }}
+                >
+                  {title || "Untitled Flipbook"}
+                </strong>
+                <span style={{ fontSize: 11, color: "#78716c", fontWeight: 500 }}>
+                  Plif Flipbook Studio • {themeTokens.label} Edition • {activePageSize.width} ×{" "}
+                  {activePageSize.height}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Center: Option C Floating SVG Icon Format Pill Bar */}
+          {/* Center: Quick Presets Switcher */}
           <div
             aria-label="Quick style switcher"
             style={{
@@ -569,11 +685,10 @@ export function App() {
               flexWrap: "wrap",
               alignItems: "center",
               gap: 4,
-              padding: 5,
+              padding: 4,
               borderRadius: 9999,
               background: "#f5f4f0",
               border: "1px solid rgba(20, 20, 19, 0.08)",
-              boxShadow: "inset 0 1px 2px rgba(20, 20, 19, 0.04)",
             }}
           >
             {QUICK_PRESET_LIST.map((preset) => {
@@ -587,7 +702,7 @@ export function App() {
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 6,
-                    padding: "7px 14px",
+                    padding: "6px 12px",
                     borderRadius: 9999,
                     border: "none",
                     background: active ? "#141413" : "transparent",
@@ -595,18 +710,18 @@ export function App() {
                     fontSize: 12,
                     fontWeight: 600,
                     cursor: "pointer",
-                    boxShadow: active ? "0 2px 8px rgba(20, 20, 19, 0.18)" : "none",
+                    boxShadow: active ? "0 2px 6px rgba(20, 20, 19, 0.14)" : "none",
                     transition: "all 150ms ease",
                   }}
                 >
                   {preset.id === "newspaper" ? (
-                    <NewspaperSpreadIcon size={15} />
+                    <NewspaperSpreadIcon size={14} />
                   ) : preset.id === "magazine" ? (
-                    <BookOpenIcon size={15} />
+                    <BookOpenIcon size={14} />
                   ) : preset.id === "hardcover" ? (
-                    <HardcoverBookIcon size={15} />
+                    <HardcoverBookIcon size={14} />
                   ) : (
-                    <ZineBookletIcon size={15} />
+                    <ZineBookletIcon size={14} />
                   )}
                   <span>{preset.label}</span>
                 </button>
@@ -614,8 +729,8 @@ export function App() {
             })}
           </div>
 
-          {/* Right: Option A Pill Action Buttons */}
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
+          {/* Right: Actions */}
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
             {!isOnline && (
               <span
                 role="status"
@@ -623,36 +738,20 @@ export function App() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 600,
-                  padding: "6px 12px",
+                  padding: "5px 10px",
                   borderRadius: 9999,
                   background: "#fef3c7",
                   border: "1px solid #f59e0b",
                   color: "#92400e",
                 }}
               >
-                <WifiOfflineIcon size={15} />
-                <span>Offline Mode • Local Storage</span>
+                <WifiOfflineIcon size={13} />
+                <span>Offline</span>
               </span>
             )}
 
-            <input
-              ref={quickFileInputRef}
-              type="file"
-              aria-label="Quick upload PDF or images"
-              accept="application/pdf,image/*"
-              multiple
-              disabled={isImporting}
-              onChange={(e) => {
-                const list = e.target.files ? Array.from(e.target.files) : [];
-                if (list.length > 0) {
-                  void handleUploadFiles(list);
-                  e.target.value = "";
-                }
-              }}
-              style={{ display: "none" }}
-            />
             <button
               type="button"
               onClick={() => quickFileInputRef.current?.click()}
@@ -661,21 +760,21 @@ export function App() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                minHeight: 40,
-                padding: "8px 18px",
+                minHeight: 36,
+                padding: "6px 14px",
                 borderRadius: 9999,
                 border: "none",
                 background: "#141413",
                 color: "#ffffff",
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: 600,
                 cursor: isImporting ? "wait" : "pointer",
-                boxShadow: "0 4px 12px rgba(20, 20, 19, 0.15)",
               }}
             >
-              <UploadDocumentIcon size={15} />
-              <span>{isImporting ? "Importing..." : "Upload PDF / Images"}</span>
+              <UploadDocumentIcon size={14} />
+              <span>{isImporting ? "Importing..." : "Upload Files"}</span>
             </button>
+
             <button
               type="button"
               onClick={() => void handleDownloadHtml()}
@@ -683,166 +782,65 @@ export function App() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                minHeight: 40,
-                padding: "8px 18px",
+                minHeight: 36,
+                padding: "6px 14px",
                 borderRadius: 9999,
                 border: "1.5px solid #141413",
                 background: "#ffffff",
                 color: "#141413",
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: 600,
                 cursor: "pointer",
               }}
             >
-              <DownloadExportIcon size={15} />
+              <DownloadExportIcon size={14} />
               <span>Export HTML</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main style={{ flex: 1, display: "grid", gap: 0 }}>
-        {/* Option A Painted Canyon Valley Hero + Editorial Headline + Interactive Dual-Page Stage */}
+      {/* Side-by-side Split View: Left (Sticky Book Stage) / Right (Scrollable Creator Wizard) */}
+      <main
+        style={{
+          flex: 1,
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(460px, 1fr))",
+          gap: 28,
+          alignItems: "start",
+          padding: "24px 28px 64px",
+          maxWidth: 1680,
+          margin: "0 auto",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
+        {/* Left Column: Sticky Interactive Flipbook Stage */}
         <section
-          aria-label="Interactive flipbook hero"
+          aria-label="Live book preview stage"
           style={{
-            width: "100%",
-            backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 78%, #ffffff 100%), url("${heroBgUrl}")`,
-            backgroundSize: "cover",
-            backgroundPosition: "center top",
-            backgroundRepeat: "no-repeat",
-            padding: "28px 16px 44px",
+            position: "sticky",
+            top: 76,
+            zIndex: 10,
             display: "grid",
-            placeItems: "center",
-            gap: 22,
+            gap: 14,
           }}
         >
-          {/* Centered Editorial Hero Copy & Pill CTAs */}
-          <div
-            style={{
-              maxWidth: 680,
-              textAlign: "center",
-              display: "grid",
-              placeItems: "center",
-              gap: 14,
-            }}
-          >
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "6px 16px",
-                borderRadius: 9999,
-                background: "#e0f2fe",
-                color: "#075985",
-                fontSize: 12,
-                fontWeight: 600,
-                letterSpacing: "0.01em",
-              }}
-            >
-              <ShieldPrivacyIcon size={14} />
-              <span>100% Local &amp; Private • Zero Cloud Upload</span>
-            </div>
-
-            <div
-              style={{
-                fontFamily: 'Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif',
-                fontSize: "clamp(32px, 4.5vw, 52px)",
-                fontWeight: 700,
-                lineHeight: 1.08,
-                letterSpacing: "-0.025em",
-                color: "#141413",
-              }}
-            >
-              Turn your PDFs into
-              <br />
-              living, tactile books
-            </div>
-
-            <p
-              style={{
-                margin: 0,
-                maxWidth: 540,
-                fontSize: 15,
-                lineHeight: 1.55,
-                color: "#44403c",
-              }}
-            >
-              Plif Flipbook Studio transforms static PDFs and images into interactive, dual-page
-              flipbooks with realistic paper curl and 1-click offline HTML export.
-            </p>
-
-            {/* Option A Black & White Pill CTA Pair */}
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 12,
-                marginTop: 4,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => quickFileInputRef.current?.click()}
-                disabled={isImporting}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "12px 24px",
-                  borderRadius: 9999,
-                  border: "none",
-                  background: "#141413",
-                  color: "#ffffff",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: isImporting ? "wait" : "pointer",
-                  boxShadow: "0 8px 20px rgba(20, 20, 19, 0.2)",
-                }}
-              >
-                <span>{isImporting ? "Importing..." : "Upload PDF or Images →"}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => void handleDownloadHtml()}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "12px 24px",
-                  borderRadius: 9999,
-                  border: "1.5px solid #141413",
-                  background: "rgba(255, 255, 255, 0.9)",
-                  color: "#141413",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                <span>Export Offline HTML</span>
-              </button>
-            </div>
-          </div>
-
           {/* Active Book Masthead Pill + Backdrop Swatches */}
           <div
             style={{
-              width: "min(920px, 94vw)",
+              width: "100%",
+              boxSizing: "border-box",
               display: "flex",
               flexWrap: "wrap",
               alignItems: "center",
               justifyContent: "space-between",
               gap: 10,
-              padding: "8px 16px",
-              borderRadius: 9999,
-              background: "rgba(255, 255, 255, 0.86)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(20, 20, 19, 0.1)",
-              boxShadow: "0 8px 24px rgba(20, 20, 19, 0.06)",
+              padding: "10px 16px",
+              borderRadius: 14,
+              background: "#ffffff",
+              border: "1px solid rgba(20, 20, 19, 0.08)",
+              boxShadow: "0 2px 8px rgba(20, 20, 19, 0.04)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -860,22 +858,22 @@ export function App() {
               >
                 Live Preview
               </span>
-              <h1
+              <h2
                 style={{
                   margin: 0,
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: 700,
                   fontFamily: 'Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif',
                   color: "#141413",
                 }}
               >
                 {activeManifest.title}
-              </h1>
+              </h2>
             </div>
 
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6 }}>
               <span style={{ fontSize: 11, fontWeight: 600, color: "#57534e", marginRight: 2 }}>
-                Paper &amp; Stage:
+                Paper:
               </span>
               {QUICK_THEME_LIST.map((t) => {
                 const active = t.id === theme;
@@ -888,13 +886,13 @@ export function App() {
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
-                      gap: 6,
-                      padding: "4px 10px",
+                      gap: 4,
+                      padding: "4px 8px",
                       borderRadius: 9999,
                       border: active ? "1.5px solid #141413" : "1px solid rgba(20, 20, 19, 0.12)",
                       background: active ? "#ffffff" : "rgba(255, 255, 255, 0.6)",
                       color: "#141413",
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: active ? 700 : 500,
                       cursor: "pointer",
                     }}
@@ -902,8 +900,8 @@ export function App() {
                     <span
                       aria-hidden="true"
                       style={{
-                        width: 11,
-                        height: 11,
+                        width: 10,
+                        height: 10,
                         borderRadius: "50%",
                         background: t.stageBg,
                         border: `2px solid ${t.accentColor}`,
@@ -928,14 +926,17 @@ export function App() {
             style={{
               display: "grid",
               placeItems: "center",
-              gap: 18,
+              gap: 16,
               width: "100%",
-              background: isFullscreen ? themeTokens.stageBg : "transparent",
-              padding: isFullscreen ? 24 : "4px 0",
-              outline: isDraggingOverStage ? "3px dashed #141413" : "none",
-              outlineOffset: -8,
-              borderRadius: 16,
-              filter: isFullscreen ? "none" : "drop-shadow(0 24px 48px rgba(20, 20, 19, 0.24))",
+              boxSizing: "border-box",
+              background: themeTokens.stageBg,
+              padding: isFullscreen ? 24 : "18px 10px",
+              outline: isDraggingOverStage
+                ? "3px dashed #141413"
+                : "1px solid rgba(20, 20, 19, 0.08)",
+              outlineOffset: -4,
+              borderRadius: 18,
+              boxShadow: isFullscreen ? "none" : "0 12px 32px rgba(20, 20, 19, 0.08)",
               transition: "filter 0.2s ease, outline 0.15s ease",
             }}
           >
@@ -950,17 +951,17 @@ export function App() {
               return (
                 <div
                   style={{
-                    width: "min(1180px, 98vw)",
+                    width: "100%",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: "clamp(16px, 3vw, 36px)",
+                    gap: 12,
                   }}
                 >
                   <div
                     style={{
-                      width: 48,
-                      flex: "0 0 48px",
+                      width: 40,
+                      flex: "0 0 40px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -973,8 +974,8 @@ export function App() {
                         title="Previous page (Left Arrow)"
                         onClick={() => book.current?.prev()}
                         style={{
-                          width: 48,
-                          height: 48,
+                          width: 40,
+                          height: 40,
                           borderRadius: "50%",
                           border: "1px solid rgba(255, 255, 255, 0.22)",
                           background: "rgba(20, 20, 19, 0.88)",
@@ -984,13 +985,12 @@ export function App() {
                           justifyContent: "center",
                           cursor: "pointer",
                           backdropFilter: "blur(10px)",
-                          boxShadow: "0 8px 24px rgba(20, 20, 19, 0.28)",
-                          transition: "transform 150ms ease, background 150ms ease",
+                          boxShadow: "0 6px 16px rgba(20, 20, 19, 0.2)",
                         }}
                       >
                         <svg
-                          width={20}
-                          height={20}
+                          width={18}
+                          height={18}
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -1006,7 +1006,7 @@ export function App() {
                     )}
                   </div>
 
-                  <div style={{ flex: "1 1 auto", maxWidth: 960, minWidth: 0 }}>
+                  <div style={{ flex: "1 1 auto", maxWidth: 760, minWidth: 0 }}>
                     <Flipbook
                       ref={book}
                       manifest={activeManifest}
@@ -1019,8 +1019,8 @@ export function App() {
 
                   <div
                     style={{
-                      width: 48,
-                      flex: "0 0 48px",
+                      width: 40,
+                      flex: "0 0 40px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -1033,8 +1033,8 @@ export function App() {
                         title="Next page (Right Arrow)"
                         onClick={() => book.current?.next()}
                         style={{
-                          width: 48,
-                          height: 48,
+                          width: 40,
+                          height: 40,
                           borderRadius: "50%",
                           border: "1px solid rgba(255, 255, 255, 0.22)",
                           background: "rgba(20, 20, 19, 0.88)",
@@ -1044,13 +1044,12 @@ export function App() {
                           justifyContent: "center",
                           cursor: "pointer",
                           backdropFilter: "blur(10px)",
-                          boxShadow: "0 8px 24px rgba(20, 20, 19, 0.28)",
-                          transition: "transform 150ms ease, background 150ms ease",
+                          boxShadow: "0 6px 16px rgba(20, 20, 19, 0.2)",
                         }}
                       >
                         <svg
-                          width={20}
-                          height={20}
+                          width={18}
+                          height={18}
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -1087,16 +1086,8 @@ export function App() {
           </div>
         </section>
 
-        {/* Option C Pastel Bento Studio Workspace Below the Valley Hero */}
-        <section
-          aria-label="Flipbook studio workspace"
-          style={{
-            background: "#ffffff",
-            padding: "12px 16px 56px",
-            display: "grid",
-            placeItems: "center",
-          }}
-        >
+        {/* Right Column: Scrollable Creator Wizard Controls */}
+        <section aria-label="Flipbook creator wizard" style={{ minWidth: 0 }}>
           <CreatorWizard
             step={step}
             onStepChange={setStep}
