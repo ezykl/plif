@@ -81,7 +81,7 @@ export async function importPdfFile(
         src,
         width,
         height,
-        alt: `${baseName} — Page ${i}`,
+        alt: `${baseName}: Page ${i}`,
       });
       opts.onProgress?.(i, pdf.numPages);
     }

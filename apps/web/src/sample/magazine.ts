@@ -558,7 +558,7 @@ export function createMagazinePages(): ImportedPage[] {
         <line x1="120" y1="220" x2="392" y2="200" stroke="#cbd5e1" stroke-width="1.5"/>
         <circle cx="310" cy="80" r="30" fill="#f59e0b" opacity="0.8"/>
         <text x="20" y="340" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="700" fill="#f8fafc">
-          FIG. 01 — THE SHADOW RECESS AT HIGH NOON
+          FIG. 01: THE SHADOW RECESS AT HIGH NOON
         </text>
       </g>
 
@@ -612,7 +612,7 @@ export function createMagazinePages(): ImportedPage[] {
           <line x1="0" y1="175" x2="392" y2="175"/>
         </g>
         <text x="20" y="195" font-family="Helvetica, Arial, sans-serif" font-size="8.5" font-weight="700" fill="#f8fafc">
-          FIG. 02 — BOARD-FORMED CEDAR IMPRINTS ALONG THE WEST WALL
+          FIG. 02: BOARD-FORMED CEDAR IMPRINTS ALONG THE WEST WALL
         </text>
       </g>
 
@@ -621,7 +621,7 @@ export function createMagazinePages(): ImportedPage[] {
         <circle cx="196" cy="105" r="50" fill="none" stroke="#60a5fa" stroke-width="2"/>
         <circle cx="196" cy="105" r="25" fill="#f59e0b" opacity="0.8"/>
         <text x="20" y="195" font-family="Helvetica, Arial, sans-serif" font-size="8.5" font-weight="700" fill="#f8fafc">
-          FIG. 03 — SUN BEAM INCIDENCE AT THE SOLSTICE
+          FIG. 03: SUN BEAM INCIDENCE AT THE SOLSTICE
         </text>
       </g>
 
@@ -737,7 +737,7 @@ export function createMagazinePages(): ImportedPage[] {
       <g transform="translate(44, 80)">
         <rect width="392" height="240" fill="#ffffff" stroke="#e5e7eb" rx="4"/>
         <text x="20" y="28" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="700" fill="#111827">
-          FIG. 04 — COURTYARD VENTILATION DYNAMICS
+          FIG. 04: COURTYARD VENTILATION DYNAMICS
         </text>
         <!-- Wind streamline vector curves -->
         <path d="M40,160 Q120,60 200,120 T360,80" fill="none" stroke="#0284c7" stroke-width="2"/>

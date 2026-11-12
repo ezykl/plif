@@ -66,8 +66,8 @@ describe("importPdfFile", () => {
     expect(pages).toHaveLength(2);
     expect(pages[0]?.width).toBe(1200);
     expect(pages[0]?.height).toBe(1600);
-    expect(pages[0]?.alt).toBe("magazine — Page 1");
-    expect(pages[1]?.alt).toBe("magazine — Page 2");
+    expect(pages[0]?.alt).toBe("magazine: Page 1");
+    expect(pages[1]?.alt).toBe("magazine: Page 2");
     expect(progress).toEqual([
       [1, 2],
       [2, 2],

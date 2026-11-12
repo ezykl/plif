@@ -15,9 +15,7 @@ import { BookSettingsPanel } from "./BookSettingsPanel";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
-  BookOpenIcon,
   DownloadExportIcon,
-  ShieldPrivacyIcon,
   SlidersStyleIcon,
   UploadDocumentIcon,
 } from "./Icons";
@@ -64,36 +62,24 @@ const STEPS: {
   id: WizardStep;
   label: string;
   subtitle: string;
-  bg: string;
-  activeBorder: string;
-  iconBg: string;
   icon: ReactNode;
 }[] = [
   {
     id: "upload",
     label: "1. Upload",
-    subtitle: "Drop PDFs or images & reorder pages",
-    bg: "#fdebd2",
-    activeBorder: "#141413",
-    iconBg: "rgba(255, 255, 255, 0.75)",
+    subtitle: "Import & Page Order",
     icon: <UploadDocumentIcon size={18} />,
   },
   {
     id: "arrange",
     label: "2. Arrange & Style",
-    subtitle: "Format presets, backdrops & chapters",
-    bg: "#dce8dc",
-    activeBorder: "#141413",
-    iconBg: "rgba(255, 255, 255, 0.75)",
+    subtitle: "Presets & Cover Binding",
     icon: <SlidersStyleIcon size={18} />,
   },
   {
     id: "publish",
     label: "3. Preview & Publish",
-    subtitle: "1-click offline HTML & embed code",
-    bg: "#d8ecfa",
-    activeBorder: "#141413",
-    iconBg: "rgba(255, 255, 255, 0.75)",
+    subtitle: "Offline HTML & Embed",
     icon: <DownloadExportIcon size={18} />,
   },
 ];
@@ -136,19 +122,24 @@ export function CreatorWizard({
   return (
     <div
       style={{
-        width: "min(960px, 92vw)",
+        width: "100%",
+        boxSizing: "border-box",
         display: "grid",
-        gap: 18,
+        gap: 16,
       }}
     >
-      {/* Option C Pastel Bento Step Switcher Cards */}
+      {/* Studio Step Switcher Tabs */}
       <div
         role="tablist"
         aria-label="Flipbook creation steps"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: 14,
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: 10,
+          padding: 6,
+          borderRadius: 12,
+          background: "#fdfbf7",
+          border: "1px solid #e6dfd5",
         }}
       >
         {STEPS.map((s) => {
@@ -164,39 +155,51 @@ export function CreatorWizard({
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 14,
-                padding: "16px 18px",
-                borderRadius: 18,
-                border: active ? `2px solid ${s.activeBorder}` : "2px solid transparent",
-                background: s.bg,
-                color: "#141413",
+                gap: 12,
+                padding: "12px 14px",
+                borderRadius: 8,
+                border: active ? "1.5px solid #c25e3e" : "1.5px solid transparent",
+                background: active ? "#ffffff" : "transparent",
+                color: active ? "#24201d" : "#6b635b",
                 textAlign: "left",
                 cursor: "pointer",
-                boxShadow: active
-                  ? "0 10px 24px rgba(20, 20, 19, 0.10)"
-                  : "0 2px 8px rgba(20, 20, 19, 0.04)",
-                transition: "transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease",
+                boxShadow: active ? "0 2px 6px rgba(36, 32, 29, 0.08)" : "none",
+                minHeight: 48,
+                transition: "all 150ms ease",
               }}
             >
               <span
                 style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 12,
-                  background: active ? "#141413" : s.iconBg,
-                  color: active ? "#ffffff" : "#141413",
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  background: active ? "#c25e3e" : "#f3efea",
+                  color: active ? "#ffffff" : "#6b635b",
                   display: "grid",
                   placeItems: "center",
                   flexShrink: 0,
+                  transition: "background 150ms ease, color 150ms ease",
                 }}
               >
                 {s.icon}
               </span>
               <span style={{ display: "grid", gap: 2 }}>
-                <strong style={{ fontSize: 15, fontWeight: 700, color: "#141413" }}>
+                <strong
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: active ? "#24201d" : "#6b635b",
+                  }}
+                >
                   {s.label}
                 </strong>
-                <span style={{ fontSize: 12, color: "#44403c", lineHeight: 1.35 }}>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: active ? "#6b635b" : "#8a8278",
+                    lineHeight: 1.3,
+                  }}
+                >
                   {s.subtitle}
                 </span>
               </span>
@@ -205,7 +208,7 @@ export function CreatorWizard({
         })}
       </div>
 
-      {/* Step Guidance & Quick Pill Navigation Bar */}
+      {/* Studio Step Action Bar */}
       <div
         style={{
           display: "flex",
@@ -213,44 +216,33 @@ export function CreatorWizard({
           alignItems: "center",
           justifyContent: "space-between",
           gap: 12,
-          padding: "12px 18px",
-          borderRadius: 9999,
-          background: "#ffffff",
-          border: "1px solid #e7e5e4",
-          boxShadow: "0 2px 10px rgba(20, 20, 19, 0.04)",
+          padding: "10px 16px",
+          borderRadius: 8,
+          background: "#fdfbf7",
+          border: "1px solid #e6dfd5",
           fontSize: 13,
-          color: "#44403c",
+          color: "#24201d",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span
             style={{
-              width: 28,
-              height: 28,
-              borderRadius: "50%",
-              background: "#e0f2fe",
-              color: "#0369a1",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
+              fontSize: 12,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              color: "#c25e3e",
             }}
           >
-            {step === "upload" ? (
-              <ShieldPrivacyIcon size={15} />
-            ) : step === "arrange" ? (
-              <BookOpenIcon size={15} />
-            ) : (
-              <DownloadExportIcon size={15} />
-            )}
+            {step === "upload" && "Step 1 of 3"}
+            {step === "arrange" && "Step 2 of 3"}
+            {step === "publish" && "Step 3 of 3"}
           </span>
-          <span>
-            {step === "upload" &&
-              "100% Client-Side: Drop in your PDF or images. Files process in-memory and never leave your browser."}
-            {step === "arrange" &&
-              "Book Binding & Style: Customize page density, standalone covers, themes, and reading direction."}
-            {step === "publish" &&
-              "Ready to Share: Download a portable standalone flipbook or grab embed code for your website."}
+          <span style={{ color: "#6b635b" }}>•</span>
+          <span style={{ fontWeight: 600, color: "#24201d" }}>
+            {step === "upload" && "100% Client-Side: Document Source & Page Order"}
+            {step === "arrange" && "Book Binding & Style: Format Presets & Covers"}
+            {step === "publish" && "Ready to Share: Export Standalone HTML & Embed"}
           </span>
         </div>
 
@@ -263,15 +255,16 @@ export function CreatorWizard({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
+                minHeight: 40,
                 padding: "8px 18px",
-                borderRadius: 9999,
+                borderRadius: 8,
                 border: "none",
-                background: "#141413",
+                background: "#c25e3e",
                 color: "#ffffff",
                 fontWeight: 600,
                 fontSize: 13,
                 cursor: "pointer",
-                transition: "all 150ms ease",
+                transition: "background 150ms ease",
               }}
             >
               <span>Next: Arrange & Style</span>
@@ -287,11 +280,12 @@ export function CreatorWizard({
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
+                  minHeight: 40,
                   padding: "8px 16px",
-                  borderRadius: 9999,
-                  border: "1.5px solid #141413",
+                  borderRadius: 8,
+                  border: "1px solid #e6dfd5",
                   background: "#ffffff",
-                  color: "#141413",
+                  color: "#24201d",
                   fontWeight: 600,
                   fontSize: 13,
                   cursor: "pointer",
@@ -307,10 +301,11 @@ export function CreatorWizard({
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
+                  minHeight: 40,
                   padding: "8px 18px",
-                  borderRadius: 9999,
+                  borderRadius: 8,
                   border: "none",
-                  background: "#141413",
+                  background: "#c25e3e",
                   color: "#ffffff",
                   fontWeight: 600,
                   fontSize: 13,
@@ -330,11 +325,12 @@ export function CreatorWizard({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
+                minHeight: 40,
                 padding: "8px 16px",
-                borderRadius: 9999,
-                border: "1.5px solid #141413",
+                borderRadius: 8,
+                border: "1px solid #e6dfd5",
                 background: "#ffffff",
-                color: "#141413",
+                color: "#24201d",
                 fontWeight: 600,
                 fontSize: 13,
                 cursor: "pointer",

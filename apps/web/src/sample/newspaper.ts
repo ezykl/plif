@@ -62,7 +62,7 @@ export function createNewspaperPages(): ImportedPage[] {
         ESTABLISHED 1894 • NUMBER 44,218
       </text>
       <text x="240" y="123" font-family="Georgia, serif" font-size="7" font-style="italic" fill="#57534e" text-anchor="middle">
-        "Veritas Vincit — Truth Conquers"
+        "Veritas Vincit: Truth Conquers"
       </text>
       <text x="440" y="123" font-family="Helvetica, Arial, sans-serif" font-size="7" font-weight="700" fill="#1c1917" text-anchor="end">
         WEDNESDAY, NOVEMBER 11, 2026
@@ -91,7 +91,7 @@ export function createNewspaperPages(): ImportedPage[] {
             Harbor Tunnel Opens Early
           </text>
           <text x="0" y="42" font-family="Georgia, serif" font-size="8.5" fill="#292524" line-height="1.4">
-            <tspan x="0" y="42" font-weight="700">PORT DISTRICT — </tspan>
+            <tspan x="0" y="42" font-weight="700">PORT DISTRICT: </tspan>
             <tspan>Commuters enjoyed</tspan>
             <tspan x="0" y="54">their first rides beneath the eastern bay</tspan>
             <tspan x="0" y="66">this morning as the subsea rail route</tspan>
@@ -136,7 +136,7 @@ export function createNewspaperPages(): ImportedPage[] {
           </text>
 
           <text x="0" y="168" font-family="Georgia, serif" font-size="8.5" fill="#292524" line-height="1.38">
-            <tspan x="0" y="168" font-weight="700">GENEVA — </tspan>
+            <tspan x="0" y="168" font-weight="700">GENEVA: </tspan>
             <tspan>Following twelve days</tspan>
             <tspan x="0" y="180">of exhaustive negotiations, chief</tspan>
             <tspan x="0" y="192">executives representing major world</tspan>
@@ -167,7 +167,7 @@ export function createNewspaperPages(): ImportedPage[] {
             Central Bank Holds Rates
           </text>
           <text x="0" y="42" font-family="Georgia, serif" font-size="8.5" fill="#292524">
-            <tspan x="0" y="42" font-weight="700">CAPITAL HILL — </tspan>
+            <tspan x="0" y="42" font-weight="700">CAPITAL HILL: </tspan>
             <tspan>Citing steadying</tspan>
             <tspan x="0" y="54">grain and freight indices, the Monetary</tspan>
             <tspan x="0" y="66">Board voted unanimously to maintain</tspan>
@@ -278,7 +278,7 @@ export function createNewspaperPages(): ImportedPage[] {
           <!-- Col 1 -->
           <g transform="translate(0, 0)">
             <text x="0" y="14" font-family="Georgia, serif" font-size="8.5" fill="#292524">
-              <tspan x="0" y="14" font-weight="700">SPECIAL DISPATCH — </tspan>
+              <tspan x="0" y="14" font-weight="700">SPECIAL DISPATCH: </tspan>
               <tspan>Every generation</tspan>
               <tspan x="0" y="26">faces the necessity of evaluating what</tspan>
               <tspan x="0" y="38">institutions deserve preservation and what</tspan>

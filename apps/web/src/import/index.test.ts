@@ -19,8 +19,8 @@ import { importFiles } from "./index";
 describe("importFiles", () => {
   it("dispatches PDF and image files in order and flattens resulting pages", async () => {
     importPdfFileMock.mockResolvedValueOnce([
-      { id: "pdf-1", src: "blob:p1", width: 600, height: 800, alt: "Doc — Page 1" },
-      { id: "pdf-2", src: "blob:p2", width: 600, height: 800, alt: "Doc — Page 2" },
+      { id: "pdf-1", src: "blob:p1", width: 600, height: 800, alt: "Doc: Page 1" },
+      { id: "pdf-2", src: "blob:p2", width: 600, height: 800, alt: "Doc: Page 2" },
     ]);
     importImageFileMock.mockResolvedValueOnce({
       id: "img-1",

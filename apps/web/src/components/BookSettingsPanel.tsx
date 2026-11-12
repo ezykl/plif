@@ -13,6 +13,8 @@ import {
   type TocItem,
 } from "@plif/core";
 import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
   AspectRatioIcon,
   BookOpenIcon,
   HardcoverBookIcon,
@@ -77,7 +79,8 @@ export function BookSettingsPanel({
     <section
       aria-label="Book style and cover settings"
       style={{
-        width: "min(960px, 92vw)",
+        width: "100%",
+        boxSizing: "border-box",
         display: "grid",
         gap: 20,
         padding: 20,
@@ -604,7 +607,7 @@ export function BookSettingsPanel({
             }}
           >
             <span>Left to Right (LTR)</span>
-            <span>→</span>
+            <ArrowRightIcon size={14} />
           </button>
           <button
             type="button"
@@ -625,7 +628,7 @@ export function BookSettingsPanel({
               gap: 6,
             }}
           >
-            <span>←</span>
+            <ArrowLeftIcon size={14} />
             <span>Right to Left (RTL)</span>
           </button>
         </div>

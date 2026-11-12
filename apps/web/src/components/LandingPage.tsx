@@ -248,7 +248,7 @@ export function LandingPage({
                 transition: "all 150ms ease",
               }}
             >
-              <span>Open Studio →</span>
+              <span>Open Studio</span>
             </button>
 
             <button
@@ -303,26 +303,6 @@ export function LandingPage({
               gap: 16,
             }}
           >
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "6px 16px",
-                borderRadius: 9999,
-                background: "rgba(224, 242, 254, 0.92)",
-                backdropFilter: "blur(8px)",
-                color: "#075985",
-                fontSize: 12,
-                fontWeight: 600,
-                letterSpacing: "0.01em",
-                boxShadow: "0 2px 8px rgba(7, 89, 133, 0.08)",
-              }}
-            >
-              <ShieldPrivacyIcon size={14} />
-              <span>100% Local &amp; Private • Zero Cloud Upload</span>
-            </div>
-
             <h1
               style={{
                 margin: 0,
@@ -384,7 +364,7 @@ export function LandingPage({
                   transition: "transform 150ms ease, box-shadow 150ms ease",
                 }}
               >
-                <span>Open Flipbook Studio →</span>
+                <span>Open Flipbook Studio</span>
               </button>
 
               <button
@@ -652,180 +632,201 @@ export function LandingPage({
           </div>
         </section>
 
-        {/* Feature Highlights Bento Grid */}
+        {/* Authentic Publication Format Showcase */}
         <section
-          aria-label="Product features"
+          aria-label="Publication formats"
           style={{
             maxWidth: 1140,
             margin: "0 auto",
-            padding: "48px 20px 64px",
+            padding: "54px 20px 64px",
             width: "100%",
             display: "grid",
-            gap: 28,
+            gap: 36,
           }}
         >
           <div style={{ textAlign: "center", display: "grid", gap: 8 }}>
             <h2
               style={{
                 margin: 0,
-                fontSize: "clamp(24px, 3.5vw, 36px)",
+                fontSize: "clamp(26px, 3.5vw, 38px)",
                 fontWeight: 700,
-                letterSpacing: "-0.02em",
+                letterSpacing: "-0.025em",
                 fontFamily: 'Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif',
+                color: "#24201d",
               }}
             >
-              Crafted for living publications
+              Four publication formats, rendered with physical fidelity
             </h2>
             <p
               style={{
                 margin: 0,
                 fontSize: 15,
-                color: "#57534e",
-                maxWidth: 600,
+                color: "#6b635b",
+                maxWidth: 620,
                 justifySelf: "center",
+                lineHeight: 1.5,
               }}
             >
-              Everything happens locally in your browser with zero tracking, zero server
-              dependencies, and realistic physical page simulation.
+              Select any format to instantly re-bind your publication with tailored paper physics,
+              dimensions, and acoustic page turn resonance.
             </p>
           </div>
 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
               gap: 20,
             }}
           >
-            {/* Feature 1 */}
-            <div
-              style={{
-                padding: "24px 22px",
-                borderRadius: 16,
-                background: "#fbfaf8",
-                border: "1px solid #e7e2da",
-                display: "grid",
-                gap: 12,
-                boxShadow: "0 2px 8px rgba(20, 20, 19, 0.04)",
-              }}
-            >
-              <span
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  background: "#e0f2fe",
-                  color: "#0369a1",
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                <ShieldPrivacyIcon size={22} />
-              </span>
-              <strong style={{ fontSize: 16, color: "#141413" }}>100% Client-Side Privacy</strong>
-              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: "#57534e" }}>
-                All document parsing, image extraction, and canvas rasterization execute locally in
-                your browser memory. Your files are never sent to a cloud server.
-              </p>
-            </div>
+            {PRESET_LIST.map((p) => {
+              const active = p.id === activePreset;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onSelectPreset(p.id)}
+                  style={{
+                    padding: "24px 22px",
+                    borderRadius: 12,
+                    background: active ? "#ffffff" : "#fdfbf7",
+                    border: active ? "1.5px solid #c25e3e" : "1px solid #e6dfd5",
+                    display: "grid",
+                    gap: 14,
+                    textAlign: "left",
+                    cursor: "pointer",
+                    boxShadow: active
+                      ? "0 8px 24px rgba(194, 94, 62, 0.12)"
+                      : "0 2px 6px rgba(36, 32, 29, 0.04)",
+                    transition: "all 150ms ease",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 10,
+                        background: active ? "#c25e3e" : "#f3efea",
+                        color: active ? "#ffffff" : "#24201d",
+                        display: "grid",
+                        placeItems: "center",
+                        transition: "background 150ms ease, color 150ms ease",
+                      }}
+                    >
+                      {p.id === "newspaper" ? (
+                        <NewspaperSpreadIcon size={20} />
+                      ) : p.id === "magazine" ? (
+                        <BookOpenIcon size={20} />
+                      ) : p.id === "hardcover" ? (
+                        <HardcoverBookIcon size={20} />
+                      ) : (
+                        <ZineBookletIcon size={20} />
+                      )}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: "0.04em",
+                        textTransform: "uppercase",
+                        color: active ? "#c25e3e" : "#8a8278",
+                      }}
+                    >
+                      {p.defaultPageSize.width} × {p.defaultPageSize.height}
+                    </span>
+                  </div>
 
-            {/* Feature 2 */}
-            <div
-              style={{
-                padding: "24px 22px",
-                borderRadius: 16,
-                background: "#fbfaf8",
-                border: "1px solid #e7e2da",
-                display: "grid",
-                gap: 12,
-                boxShadow: "0 2px 8px rgba(20, 20, 19, 0.04)",
-              }}
-            >
-              <span
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  background: "#fef3c7",
-                  color: "#b45309",
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                <HardcoverBookIcon size={22} />
-              </span>
-              <strong style={{ fontSize: 16, color: "#141413" }}>3D Hardbound Cover Studio</strong>
-              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: "#57534e" }}>
-                Apply tactile debossed and embossed gold or silver foil titles, rigid bookbinder
-                board perspective physics, cloth textures, and custom silhouette artwork.
-              </p>
-            </div>
+                  <div style={{ display: "grid", gap: 4 }}>
+                    <strong style={{ fontSize: 16, color: "#24201d", fontWeight: 700 }}>
+                      {p.label}
+                    </strong>
+                    <span style={{ fontSize: 12, color: "#6b635b", fontWeight: 500 }}>
+                      {p.description}
+                    </span>
+                  </div>
 
-            {/* Feature 3 */}
-            <div
+                  <p style={{ margin: 0, fontSize: 13, lineHeight: 1.5, color: "#6b635b" }}>
+                    {p.id === "magazine" &&
+                      "Double-page glossy spreads, soft folio margins, and dynamic paper curl physics."}
+                    {p.id === "newspaper" &&
+                      "High-density multi-column newsprint reading with ink absorption tones and broadsheet spreads."}
+                    {p.id === "hardcover" &&
+                      "Rigid binder board with metallic debossed or embossed gold and silver foil titles."}
+                    {p.id === "zine" &&
+                      "Edge-to-edge square spreads with crisp card-stock page curl acoustics."}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Craftsman Statement & Client-Side Privacy */}
+          <div
+            style={{
+              padding: "28px 32px",
+              borderRadius: 12,
+              background: "#fdfbf7",
+              border: "1px solid #e6dfd5",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: 20,
+            }}
+          >
+            <span
               style={{
-                padding: "24px 22px",
-                borderRadius: 16,
-                background: "#fbfaf8",
-                border: "1px solid #e7e2da",
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                background: "#f3efea",
+                color: "#3e6b5c",
                 display: "grid",
-                gap: 12,
-                boxShadow: "0 2px 8px rgba(20, 20, 19, 0.04)",
+                placeItems: "center",
+                flexShrink: 0,
               }}
             >
-              <span
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  background: "#dcfce7",
-                  color: "#15803d",
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                <DownloadExportIcon size={22} />
-              </span>
-              <strong style={{ fontSize: 16, color: "#141413" }}>
-                Self-Contained Offline HTML
+              <ShieldPrivacyIcon size={26} />
+            </span>
+            <div style={{ flex: "1 1 300px", display: "grid", gap: 4 }}>
+              <strong style={{ fontSize: 16, color: "#24201d", fontWeight: 700 }}>
+                100% In-Memory Architecture
               </strong>
-              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: "#57534e" }}>
-                Export a standalone HTML file that bundles all pages and the full flipbook reader
-                engine into a single file. Double-click to view offline or email to clients.
+              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: "#6b635b" }}>
+                All document parsing, image extraction, and canvas rasterization execute locally in
+                your browser memory. When you export, Plif packages the complete reader and assets
+                into a single self-contained HTML file. Double-click to open in any web browser
+                without internet access.
               </p>
             </div>
-
-            {/* Feature 4 */}
-            <div
+            <button
+              type="button"
+              onClick={onOpenStudio}
               style={{
-                padding: "24px 22px",
-                borderRadius: 16,
-                background: "#fbfaf8",
-                border: "1px solid #e7e2da",
-                display: "grid",
-                gap: 12,
-                boxShadow: "0 2px 8px rgba(20, 20, 19, 0.04)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                minHeight: 44,
+                padding: "10px 22px",
+                borderRadius: 8,
+                border: "none",
+                background: "#c25e3e",
+                color: "#ffffff",
+                fontSize: 14,
+                fontWeight: 700,
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(194, 94, 62, 0.24)",
+                transition: "background 150ms ease",
               }}
             >
-              <span
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  background: "#f3e8ff",
-                  color: "#7e22ce",
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                <ZineBookletIcon size={22} />
-              </span>
-              <strong style={{ fontSize: 16, color: "#141413" }}>Format Presets &amp; Audio</strong>
-              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: "#57534e" }}>
-                Switch effortlessly between Magazine A4, Newspaper broadsheet, Trade Book 6×9, and
-                Square art zine formats with realistic paper turn sound synthesis.
-              </p>
-            </div>
+              <span>Launch Studio</span>
+            </button>
           </div>
         </section>
       </main>
@@ -869,7 +870,7 @@ export function LandingPage({
                 padding: 0,
               }}
             >
-              Open Studio →
+              Open Studio
             </button>
             <a
               href="https://github.com/ezykl/plif"

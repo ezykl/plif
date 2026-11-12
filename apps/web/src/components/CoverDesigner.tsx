@@ -201,7 +201,7 @@ export function CoverDesigner({
           <span style={fieldLabel}>Hardbound cover studio</span>
           <span style={{ fontSize: 12, color: "#6b635b", fontWeight: 400 }}>
             {hasGraphic
-              ? "Detected cover artwork — stamp it as a debossed foil silhouette or wrap it on the board"
+              ? "Detected cover artwork: stamp it as a debossed foil silhouette or wrap it on the board"
               : "Design a textured bookcloth or leather cover with debossed foil lettering or a custom silhouette"}
           </span>
         </span>
@@ -222,7 +222,7 @@ export function CoverDesigner({
               }}
             />
             <span style={{ fontSize: 11, color: "#6b635b", fontWeight: 600 }}>
-              Front Cover (Page 1) — Live Preview
+              Front Cover (Page 1) : Live Preview
             </span>
           </div>
 
