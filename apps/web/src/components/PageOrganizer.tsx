@@ -44,7 +44,8 @@ export function PageOrganizer({
     <section
       aria-label="Page organizer"
       style={{
-        width: "min(960px, 92vw)",
+        width: "100%",
+        boxSizing: "border-box",
         display: "grid",
         gap: 16,
         padding: 20,

@@ -28,6 +28,7 @@ import { CreatorWizard, type WizardStep } from "./components/CreatorWizard";
 import { LandingPage } from "./components/LandingPage";
 import {
   ArrowLeftIcon,
+  ArrowRightIcon,
   BookOpenIcon,
   DownloadExportIcon,
   HardcoverBookIcon,
@@ -558,17 +559,84 @@ export function App() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#fcfbf7",
-        color: "#141413",
-        display: "flex",
-        flexDirection: "column",
-        fontFamily:
-          'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-      }}
-    >
+    <div className="studio-layout">
+      <style>{`
+        .studio-layout {
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+          background: #fcfbf7;
+          color: #24201d;
+          font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          overflow: hidden;
+        }
+        .studio-header {
+          flex: 0 0 auto;
+          position: sticky;
+          top: 0;
+          z-index: 30;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(14px);
+          border-bottom: 1px solid rgba(20, 20, 19, 0.08);
+          padding: 8px 20px;
+        }
+        .studio-workspace-grid {
+          flex: 1 1 auto;
+          min-height: 0;
+          display: grid;
+          grid-template-columns: minmax(0, 1.25fr) minmax(420px, 500px);
+          overflow: hidden;
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .studio-stage-section {
+          min-width: 0;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 20px 20px;
+          box-sizing: border-box;
+          overflow: hidden;
+          position: relative;
+        }
+        .studio-inspector-section {
+          min-width: 0;
+          height: 100%;
+          overflow-y: auto;
+          box-sizing: border-box;
+          padding: 20px 24px 60px;
+          background: #fdfbf7;
+          border-left: 1px solid #e6dfd5;
+        }
+        @media (max-width: 1023px) {
+          .studio-layout {
+            height: auto !important;
+            min-height: 100vh !important;
+            overflow: visible !important;
+          }
+          .studio-workspace-grid {
+            display: flex !important;
+            flex-direction: column !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
+          .studio-stage-section {
+            height: auto !important;
+            overflow: visible !important;
+            padding: 16px 12px !important;
+          }
+          .studio-inspector-section {
+            height: auto !important;
+            overflow: visible !important;
+            border-left: none !important;
+            border-top: 1px solid #e6dfd5 !important;
+            padding: 16px 16px 60px !important;
+          }
+        }
+      `}</style>
+
       <input
         ref={quickFileInputRef}
         type="file"
@@ -587,18 +655,7 @@ export function App() {
       />
 
       {/* Studio Header Bar */}
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 30,
-          background: "rgba(255, 255, 255, 0.94)",
-          backdropFilter: "blur(14px)",
-          color: "#141413",
-          borderBottom: "1px solid rgba(20, 20, 19, 0.08)",
-          padding: "10px 24px",
-        }}
-      >
+      <header className="studio-header">
         <div
           style={{
             maxWidth: 1680,
@@ -607,7 +664,7 @@ export function App() {
             flexWrap: "wrap",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 14,
+            gap: 12,
           }}
         >
           {/* Left: Back to Showcase + Book Meta */}
@@ -625,10 +682,10 @@ export function App() {
                 alignItems: "center",
                 gap: 6,
                 padding: "6px 12px",
-                borderRadius: 9999,
-                border: "1px solid rgba(20, 20, 19, 0.12)",
+                borderRadius: 8,
+                border: "1px solid #e6dfd5",
                 background: "#ffffff",
-                color: "#141413",
+                color: "#24201d",
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: "pointer",
@@ -640,10 +697,7 @@ export function App() {
               <span>Back to Showcase</span>
             </button>
 
-            <span
-              role="separator"
-              style={{ width: 1, height: 20, background: "rgba(20, 20, 19, 0.12)" }}
-            />
+            <span role="separator" style={{ width: 1, height: 20, background: "#e6dfd5" }} />
 
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span
@@ -653,7 +707,7 @@ export function App() {
                   width: 32,
                   height: 32,
                   borderRadius: 8,
-                  background: "#141413",
+                  background: "#24201d",
                   color: "#ffffff",
                   display: "inline-flex",
                   alignItems: "center",
@@ -665,11 +719,17 @@ export function App() {
               </span>
               <div>
                 <strong
-                  style={{ fontSize: 14, fontWeight: 700, display: "block", lineHeight: 1.2 }}
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    display: "block",
+                    lineHeight: 1.25,
+                    color: "#24201d",
+                  }}
                 >
                   {title || "Untitled Flipbook"}
                 </strong>
-                <span style={{ fontSize: 11, color: "#78716c", fontWeight: 500 }}>
+                <span style={{ fontSize: 11, color: "#6b635b", fontWeight: 500 }}>
                   Plif Flipbook Studio • {themeTokens.label} Edition • {activePageSize.width} ×{" "}
                   {activePageSize.height}
                 </span>
@@ -684,11 +744,11 @@ export function App() {
               display: "flex",
               flexWrap: "wrap",
               alignItems: "center",
-              gap: 4,
-              padding: 4,
-              borderRadius: 9999,
-              background: "#f5f4f0",
-              border: "1px solid rgba(20, 20, 19, 0.08)",
+              gap: 3,
+              padding: 3,
+              borderRadius: 8,
+              background: "#f4eee6",
+              border: "1px solid #e6dfd5",
             }}
           >
             {QUICK_PRESET_LIST.map((preset) => {
@@ -702,15 +762,15 @@ export function App() {
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 6,
-                    padding: "6px 12px",
-                    borderRadius: 9999,
-                    border: "none",
-                    background: active ? "#141413" : "transparent",
-                    color: active ? "#ffffff" : "#44403c",
+                    padding: "5px 12px",
+                    borderRadius: 6,
+                    border: active ? "1px solid rgba(0, 0, 0, 0.06)" : "1px solid transparent",
+                    background: active ? "#ffffff" : "transparent",
+                    color: active ? "#24201d" : "#6b635b",
                     fontSize: 12,
-                    fontWeight: 600,
+                    fontWeight: active ? 700 : 500,
                     cursor: "pointer",
-                    boxShadow: active ? "0 2px 6px rgba(20, 20, 19, 0.14)" : "none",
+                    boxShadow: active ? "0 1px 4px rgba(36, 32, 29, 0.08)" : "none",
                     transition: "all 150ms ease",
                   }}
                 >
@@ -741,7 +801,7 @@ export function App() {
                   fontSize: 11,
                   fontWeight: 600,
                   padding: "5px 10px",
-                  borderRadius: 9999,
+                  borderRadius: 6,
                   background: "#fef3c7",
                   border: "1px solid #f59e0b",
                   color: "#92400e",
@@ -762,13 +822,14 @@ export function App() {
                 gap: 6,
                 minHeight: 36,
                 padding: "6px 14px",
-                borderRadius: 9999,
-                border: "none",
-                background: "#141413",
-                color: "#ffffff",
+                borderRadius: 8,
+                border: "1px solid #e6dfd5",
+                background: "#ffffff",
+                color: "#24201d",
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: isImporting ? "wait" : "pointer",
+                transition: "all 150ms ease",
               }}
             >
               <UploadDocumentIcon size={14} />
@@ -784,13 +845,15 @@ export function App() {
                 gap: 6,
                 minHeight: 36,
                 padding: "6px 14px",
-                borderRadius: 9999,
-                border: "1.5px solid #141413",
-                background: "#ffffff",
-                color: "#141413",
+                borderRadius: 8,
+                border: "none",
+                background: "#c25e3e",
+                color: "#ffffff",
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: "pointer",
+                boxShadow: "0 2px 6px rgba(194, 94, 62, 0.24)",
+                transition: "background 150ms ease",
               }}
             >
               <DownloadExportIcon size={14} />
@@ -800,80 +863,60 @@ export function App() {
         </div>
       </header>
 
-      {/* Side-by-side Split View: Left (Sticky Book Stage) / Right (Scrollable Creator Wizard) */}
-      <main
-        style={{
-          flex: 1,
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(460px, 1fr))",
-          gap: 28,
-          alignItems: "start",
-          padding: "24px 28px 64px",
-          maxWidth: 1680,
-          margin: "0 auto",
-          width: "100%",
-          boxSizing: "border-box",
-        }}
-      >
-        {/* Left Column: Sticky Interactive Flipbook Stage */}
-        <section
-          aria-label="Live book preview stage"
-          style={{
-            position: "sticky",
-            top: 76,
-            zIndex: 10,
-            display: "grid",
-            gap: 14,
-          }}
-        >
-          {/* Active Book Masthead Pill + Backdrop Swatches */}
+      {/* Side-by-side Split View: Left (Interactive Book Stage) / Right (Scrollable Creator Wizard) */}
+      <main className="studio-workspace-grid">
+        {/* Left Column: Interactive Live Stage */}
+        <section aria-label="Live book preview stage" className="studio-stage-section">
+          {/* Stage Top Bar: Canvas status & Paper Backdrop Swatches */}
           <div
             style={{
               width: "100%",
+              maxWidth: 860,
               boxSizing: "border-box",
               display: "flex",
               flexWrap: "wrap",
               alignItems: "center",
               justifyContent: "space-between",
               gap: 10,
-              padding: "10px 16px",
-              borderRadius: 14,
+              padding: "7px 14px",
+              borderRadius: 8,
               background: "#ffffff",
-              border: "1px solid rgba(20, 20, 19, 0.08)",
-              boxShadow: "0 2px 8px rgba(20, 20, 19, 0.04)",
+              border: "1px solid #e6dfd5",
+              boxShadow: "0 1px 4px rgba(36, 32, 29, 0.04)",
+              flexShrink: 0,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span
                 style={{
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
-                  padding: "3px 10px",
-                  borderRadius: 9999,
-                  background: "#141413",
+                  padding: "2px 7px",
+                  borderRadius: 4,
+                  background: "#24201d",
                   color: "#ffffff",
                 }}
               >
-                Live Preview
+                Canvas
               </span>
               <h2
                 style={{
                   margin: 0,
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: 700,
                   fontFamily: 'Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif',
-                  color: "#141413",
+                  color: "#24201d",
                 }}
               >
                 {activeManifest.title}
               </h2>
             </div>
 
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#57534e", marginRight: 2 }}>
-                Paper:
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 5 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#6b635b", marginRight: 2 }}>
+                Paper Backdrop:
               </span>
               {QUICK_THEME_LIST.map((t) => {
                 const active = t.id === theme;
@@ -887,21 +930,22 @@ export function App() {
                       display: "inline-flex",
                       alignItems: "center",
                       gap: 4,
-                      padding: "4px 8px",
-                      borderRadius: 9999,
-                      border: active ? "1.5px solid #141413" : "1px solid rgba(20, 20, 19, 0.12)",
-                      background: active ? "#ffffff" : "rgba(255, 255, 255, 0.6)",
-                      color: "#141413",
+                      padding: "3px 8px",
+                      borderRadius: 6,
+                      border: active ? "1.5px solid #c25e3e" : "1px solid rgba(20, 20, 19, 0.12)",
+                      background: active ? "#ffffff" : "transparent",
+                      color: active ? "#24201d" : "#6b635b",
                       fontSize: 11,
                       fontWeight: active ? 700 : 500,
                       cursor: "pointer",
+                      transition: "all 150ms ease",
                     }}
                   >
                     <span
                       aria-hidden="true"
                       style={{
-                        width: 10,
-                        height: 10,
+                        width: 9,
+                        height: 9,
                         borderRadius: "50%",
                         background: t.stageBg,
                         border: `2px solid ${t.accentColor}`,
@@ -924,20 +968,29 @@ export function App() {
             onDragLeave={() => setIsDraggingOverStage(false)}
             onDrop={handleStageDrop}
             style={{
-              display: "grid",
-              placeItems: "center",
-              gap: 16,
+              flex: "1 1 auto",
+              minHeight: 0,
               width: "100%",
+              maxWidth: 860,
               boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
               background: themeTokens.stageBg,
-              padding: isFullscreen ? 24 : "18px 10px",
+              padding: isFullscreen ? 24 : "16px 14px",
               outline: isDraggingOverStage
-                ? "3px dashed #141413"
+                ? "2px dashed #c25e3e"
                 : "1px solid rgba(20, 20, 19, 0.08)",
-              outlineOffset: -4,
-              borderRadius: 18,
-              boxShadow: isFullscreen ? "none" : "0 12px 32px rgba(20, 20, 19, 0.08)",
+              outlineOffset: -2,
+              borderRadius: 12,
+              boxShadow: isFullscreen
+                ? "none"
+                : "inset 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(20, 20, 19, 0.06)",
               transition: "filter 0.2s ease, outline 0.15s ease",
+              marginTop: 10,
+              position: "relative",
             }}
           >
             {(() => {
@@ -951,62 +1004,54 @@ export function App() {
               return (
                 <div
                   style={{
+                    position: "relative",
                     width: "100%",
+                    flex: "1 1 auto",
+                    minHeight: 0,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: 12,
                   }}
                 >
+                  {canPrev && (
+                    <button
+                      type="button"
+                      aria-label="Turn to previous page"
+                      title="Previous page (Left Arrow)"
+                      onClick={() => book.current?.prev()}
+                      style={{
+                        position: "absolute",
+                        left: 8,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 10,
+                        width: 38,
+                        height: 38,
+                        borderRadius: "50%",
+                        border: "1px solid rgba(255, 255, 255, 0.25)",
+                        background: "rgba(36, 32, 29, 0.82)",
+                        color: "#ffffff",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        backdropFilter: "blur(8px)",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                        transition: "transform 150ms ease, background 150ms ease",
+                      }}
+                    >
+                      <ArrowLeftIcon size={18} />
+                    </button>
+                  )}
+
                   <div
                     style={{
-                      width: 40,
-                      flex: "0 0 40px",
+                      width: "100%",
+                      maxWidth: 760,
                       display: "flex",
-                      alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    {canPrev && (
-                      <button
-                        type="button"
-                        aria-label="Turn to previous page"
-                        title="Previous page (Left Arrow)"
-                        onClick={() => book.current?.prev()}
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: "50%",
-                          border: "1px solid rgba(255, 255, 255, 0.22)",
-                          background: "rgba(20, 20, 19, 0.88)",
-                          color: "#ffffff",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          backdropFilter: "blur(10px)",
-                          boxShadow: "0 6px 16px rgba(20, 20, 19, 0.2)",
-                        }}
-                      >
-                        <svg
-                          width={18}
-                          height={18}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
-                        >
-                          <path d="M19 12H5" />
-                          <path d="m12 19-7-7 7-7" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-
-                  <div style={{ flex: "1 1 auto", maxWidth: 760, minWidth: 0 }}>
                     <Flipbook
                       ref={book}
                       manifest={activeManifest}
@@ -1017,53 +1062,36 @@ export function App() {
                     />
                   </div>
 
-                  <div
-                    style={{
-                      width: 40,
-                      flex: "0 0 40px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {canNext && (
-                      <button
-                        type="button"
-                        aria-label="Turn to next page"
-                        title="Next page (Right Arrow)"
-                        onClick={() => book.current?.next()}
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: "50%",
-                          border: "1px solid rgba(255, 255, 255, 0.22)",
-                          background: "rgba(20, 20, 19, 0.88)",
-                          color: "#ffffff",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          backdropFilter: "blur(10px)",
-                          boxShadow: "0 6px 16px rgba(20, 20, 19, 0.2)",
-                        }}
-                      >
-                        <svg
-                          width={18}
-                          height={18}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
-                        >
-                          <path d="M5 12h14" />
-                          <path d="m12 5 7 7-7 7" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
+                  {canNext && (
+                    <button
+                      type="button"
+                      aria-label="Turn to next page"
+                      title="Next page (Right Arrow)"
+                      onClick={() => book.current?.next()}
+                      style={{
+                        position: "absolute",
+                        right: 8,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 10,
+                        width: 38,
+                        height: 38,
+                        borderRadius: "50%",
+                        border: "1px solid rgba(255, 255, 255, 0.25)",
+                        background: "rgba(36, 32, 29, 0.82)",
+                        color: "#ffffff",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        backdropFilter: "blur(8px)",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                        transition: "transform 150ms ease, background 150ms ease",
+                      }}
+                    >
+                      <ArrowRightIcon size={18} />
+                    </button>
+                  )}
                 </div>
               );
             })()}
@@ -1087,7 +1115,7 @@ export function App() {
         </section>
 
         {/* Right Column: Scrollable Creator Wizard Controls */}
-        <section aria-label="Flipbook creator wizard" style={{ minWidth: 0 }}>
+        <section aria-label="Flipbook creator wizard" className="studio-inspector-section">
           <CreatorWizard
             step={step}
             onStepChange={setStep}

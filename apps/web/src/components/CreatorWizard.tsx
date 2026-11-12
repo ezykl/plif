@@ -134,11 +134,11 @@ export function CreatorWizard({
         aria-label="Flipbook creation steps"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: 10,
-          padding: 6,
-          borderRadius: 12,
-          background: "#fdfbf7",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 6,
+          padding: 4,
+          borderRadius: 10,
+          background: "#f4eee6",
           border: "1px solid #e6dfd5",
         }}
       >
@@ -155,25 +155,25 @@ export function CreatorWizard({
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 12,
-                padding: "12px 14px",
-                borderRadius: 8,
-                border: active ? "1.5px solid #c25e3e" : "1.5px solid transparent",
+                gap: 8,
+                padding: "8px 10px",
+                borderRadius: 7,
+                border: active ? "1px solid rgba(0, 0, 0, 0.06)" : "1px solid transparent",
                 background: active ? "#ffffff" : "transparent",
                 color: active ? "#24201d" : "#6b635b",
                 textAlign: "left",
                 cursor: "pointer",
-                boxShadow: active ? "0 2px 6px rgba(36, 32, 29, 0.08)" : "none",
-                minHeight: 48,
+                boxShadow: active ? "0 1px 4px rgba(36, 32, 29, 0.08)" : "none",
+                minHeight: 44,
                 transition: "all 150ms ease",
               }}
             >
               <span
                 style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 8,
-                  background: active ? "#c25e3e" : "#f3efea",
+                  width: 28,
+                  height: 28,
+                  borderRadius: 6,
+                  background: active ? "#c25e3e" : "#eadecc",
                   color: active ? "#ffffff" : "#6b635b",
                   display: "grid",
                   placeItems: "center",
@@ -183,21 +183,27 @@ export function CreatorWizard({
               >
                 {s.icon}
               </span>
-              <span style={{ display: "grid", gap: 2 }}>
+              <span style={{ display: "grid", gap: 1, minWidth: 0, overflow: "hidden" }}>
                 <strong
                   style={{
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: 700,
                     color: active ? "#24201d" : "#6b635b",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                 >
                   {s.label}
                 </strong>
                 <span
                   style={{
-                    fontSize: 11,
+                    fontSize: 10,
                     color: active ? "#6b635b" : "#8a8278",
-                    lineHeight: 1.3,
+                    lineHeight: 1.2,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                 >
                   {s.subtitle}
